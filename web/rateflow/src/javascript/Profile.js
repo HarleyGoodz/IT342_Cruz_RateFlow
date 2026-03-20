@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 import "../css/Profile_css.css";
 
 function Profile() {
@@ -8,29 +9,58 @@ function Profile() {
   const [user, setUser] = useState(null);
 
   // 🔐 Check session
-  useEffect(() => {
-    fetch("http://localhost:8080/api/auth/me", {
-      credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Not authenticated");
-        return res.json();
-      })
-      .then((data) => setUser(data))
-      .catch(() => navigate("/"));
-  }, [navigate]);
+useEffect(() => {
+  let isMounted = true;
+
+  const init = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!isMounted) return;
+
+    if (session) {
+      setUser({
+        username:
+          session.user.user_metadata?.full_name ||
+          session.user.email,
+        email: session.user.email
+      });
+    }
+  };
+
+  init();
+
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (event, session) => {
+      if (event === "SIGNED_OUT") {
+        navigate("/");
+      }
+
+      if (session) {
+        setUser({
+          username:
+            session.user.user_metadata?.full_name ||
+            session.user.email,
+          email: session.user.email
+        });
+      }
+    }
+  );
+
+  return () => {
+    isMounted = false;
+    listener.subscription.unsubscribe();
+  };
+}, [navigate]);
 
   const handleLogout = async () => {
     const confirmed = window.confirm("Are you sure you want to logout?");
     if (!confirmed) return;
 
     try {
-      await fetch("http://localhost:8080/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } finally {
-      navigate("/");
+      await supabase.auth.signOut();
+navigate("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
     }
   };
 
