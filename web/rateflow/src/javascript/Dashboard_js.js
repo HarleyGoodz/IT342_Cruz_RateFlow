@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 import "../css/dashboard_css.css";
 
 function Dashboard() {
@@ -8,38 +9,57 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState("Services");
   const [user, setUser] = useState(null);
 
-  // 🔐 Check session when dashboard loads
-  useEffect(() => {
-    fetch("http://localhost:8080/api/auth/me", {
-      credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Not authenticated");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setUser(data);
-      })
-      .catch(() => {
-        navigate("/");
-      });
-  }, [navigate]);
+useEffect(() => {
+  let isMounted = true;
 
-  const handleLogout = async () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return;
+  const init = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
 
-    try {
-      await fetch("http://localhost:8080/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
+    if (!isMounted) return;
+
+    if (session) {
+      setUser({
+        username:
+          session.user.user_metadata?.full_name ||
+          session.user.email
       });
-    } finally {
-      navigate("/");
     }
   };
+
+  init();
+
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (event, session) => {
+      console.log("Auth event:", event);
+
+      // 🔥 ONLY redirect on SIGNED_OUT
+      if (event === "SIGNED_OUT") {
+        navigate("/");
+      }
+
+      if (session) {
+        setUser({
+          username:
+            session.user.user_metadata?.full_name ||
+            session.user.email
+        });
+      }
+    }
+  );
+
+  return () => {
+    isMounted = false;
+    listener.subscription.unsubscribe();
+  };
+}, [navigate]);
+
+  const handleLogout = async () => {
+  const confirmed = window.confirm("Are you sure you want to logout?");
+  if (!confirmed) return;
+
+  await supabase.auth.signOut();
+  navigate("/");
+};
 
   const stats = [
     { label: "Total Revenue", value: "$45,231", change: "+20.1%", positive: true, icon: "💰" },

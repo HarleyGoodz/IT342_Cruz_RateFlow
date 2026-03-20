@@ -169,6 +169,7 @@
                         android:layout_marginTop="24dp"
                         android:layout_marginBottom="24dp">
 
+
                         <View
                             android:layout_width="0dp"
                             android:layout_height="1dp"
@@ -189,7 +190,30 @@
                             android:layout_height="1dp"
                             android:layout_weight="1"
                             android:background="#1e293b" />
+
+
                     </LinearLayout>
+
+                    <!-- Google Sign In Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGoogleSignIn"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Sign in with Google"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#e5e7eb"
+                        android:letterSpacing="0.02"
+                        app:backgroundTint="#1e293b"
+                        app:cornerRadius="12dp"
+                        app:elevation="4dp"
+                        app:strokeColor="#334155"
+                        app:strokeWidth="1dp"
+                        app:icon="@drawable/ic_google"
+                        app:iconGravity="textStart"
+                        app:iconTint="@null"
+                        app:iconPadding="12dp"
+                        android:layout_marginBottom="24dp" />
 
                     <!-- Register Text -->
                     <LinearLayout
