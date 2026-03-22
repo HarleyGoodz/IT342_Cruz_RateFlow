@@ -2,66 +2,152 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 import "../css/Profile_css.css";
+import Dashboard from "./Dashboard_js";
 
 function Profile() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [user, setUser] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
 
   // 🔐 Check session
 useEffect(() => {
   let isMounted = true;
 
-  const init = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
+        }
+      );
 
-    if (!isMounted) return;
+      if (!response.ok) {
+        console.log("Not authenticated");
+        navigate("/");
+        return;
+      }
 
-    if (session) {
+      const data = await response.json();
+
+      if (!isMounted) return;
+
       setUser({
-        username:
-          session.user.user_metadata?.full_name ||
-          session.user.email,
-        email: session.user.email
+        username: data.username?.trim() || "user",
+        email: data.email || ""
       });
+
+      setNewUsername(
+        data.username?.trim() || ""
+      );
+
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
     }
   };
 
-  init();
-
-  const { data: listener } = supabase.auth.onAuthStateChange(
-    (event, session) => {
-      if (event === "SIGNED_OUT") {
-        navigate("/");
-      }
-
-      if (session) {
-        setUser({
-          username:
-            session.user.user_metadata?.full_name ||
-            session.user.email,
-          email: session.user.email
-        });
-      }
-    }
-  );
+  fetchUser();
 
   return () => {
     isMounted = false;
-    listener.subscription.unsubscribe();
   };
+
 }, [navigate]);
 
-  const handleLogout = async () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return;
+/* LOGOUT MODAL FUNCTIONS */
 
-    try {
-      await supabase.auth.signOut();
-navigate("/");
-    } catch (error) {
-      console.error("Error logging out:", error);
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:8080/api/auth/logout",
+      {
+        method: "POST",
+        credentials: "include"
+      }
+    );
+
+    if (!response.ok) {
+      alert("Logout failed");
+      return;
     }
+
+    // Clear local state
+    setUser(null);
+
+    setShowLogoutModal(false);
+
+    navigate("/");
+
+  } catch (error) {
+    console.error("Logout error:", error);
+    alert("Logout failed");
+  }
+};
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
+
+  const handleEditProfile = () => {
+    setIsEditing(true);
+  };
+
+const confirmEditProfile = async () => {
+  if (!newUsername.trim()) {
+    alert("Username cannot be empty");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "http://localhost:8080/api/auth/update-username",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username: newUsername
+        })
+      }
+    );
+
+    if (!response.ok) {
+      alert("Failed to update username");
+      return;
+    }
+
+    const data = await response.json();
+
+    setUser({
+      username: data.username,
+      email: data.email
+    });
+
+    setIsEditing(false);
+
+    setShowSuccessModal(true);
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to update username");
+  }
+};
+
+  const cancelEditProfile = () => {
+    setNewUsername(user ? user.username : "");
+    setIsEditing(false);
   };
 
   return (
@@ -75,7 +161,7 @@ navigate("/");
           </div>
           <button
             className="collapse-btn"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={() =>  navigate("/dashboard")}
           >
             {sidebarCollapsed ? "→" : "←"}
           </button>
@@ -86,14 +172,16 @@ navigate("/");
             {!sidebarCollapsed && <span className="nav-label">Services</span>}
           </button>
 
-          <button className="nav-item">
+          <button className="nav-item" onClick={() =>
+              navigate("/my-ratings")
+            }>
             {!sidebarCollapsed && <span className="nav-label">My Ratings</span>}
           </button>
         </nav>
 
         <div className="sidebar-footer">
-          <button className="logout-sidebar-btn" onClick={handleLogout}>
-            🚪 {!sidebarCollapsed && "Logout"}
+          <button className="logout-sidebar-btn" onClick={handleLogoutClick}>
+            Logout
           </button>
         </div>
       </aside>
@@ -104,9 +192,14 @@ navigate("/");
           <h1 className="page-title">Profile</h1>
 
           <div className="header-actions">
-            <button className="icon-btn">🔔</button>
+            <button
+            className="icon-btn"
+            onClick={() => navigate("/notifications")}
+          >
+            🔔
+          </button>
             <div className="user-avatar">
-              {user ? user.username.charAt(0).toUpperCase() : "U"}
+              👤
             </div>
           </div>
         </header>
@@ -114,29 +207,125 @@ navigate("/");
         {/* Profile Card */}
         <section className="profile-card">
           <div className="profile-avatar-large">
-            {user ? user.username.charAt(0).toUpperCase() : "U"}
+            {user?.username?.charAt(0)?.toUpperCase() || "U"}
           </div>
 
-          <div className="profile-info">
-            <h2>{user ? user.username : "Username"}</h2>
+        <div className="profile-info">
 
-            <input
-              type="text"
-              value={user ? user.email : ""}
-              disabled
-              className="profile-input"
-            />
+        {isEditing ? (
+          <input
+            type="text"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            className="profile-input"
+            maxLength={100}
+          />
+        ) : (
+          <h2>{user?.username || "user"}</h2>
+        )}
+
+        {/* EMAIL FIELD — TINTED */}
+        <input
+          type="text"
+          value={user?.email || ""}
+          readOnly
+          className="profile-input email-tint"
+        />
+
+        {isEditing ? (
+          <div className="edit-action-buttons">
 
             <button
-              className="edit-profile-btn"
-              onClick={() => navigate("/edit-profile")}
+              className="confirm-edit-btn"
+              onClick={confirmEditProfile}
             >
-              Edit Profile
+              Confirm
             </button>
+
+            <button
+              className="cancel-edit-btn"
+              onClick={cancelEditProfile}
+            >
+              Cancel
+            </button>
+
           </div>
+        ) : (
+          <button
+            className="edit-profile-btn"
+            onClick={handleEditProfile}
+          >
+            Edit Profile
+          </button>
+        )}
+
+      </div>
         </section>
       </main>
+
+      {/* LOGOUT MODAL */}
+
+      {showLogoutModal && (
+        <div className="logout-modal-overlay">
+
+          <div className="logout-modal">
+
+            <div className="logout-text">
+              Are you sure you want to logout?
+            </div>
+
+            <div className="logout-buttons">
+
+              <button
+                className="confirm-btn"
+                onClick={confirmLogout}
+              >
+                Confirm
+              </button>
+
+              <button
+                className="cancel-btn"
+                onClick={cancelLogout}
+              >
+                Cancel
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* SUCCESS MODAL */}
+
+      {showSuccessModal && (
+        <div className="logout-modal-overlay">
+
+          <div className="logout-modal">
+
+            <div className="logout-text">
+              Successfully changed username!
+            </div>
+
+            <div className="logout-buttons">
+
+              <button
+                className="confirm-btn"
+                onClick={() => setShowSuccessModal(false)}
+              >
+                OK
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
     </div>
+
+    
   );
 }
 
