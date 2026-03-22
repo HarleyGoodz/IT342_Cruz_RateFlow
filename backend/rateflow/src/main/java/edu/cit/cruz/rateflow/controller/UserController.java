@@ -110,6 +110,53 @@ public ResponseEntity<?> me(HttpSession session) {
     return ResponseEntity.ok(user);
 }
 
+@PostMapping("/update-username")
+public ResponseEntity<?> updateUsername(
+        @RequestBody User updatedUser,
+        HttpSession session) {
+
+    try {
+
+        Integer userId =
+            (Integer) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity
+                    .status(401)
+                    .body("Not authenticated");
+        }
+
+        Optional<User> userOpt =
+                userv.findById(userId);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity
+                    .status(404)
+                    .body("User not found");
+        }
+
+        User user = userOpt.get();
+
+        user.setUsername(
+            updatedUser.getUsername()
+        );
+
+        User saved =
+            userv.createUser(user);
+
+        saved.setPassword(null);
+
+        return ResponseEntity.ok(saved);
+
+    } catch (Exception e) {
+
+        return ResponseEntity
+                .status(500)
+                .body("Failed to update username");
+
+    }
+}
+
 
 
 }

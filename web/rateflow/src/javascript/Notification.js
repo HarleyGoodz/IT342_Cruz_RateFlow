@@ -1,21 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
-import "../css/dashboard_css.css";
+import "../css/notifications_css.css";
 
-function Dashboard() {
+function Notification() {
   const navigate = useNavigate();
 
   const [sidebarCollapsed, setSidebarCollapsed] =
     useState(false);
 
-  const [activeTab, setActiveTab] =
-    useState("Services");
-
   const [user, setUser] = useState(null);
 
-  const [showLogoutModal, setShowLogoutModal] =
-    useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const [notifications, setNotifications] =
+    useState([
+      {
+        id: 1,
+        message:
+          "This is a notification message",
+      },
+      {
+        id: 2,
+        message:
+          "This is a notification message",
+      },
+      {
+        id: 3,
+        message:
+          "This is a notification message",
+      },
+    ]);
+
+  /* SESSION CHECK */
 
   useEffect(() => {
     let isMounted = true;
@@ -23,7 +40,8 @@ function Dashboard() {
     const init = async () => {
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } =
+        await supabase.auth.getSession();
 
       if (!isMounted) return;
 
@@ -42,8 +60,6 @@ function Dashboard() {
     const { data: listener } =
       supabase.auth.onAuthStateChange(
         (event, session) => {
-          console.log("Auth event:", event);
-
           if (event === "SIGNED_OUT") {
             navigate("/");
           }
@@ -65,6 +81,7 @@ function Dashboard() {
     };
   }, [navigate]);
 
+  /* LOGOUT */
   /* LOGOUT MODAL FUNCTIONS */
 
   const handleLogoutClick = () => {
@@ -103,14 +120,32 @@ function Dashboard() {
     setShowLogoutModal(false);
   };
 
+  /* DELETE ONE */
+
+  const deleteNotification = (id) => {
+    setNotifications(
+      notifications.filter(
+        (n) => n.id !== id
+      )
+    );
+  };
+
+  /* CLEAR ALL */
+
+  const clearAll = () => {
+    setNotifications([]);
+  };
+
   return (
     <div className="dashboard-layout">
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
 
       <aside
         className={`sidebar ${
-          sidebarCollapsed ? "collapsed" : ""
+          sidebarCollapsed
+            ? "collapsed"
+            : ""
         }`}
       >
         <div className="sidebar-header">
@@ -127,42 +162,39 @@ function Dashboard() {
             )}
           </div>
 
+          <button
+            className="collapse-btn"
+            onClick={() =>
+              navigate("/dashboard")
+            }
+          >
+            ←
+          </button>
+
         </div>
 
         <nav className="sidebar-nav">
 
           <button
-            className={`nav-item ${
-              activeTab === "Services"
-                ? "active"
-                : ""
-            }`}
+            className="nav-item"
             onClick={() =>
-              setActiveTab("Services")
+              navigate("/dashboard")
             }
           >
-            {!sidebarCollapsed && (
-              <span className="nav-label">
-                Services
-              </span>
-            )}
+            <span className="nav-label">
+              Services
+            </span>
           </button>
 
           <button
-            className={`nav-item ${
-              activeTab === "My Ratings"
-                ? "active"
-                : ""
-            }`}
+            className="nav-item"
             onClick={() =>
               navigate("/my-ratings")
             }
           >
-            {!sidebarCollapsed && (
-              <span className="nav-label">
-                My Ratings
-              </span>
-            )}
+            <span className="nav-label">
+              My Ratings
+            </span>
           </button>
 
         </nav>
@@ -173,50 +205,34 @@ function Dashboard() {
             className="logout-sidebar-btn"
             onClick={handleLogoutClick}
           >
-
-            {!sidebarCollapsed && (
-              <span className="nav-label">
-                Logout
-              </span>
-            )}
+            Logout
           </button>
 
         </div>
 
       </aside>
 
-      {/* Main Content */}
+      {/* MAIN */}
 
       <main className="main-content">
 
-        {/* Header */}
+        {/* HEADER */}
 
         <header className="dashboard-header">
 
           <div className="header-content">
 
-            <h1 className="page-title">
-              Services
-            </h1>
+            <div className="notification-header-left">
 
-            <div className="header-search">
-
-              <input
-                type="text"
-                placeholder="Search services..."
-                className="search-input"
-              />
+              <h1 className="page-title">
+                Notifications
+              </h1>
 
             </div>
 
             <div className="header-actions">
 
-              <button
-                className="notifications-btn"
-                onClick={() =>
-                  navigate("/notifications")
-                }
-              >
+              <button className="icon-btn">
                 🔔
               </button>
 
@@ -225,9 +241,6 @@ function Dashboard() {
                 onClick={() =>
                   navigate("/profile")
                 }
-                style={{
-                  cursor: "pointer",
-                }}
               >
                 👤
               </div>
@@ -238,70 +251,49 @@ function Dashboard() {
 
         </header>
 
-        {/* Filter Section */}
+        {/* CONTENT */}
 
-        <section className="filter-section">
+        <section className="notification-container">
 
-          <h3 className="filter-title">
-            Filter Category
-          </h3>
+          <div className="notification-top">
 
-          <div className="filter-buttons">
-
-            <button className="filter-btn">
-              Food & Hospitality
-            </button>
-
-            <button className="filter-btn">
-              Medical & Health
-            </button>
-
-            <button className="filter-btn">
-              Retail & Commercial
-            </button>
-
-            <button className="filter-btn">
-              Personal & Lifestyle
+            <button
+              className="clear-btn"
+              onClick={clearAll}
+            >
+              Clear All
             </button>
 
           </div>
 
-        </section>
-
-        {/* Services Grid */}
-
-        <section className="services-grid">
-
-          {[1,2,3,4,5,6,7,8,9].map(
-            (service) => (
+          {notifications.map(
+            (notification) => (
 
               <div
-                key={service}
-                className="service-card"
+                key={notification.id}
+                className="notification-card"
               >
 
-                <div className="service-image" />
-
-                <div className="service-info">
-
-                  <h3 className="service-name">
-                    Service X
-                  </h3>
-
-                  <p className="service-category">
-                    Service Category
-                  </p>
-
-                  <button
-                    className="rate-btn"
-                    onClick={() =>
-                      navigate("/rate-service")
-                    }
-                  >
-                    Rate Service
-                  </button>
-
+                <div className="notification-icon">
+                  !
                 </div>
+
+                <div className="notification-text">
+                  {
+                    notification.message
+                  }
+                </div>
+
+                <button
+                  className="delete-btn"
+                  onClick={() =>
+                    deleteNotification(
+                      notification.id
+                    )
+                  }
+                >
+                  🗑
+                </button>
 
               </div>
 
@@ -350,4 +342,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default Notification;
