@@ -13,48 +13,55 @@ function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState("");
 
-  // 🔐 Check session
 useEffect(() => {
   let isMounted = true;
 
-  const fetchUser = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:8080/api/auth/me",
-        {
-          method: "GET",
-          credentials: "include"
-        }
-      );
+  const init = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-      if (!response.ok) {
-        console.log("Not authenticated");
+    if (!isMounted) return;
+
+    if (session) {
+      setUser({
+        username:
+          session.user.user_metadata?.full_name ||
+          session.user.email,
+        email: session.user.email,
+      });
+    }
+  };
+
+  init();
+
+const { data: listener } =
+  supabase.auth.onAuthStateChange(
+    (event, session) => {
+      console.log("Auth event:", event);
+
+      if (event === "SIGNED_OUT") {
         navigate("/");
         return;
       }
 
-      const data = await response.json();
-
-      if (!isMounted) return;
+      // 🔴 FIX — check session exists
+      if (!session) {
+        return;
+      }
 
       setUser({
-        username: data.username?.trim() || "user",
-        email: data.email || ""
+        username:
+          session.user.user_metadata?.full_name ||
+          session.user.email,
+        email: session.user.email,
       });
-
-      setNewUsername(
-        data.username?.trim() || ""
-      );
-
-    } catch (error) {
-      console.error("Failed to fetch user:", error);
     }
-  };
-
-  fetchUser();
+  );
 
   return () => {
     isMounted = false;
+    listener.subscription.unsubscribe();
   };
 
 }, [navigate]);
