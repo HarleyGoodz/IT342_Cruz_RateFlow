@@ -16,48 +16,93 @@ function Profile() {
 useEffect(() => {
   let isMounted = true;
 
-  const init = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+  const loadUser = async () => {
 
-    if (!isMounted) return;
+    try {
 
-    if (session) {
+      /* STEP 1 — Try Spring session */
+
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
+        }
+      );
+
+      if (response.ok) {
+
+        const data = await response.json();
+
+        if (!isMounted) return;
+
+        setUser({
+          username: data.username || "user",
+          email: data.email
+        });
+
+        console.log("Loaded from Spring session");
+        return;
+      }
+
+    } catch (err) {
+      console.log("Spring session not found");
+    }
+
+    /* STEP 2 — Try Supabase session */
+
+    try {
+
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        console.log("No Supabase session");
+        return;
+      }
+
+      if (!isMounted) return;
+
+      const username =
+        session.user?.user_metadata?.username ||
+        session.user?.user_metadata?.full_name ||
+        "user";
+
       setUser({
-        username:
-          session.user.user_metadata?.full_name ||
-          session.user.email,
-        email: session.user.email,
+        username,
+        email: session.user.email
       });
+
+      console.log("Loaded from Supabase session");
+
+    } catch (error) {
+      console.error("Failed to load user:", error);
     }
   };
 
-  init();
+  loadUser();
 
-const { data: listener } =
-  supabase.auth.onAuthStateChange(
-    (event, session) => {
-      console.log("Auth event:", event);
+  const { data: listener } =
+    supabase.auth.onAuthStateChange(
+      (event, session) => {
 
-      if (event === "SIGNED_OUT") {
-        navigate("/");
-        return;
+        if (event === "SIGNED_OUT") {
+          navigate("/");
+          return;
+        }
+
+        if (!session) return;
+
+        setUser({
+          username:
+            session.user?.user_metadata?.username ||
+            session.user?.user_metadata?.full_name ||
+            "user",
+          email: session.user.email
+        });
       }
-
-      // 🔴 FIX — check session exists
-      if (!session) {
-        return;
-      }
-
-      setUser({
-        username:
-          session.user.user_metadata?.full_name ||
-          session.user.email,
-        email: session.user.email,
-      });
-    }
-  );
+    );
 
   return () => {
     isMounted = false;
