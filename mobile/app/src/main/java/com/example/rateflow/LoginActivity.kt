@@ -20,6 +20,15 @@ class LoginActivity : AppCompatActivity() {
 
         setContentView(R.layout.login_page)
 
+        // ✅ Show success notification if coming from registration
+        if (intent.getBooleanExtra("REGISTRATION_SUCCESS", false)) {
+            NotificationHelper.show(
+                this,
+                "Account created! Please sign in.",
+                NotificationHelper.Type.SUCCESS
+            )
+        }
+
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val txtRegister = findViewById<TextView>(R.id.txtRegister)
 
@@ -69,32 +78,24 @@ class LoginActivity : AppCompatActivity() {
 
                                 if (response.isSuccessful) {
 
-                                    Toast.makeText(
-                                        this@LoginActivity,
-                                        "Login successful!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    // Success
+                                    NotificationHelper.show(this@LoginActivity, "Login successful!", NotificationHelper.Type.SUCCESS)
+
 
                                     val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
                                     startActivity(intent)
                                     finish()
 
                                 } else {
-                                    Toast.makeText(
-                                        this@LoginActivity,
-                                        "Invalid email or password",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    // Invalid credentials
+                                    NotificationHelper.show(this@LoginActivity, "Invalid email or password", NotificationHelper.Type.ERROR)
                                 }
                             }
 
                             override fun onFailure(call: Call<User>, t: Throwable) {
 
-                                Toast.makeText(
-                                    this@LoginActivity,
-                                    "Server error: ${t.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                // Network failure
+                                NotificationHelper.show(this@LoginActivity, "Server error: ${t.message}", NotificationHelper.Type.WARNING)
                             }
                         })
                 }
