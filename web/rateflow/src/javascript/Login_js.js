@@ -38,10 +38,16 @@ function Login() {
       const data = await response.json();
       console.log(data);
 
+      localStorage.setItem("role", data.role);
+
       setSuccessMessage("Login successful! Redirecting to dashboard...");
 
       setTimeout(() => {
-        navigate("/dashboard");
+        if (data.role === "ADMIN") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }, 1500);
 
     } catch (err) {

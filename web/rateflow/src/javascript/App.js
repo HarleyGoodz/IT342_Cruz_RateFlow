@@ -6,6 +6,8 @@ import Profile from "./Profile";
 import MyRatings from "./MyRatings";
 import Notification from "./Notification";
 import RateService from "./RateService";
+import AdminDashboard from "./Admindashboard"; 
+import AdminRoute from "./AdminRoute";
 import '../css/App.css';
 
 
@@ -20,6 +22,8 @@ function App() {
         <Route path="/my-ratings" element={<MyRatings />} />
         <Route path="/notifications" element={<Notification />} />
         <Route path="/rate-service" element={<RateService />} />
+        <Route path="/admin" element={ <AdminRoute> <AdminDashboard /></AdminRoute>}/>
+        
       </Routes>
     </Router>
   );
