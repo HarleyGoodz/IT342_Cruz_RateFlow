@@ -10,6 +10,7 @@ import AdminDashboard from "./Admindashboard";
 import AdminRoute from "./AdminRoute";
 import CreateService from "./CreateService";
 import ManageServices from "./ManageServices";
+import AccessControl from "./AccessControl";
 import '../css/App.css';
 
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/admin" element={ <AdminRoute> <AdminDashboard /></AdminRoute>}/>
         <Route path="/admin/create-service" element={ <AdminRoute> <CreateService /></AdminRoute>}/>
         <Route path="/admin/manage-services" element={ <AdminRoute> <ManageServices /></AdminRoute>}/>
+        <Route path="/admin/access-control" element={ <AdminRoute> <AccessControl /></AdminRoute>}/>
       </Routes>
     </Router>
   );
