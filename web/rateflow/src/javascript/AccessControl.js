@@ -177,11 +177,13 @@ function AccessControl() {
                   <div className="ac-user-info">
                     <h3 className="ac-user-name">{userItem.name}</h3>
                     <p className="ac-user-email">{userItem.email}</p>
+                  </div>
+                  <div className="ac-user-actions">
+
                     <span className={`ac-user-role ${userItem.isAdmin ? "admin" : "user"}`}>
                       {userItem.role}
                     </span>
-                  </div>
-                  <div className="ac-user-actions">
+                    
                     {!userItem.isAdmin ? (
                       <button 
                         className="ac-grant-btn"
