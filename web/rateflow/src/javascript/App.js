@@ -12,6 +12,7 @@ import CreateService from "./CreateService";
 import ManageServices from "./ManageServices";
 import AccessControl from "./AccessControl";
 import AdminProfile from "./AdminProfile";
+import AdminNotif from "./AdminNotif";
 import '../css/App.css';
 
 
@@ -31,6 +32,7 @@ function App() {
         <Route path="/admin/manage-services" element={ <AdminRoute> <ManageServices /></AdminRoute>}/>
         <Route path="/admin/access-control" element={ <AdminRoute> <AccessControl /></AdminRoute>}/>
         <Route path="/admin/profile" element={ <AdminRoute> <AdminProfile /></AdminRoute>}/>
+        <Route path="/admin/notifications" element={ <AdminRoute> <AdminNotif /></AdminRoute>}/>
       </Routes>
     </Router>
   );
