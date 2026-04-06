@@ -720,3 +720,237 @@ body {
   }
   
 }
+
+/* Add these styles to your existing CreateServiceStyles.css */
+
+/* Filter / Category Bar */
+.cs-filter-bar {
+  padding: 24px 40px 0 40px;
+  animation: csFadeIn 0.5s ease-out;
+}
+
+.cs-filter-label {
+  font-size: 16px;
+  color: var(--cs-text-secondary);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.cs-filter-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cs-filter-chip {
+  padding: 8px 20px;
+  border-radius: 30px;
+  border: 1px solid var(--cs-card-border);
+  background: rgba(56, 189, 248, 0.08);
+  color: var(--cs-text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.cs-filter-chip:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: var(--cs-primary);
+  transform: translateY(-1px);
+}
+
+.cs-filter-chip.active {
+  background: linear-gradient(135deg, var(--cs-primary), var(--cs-primary-dark));
+  color: var(--cs-bg-primary);
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+/* Category Select Dropdown */
+.cs-category-select {
+  cursor: pointer;
+}
+
+.cs-category-select option {
+  background: var(--cs-bg-tertiary);
+  color: var(--cs-text-primary);
+}
+
+/* Sample Services Section */
+.cs-sample-services-section {
+  padding: 0 40px 48px 40px;
+  animation: csFadeIn 0.5s ease-out;
+}
+
+.cs-sample-services-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.cs-sample-services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cs-card-border);
+}
+
+.cs-sample-services-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--cs-text-primary);
+}
+
+.cs-sample-services-count {
+  color: var(--cs-text-muted);
+  font-size: 14px;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.cs-sample-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.cs-sample-service-card {
+  background: linear-gradient(135deg, rgba(20, 34, 60, 0.8) 0%, rgba(30, 50, 80, 0.75) 100%);
+  border: 1px solid var(--cs-card-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cs-sample-service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cs-primary), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.cs-sample-service-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cs-sample-service-card:hover::before {
+  transform: scaleX(1);
+}
+
+.cs-sample-service-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cs-sample-service-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cs-text-primary);
+}
+
+.cs-sample-service-category {
+  background: rgba(56, 189, 248, 0.15);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--cs-primary);
+  letter-spacing: 0.3px;
+}
+
+.cs-sample-service-description {
+  color: var(--cs-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.cs-no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--cs-text-muted);
+  font-size: 14px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 12px;
+  border: 1px dashed var(--cs-card-border);
+}
+
+/* Update existing styles */
+.cs-form-area {
+  padding: 32px 40px 24px 40px;
+}
+
+.cs-form-card {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Add collapse button to sidebar header */
+.cs-sidebar-header {
+  justify-content: space-between;
+}
+
+.cs-collapse-btn {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: var(--cs-primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.cs-collapse-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cs-filter-bar {
+    padding: 20px 20px 0 20px;
+  }
+  
+  .cs-form-area {
+    padding: 24px 20px;
+  }
+  
+  .cs-sample-services-section {
+    padding: 0 20px 32px 20px;
+  }
+  
+  .cs-filter-chip {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+  
+  .cs-sample-services-grid {
+    grid-template-columns: 1fr;
+  }
+}

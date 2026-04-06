@@ -6,58 +6,54 @@ import "../css/admin_dashboard.css";
 function AdminDashboard() {
   const navigate = useNavigate();
 
-  const [sidebarCollapsed, setSidebarCollapsed] =
-    useState(false);
-
-  const [activeTab, setActiveTab] =
-    useState("Services");
-
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState("Services");
   const [user, setUser] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [showLogoutModal, setShowLogoutModal] =
-    useState(false);
+  // Sample services data
+  const [services] = useState([
+    { id: 1, name: "Gourmet Bistro", category: "Food & Hospitality", description: "Fine dining experience" },
+    { id: 2, name: "Wellness Center", category: "Medical & Health", description: "Comprehensive healthcare" },
+    { id: 3, name: "Urban Mart", category: "Retail & Commercial", description: "Shopping destination" },
+    { id: 4, name: "Spa & Relaxation", category: "Personal & Lifestyle", description: "Rejuvenating treatments" },
+    { id: 5, name: "Cafe Deluxe", category: "Food & Hospitality", description: "Artisan coffee" },
+    { id: 6, name: "PharmaCare", category: "Medical & Health", description: "24/7 pharmacy" },
+    { id: 7, name: "Fashion Hub", category: "Retail & Commercial", description: "Latest trends" },
+    { id: 8, name: "Fitness Studio", category: "Personal & Lifestyle", description: "Personal training" },
+  ]);
+
+  const categories = ["All", "Food & Hospitality", "Medical & Health", "Retail & Commercial", "Personal & Lifestyle"];
+
+  // Filter services
+  const filteredServices = services.filter(service => {
+    const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || service.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   useEffect(() => {
     let isMounted = true;
 
     const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      const { data: { session } } = await supabase.auth.getSession();
       if (!isMounted) return;
-
       if (session) {
-        setUser({
-          username:
-            session.user.user_metadata
-              ?.full_name ||
-            session.user.email,
-        });
+        setUser({ username: session.user.user_metadata?.full_name || session.user.email });
       }
     };
 
     init();
 
-    const { data: listener } =
-      supabase.auth.onAuthStateChange(
-        (event, session) => {
-          console.log("Auth event:", event);
-
-          if (event === "SIGNED_OUT") {
-            navigate("/");
-          }
-
-          if (session) {
-            setUser({
-              username:
-                session.user.user_metadata
-                  ?.full_name ||
-                session.user.email,
-            });
-          }
-        }
-      );
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") navigate("/");
+      if (session) {
+        setUser({ username: session.user.user_metadata?.full_name || session.user.email });
+      }
+    });
 
     return () => {
       isMounted = false;
@@ -65,27 +61,18 @@ function AdminDashboard() {
     };
   }, [navigate]);
 
-  /* LOGOUT MODAL FUNCTIONS */
-
-  const handleLogoutClick = () => {
-    setShowLogoutModal(true);
-  };
+  const handleLogoutClick = () => setShowLogoutModal(true);
 
   const confirmLogout = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/auth/logout",
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
-
+      const response = await fetch("http://localhost:8080/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
       if (!response.ok) {
         alert("Logout failed");
         return;
       }
-
       setUser(null);
       setShowLogoutModal(false);
       navigate("/");
@@ -95,277 +82,121 @@ function AdminDashboard() {
     }
   };
 
-  const cancelLogout = () => {
-    setShowLogoutModal(false);
-  };
+  const cancelLogout = () => setShowLogoutModal(false);
 
   return (
     <div className="admin-layout">
-
-      {/* Admin Sidebar */}
-
-      <aside
-        className={`admin-sidebar ${
-          sidebarCollapsed ? "collapsed" : ""
-        }`}
-      >
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="admin-sidebar-header">
-
           <div className="admin-logo">
-            <span className="admin-logo-icon">
-              🛡️
-            </span>
-
-            {!sidebarCollapsed && (
-              <span className="admin-logo-text">
-                Admin
-              </span>
-            )}
+            <span className="admin-logo-icon">🛡️</span>
+            {!sidebarCollapsed && <span className="admin-logo-text">Admin</span>}
           </div>
-
         </div>
 
         <nav className="admin-nav">
-
-          <button
-            className={`admin-nav-item ${
-              activeTab === "Services" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("Services")}
-          >
-            {!sidebarCollapsed && (
-              <span className="admin-nav-label">
-                Services
-              </span>
-            )}
+          <button className={`admin-nav-item ${activeTab === "Services" ? "active" : ""}`} onClick={() => setActiveTab("Services")}>
+            {!sidebarCollapsed && <span className="admin-nav-label">Services</span>}
           </button>
-
-          <button
-            className={`admin-nav-item ${
-              activeTab === "Create-Service" ? "active" : ""
-            }`}
-            onClick={() => {
-            setActiveTab("Create-Service");
-            navigate("/admin/create-service");
-          }}
-        >
-            {!sidebarCollapsed && (
-              <span className="admin-nav-label">
-                Create Service
-              </span>
-            )}
+          <button className={`admin-nav-item ${activeTab === "Create-Service" ? "active" : ""}`} onClick={() => navigate("/admin/create-service")}>
+            {!sidebarCollapsed && <span className="admin-nav-label">Create Service</span>}
           </button>
-
-          <button
-            className={`admin-nav-item ${
-              activeTab === "Manage-Services" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("Manage-Services")}
-          >
-
-            {!sidebarCollapsed && (
-              <span className="admin-nav-label">
-                Manage Services
-              </span>
-            )}
+          <button className={`admin-nav-item ${activeTab === "Manage-Services" ? "active" : ""}`} onClick={() => navigate("/admin/manage-services")}>
+            {!sidebarCollapsed && <span className="admin-nav-label">Manage Services</span>}
           </button>
-
-          <button
-            className={`admin-nav-item ${
-              activeTab === "Access-Control" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("Access-Control")}
-          >
-            
-            {!sidebarCollapsed && (
-              <span className="admin-nav-label">
-                Access Control
-              </span>
-            )}
+          <button className={`admin-nav-item ${activeTab === "Access-Control" ? "active" : ""}`} onClick={() => navigate("/admin/access-control")}>
+            {!sidebarCollapsed && <span className="admin-nav-label">Access Control</span>}
           </button>
-
         </nav>
 
         <div className="admin-sidebar-footer">
-
-          <button
-            className="admin-logout-btn"
-            onClick={handleLogoutClick}
-          >
-            <span className="admin-nav-icon">🚪</span>
-            {!sidebarCollapsed && (
-              <span className="admin-nav-label">
-                Logout
-              </span>
-            )}
+          <button className="admin-logout-btn" onClick={handleLogoutClick}>
+            {!sidebarCollapsed && <span className="admin-nav-label">Logout</span>}
           </button>
-
         </div>
-
       </aside>
 
-      {/* Admin Panel (Main Content) */}
-
+      {/* Main Panel */}
       <main className="admin-panel">
-
-        {/* Admin Topbar */}
-
+        {/* Topbar */}
         <header className="admin-topbar">
-
           <div className="admin-topbar-content">
-
-            <h1 className="admin-page-title">
-              Services
-            </h1>
+            <div>
+              <h1 className="admin-page-title">Services</h1>
+            </div>
 
             <div className="admin-search-wrapper">
-
               <input
                 type="text"
                 placeholder="Search services..."
                 className="admin-search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-
             </div>
 
             <div className="admin-topbar-actions">
-
-              <button
-                className="admin-icon-btn"
-                onClick={() =>
-                  navigate("/admin/notifications")
-                }
-              >
-                🔔
-                <span className="admin-notification-badge">
-                  3
-                </span>
+              <button className="admin-icon-btn" onClick={() => navigate("/admin/notifications")}>
+                🔔<span className="admin-notification-badge">3</span>
               </button>
-
-              <div
-                className="admin-avatar"
-                onClick={() =>
-                  navigate("/admin/profile")
-                }
-                style={{ cursor: "pointer" }}
-              >
-                👤
-              </div>
-
+              <div className="admin-avatar" onClick={() => navigate("/admin/profile")}>👤</div>
             </div>
-
           </div>
-
         </header>
 
-        {/* Filter / Category Bar */}
-
+        {/* Filter Bar */}
         <section className="admin-filter-bar">
-
-          <h3 className="admin-filter-label">
-            Filter Category
-          </h3>
-
+          <h3 className="admin-filter-label">Filter by Category</h3>
           <div className="admin-filter-group">
-
-            <button className="admin-filter-chip">
-              Food & Hospitality
-            </button>
-
-            <button className="admin-filter-chip">
-              Medical & Health
-            </button>
-
-            <button className="admin-filter-chip">
-              Retail & Commercial
-            </button>
-
-            <button className="admin-filter-chip">
-              Personal & Lifestyle
-            </button>
-
-          </div>
-
-        </section>
-
-        {/* Admin Records Grid */}
-
-        <section className="admin-records-grid">
-
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(
-            (record) => (
-
-              <div
-                key={record}
-                className="admin-record-card"
+            {categories.map(category => (
+              <button
+                key={category}
+                className={`admin-filter-chip ${selectedCategory === category ? "active" : ""}`}
+                onClick={() => setSelectedCategory(category)}
               >
-
-                <div className="admin-record-thumbnail" />
-
-                <div className="admin-record-details">
-
-                  <h3 className="admin-record-name">
-                    Service {record}
-                  </h3>
-
-                  <p className="admin-record-category">
-                    Service Category
-                  </p>
-
-                  <button
-                    className="admin-record-action-btn"
-                    onClick={() =>
-                      navigate("/admin/manage-service")
-                    }
-                  >
-                    Manage
-                  </button>
-
-                </div>
-
-              </div>
-
-            )
-          )}
-
+                {category}
+              </button>
+            ))}
+          </div>
         </section>
 
+        {/* Services Grid */}
+        <section className="admin-records-grid">
+          {filteredServices.map((service) => (
+            <div key={service.id} className="admin-record-card">
+              <div className="admin-record-thumbnail" />
+              <div className="admin-record-details">
+                <h3 className="admin-record-name">{service.name}</h3>
+                <p className="admin-record-category">{service.category}</p>
+                <button 
+                  className="admin-record-action-btn"
+            
+                >
+                  View Ratings
+                </button>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {filteredServices.length === 0 && (
+          <div className="admin-no-results">No services found matching your criteria.</div>
+        )}
       </main>
 
-      {/* Logout Confirm Modal */}
-
+      {/* Logout Modal */}
       {showLogoutModal && (
         <div className="admin-logout-overlay">
-
           <div className="admin-logout-modal">
-
-            <div className="admin-logout-modal-text">
-              Are you sure you want to logout?
-            </div>
-
+            <div className="admin-logout-modal-text">Are you sure you want to logout?</div>
             <div className="admin-logout-modal-actions">
-
-              <button
-                className="admin-confirm-btn"
-                onClick={confirmLogout}
-              >
-                Confirm
-              </button>
-
-              <button
-                className="admin-cancel-btn"
-                onClick={cancelLogout}
-              >
-                Cancel
-              </button>
-
+              <button className="admin-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="admin-cancel-btn" onClick={cancelLogout}>Cancel</button>
             </div>
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 }
