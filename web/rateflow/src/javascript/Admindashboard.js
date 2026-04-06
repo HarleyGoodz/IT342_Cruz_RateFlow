@@ -123,15 +123,6 @@ function AdminDashboard() {
             )}
           </div>
 
-          <button
-            className="admin-collapse-btn"
-            onClick={() =>
-              setSidebarCollapsed(!sidebarCollapsed)
-            }
-          >
-            {sidebarCollapsed ? "→" : "←"}
-          </button>
-
         </div>
 
         <nav className="admin-nav">
@@ -153,8 +144,11 @@ function AdminDashboard() {
             className={`admin-nav-item ${
               activeTab === "Create-Service" ? "active" : ""
             }`}
-            onClick={() => setActiveTab("Create-Service")}
-          >
+            onClick={() => {
+            setActiveTab("Create-Service");
+            navigate("/admin/create-service");
+          }}
+        >
             {!sidebarCollapsed && (
               <span className="admin-nav-label">
                 Create Service
