@@ -114,9 +114,6 @@
             <div className="sidebar-header">
 
             <div className="logo">
-                <span className="logo-icon">
-                ⚡
-                </span>
 
                 {!sidebarCollapsed && (
                 <span className="logo-text">
