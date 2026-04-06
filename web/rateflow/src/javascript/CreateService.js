@@ -9,6 +9,8 @@ function CreateService() {
   const [sidebarCollapsed, setSidebarCollapsed] =
     useState(false);
 
+const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const [activeTab, setActiveTab] =
     useState("Create-Service");
 
@@ -94,36 +96,10 @@ function CreateService() {
 
   /* FORM SUBMIT */
 
-  const handleCreate = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:8080/api/services/create",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: serviceName,
-            category: serviceCategory,
-            description: serviceDescription,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        alert("Failed to create service");
-        return;
-      }
-
-      alert("Service created successfully!");
-      navigate("/admin/services");
-    } catch (error) {
-      console.error("Create service error:", error);
-      alert("Failed to create service");
-    }
-  };
+  const handleCreate = () => {
+  // No backend yet — just show success popup
+  setShowSuccessModal(true);
+    };
 
   const handleCancel = () => {
     navigate("/admin");
@@ -261,6 +237,8 @@ function CreateService() {
           </button>
 
         </nav>
+
+
 
         <div className="cs-sidebar-footer">
 
@@ -426,6 +404,30 @@ function CreateService() {
         </section>
 
       </main>
+
+      
+  {showSuccessModal && (
+  <div className="cs-success-overlay">
+    <div className="cs-success-modal">
+      
+      <div className="cs-success-icon">
+        ✓
+      </div>
+
+      <div className="cs-success-message">
+        Service Successfully Created
+      </div>
+
+      <button
+        className="cs-success-btn"
+        onClick={() => navigate("/admin")}
+      >
+        Continue
+      </button>
+
+    </div>
+  </div>
+)}
 
       {/* Logout Modal */}
 

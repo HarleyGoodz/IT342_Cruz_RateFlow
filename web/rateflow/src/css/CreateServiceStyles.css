@@ -627,6 +627,62 @@ body {
   transform: translateY(-2px);
 }
 
+/* Success Popup */
+
+.cs-success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.cs-success-modal {
+  background: #2b456b;
+  padding: 40px 60px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.cs-success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #16a34a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  color: white;
+}
+
+.cs-success-message {
+  font-size: 22px;
+  font-weight: 600;
+  color: #6fd3ff;
+  background: #3f5f8f;
+  padding: 14px 28px;
+  border-radius: 8px;
+}
+
+.cs-success-btn {
+  padding: 12px 32px;
+  background: #4f6fa1;
+  color: #6fd3ff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .cs-sidebar {
@@ -662,4 +718,5 @@ body {
   .cs-topbar {
     padding: 0 20px;
   }
+  
 }
