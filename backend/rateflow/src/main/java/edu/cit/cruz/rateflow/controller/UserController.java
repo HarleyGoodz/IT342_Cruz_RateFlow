@@ -26,34 +26,31 @@ public class UserController {
     @Autowired
     private UserService userv;
  
-@PostMapping("/register")
-public ResponseEntity<?> addUser(@RequestBody User newUser) {
-    try {
-
-        // Check if email already exists
-        if (userv.findByEmail(newUser.getEmail()).isPresent()) {
-            return ResponseEntity
-                    .status(409)
-                    .body("Email has already been created!");
-        }
-
-        newUser.setRole(Role.USER);
-
-        User saved = userv.createUser(newUser);
-        saved.setPassword(null);
-
-        return ResponseEntity.ok(saved);
-
-    } catch (Exception e) {
-        return ResponseEntity.status(400).body("Registration failed.");
-    }
-}
- 
-    // LOGIN - sets HttpSession attribute and returns user (without password)
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginData, HttpSession session) {
+    @PostMapping("/register")
+    public ResponseEntity<?> addUser(@RequestBody User newUser) {
         try {
-            String input = loginData.getEmail(); // can be email or fullname
+            if (userv.findByEmail(newUser.getEmail()).isPresent()) {
+                return ResponseEntity
+                        .status(409)
+                        .body("Email has already been created!");
+            }
+
+            newUser.setRole(Role.USER);
+            User saved = userv.createUser(newUser);
+            saved.setPassword(null);
+
+            return ResponseEntity.ok(saved);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Registration failed.");
+        }
+    }
+ 
+    // Single admin login endpoint that handles both admin and regular users
+    @PostMapping("/admin/login")
+    public ResponseEntity<?> adminLogin(@RequestBody User loginData, HttpSession session) {
+        try {
+            String input = loginData.getEmail();
             String password = loginData.getPassword();
  
             Optional<User> userOpt = userv.findByEmailOrUsername(input);
@@ -64,16 +61,16 @@ public ResponseEntity<?> addUser(@RequestBody User newUser) {
  
             User user = userOpt.get();
  
-            // Plaintext password check (replace with hashed check in production)
             if (!userv.checkPassword(user, password)) {
                 return ResponseEntity.status(401).body("Wrong password");
             }
  
-            // Set session attributes
+            // Check if user is admin - if not, still return user but with role USER
+            // This allows the frontend to redirect based on role
             session.setAttribute("userId", user.getId());
             session.setAttribute("userEmail", user.getEmail());
+            session.setAttribute("userRole", user.getRole());
  
-            // hide password before returning
             user.setPassword(null);
             return ResponseEntity.ok(user);
  
@@ -81,7 +78,6 @@ public ResponseEntity<?> addUser(@RequestBody User newUser) {
             return ResponseEntity.status(500).body("Server error: " + e.getMessage());
         }
     }
-   
  
     // LOGOUT - invalidate session
     @PostMapping("/logout")
@@ -91,25 +87,22 @@ public ResponseEntity<?> addUser(@RequestBody User newUser) {
     }
 
     @GetMapping("/me")
-public ResponseEntity<?> me(HttpSession session) {
-    Integer userId = (Integer) session.getAttribute("userId");
+    public ResponseEntity<?> me(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("userId");
 
-    if (userId == null) {
-        return ResponseEntity.status(401).body("Not authenticated");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+
+        Optional<User> userOpt = userv.findById(userId);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        User user = userOpt.get();
+        user.setPassword(null);
+
+        return ResponseEntity.ok(user);
     }
-
-    Optional<User> userOpt = userv.findById(userId);
-
-    if (userOpt.isEmpty()) {
-        return ResponseEntity.status(404).body("User not found");
-    }
-
-    User user = userOpt.get();
-    user.setPassword(null);
-
-    return ResponseEntity.ok(user);
-}
-
-
-
 }

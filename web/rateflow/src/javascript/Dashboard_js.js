@@ -7,8 +7,22 @@ function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("Services");
   const [user, setUser] = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // 🔐 Check session when dashboard loads
+  const categories = ["All", "Food & Hospitality", "Medical & Health", "Retail & Commercial", "Personal & Lifestyle"];
+
+  // Filter services based on search term and category
+  const filteredServices = services.filter(service => {
+    const matchesSearch = service.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || service.serviceCategory === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Check authentication and fetch services
   useEffect(() => {
     fetch("http://localhost:8080/api/auth/me", {
       credentials: "include",
@@ -20,40 +34,68 @@ function Dashboard() {
         return res.json();
       })
       .then((data) => {
+        if (data.role === "ADMIN") {
+          navigate("/admindashboard");
+          return;
+        }
         setUser(data);
+        fetchServices();
       })
       .catch(() => {
         navigate("/");
       });
   }, [navigate]);
 
-  const handleLogout = async () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return;
+  const fetchServices = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/services", {
+        credentials: "include",
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
-    } finally {
+      setShowLogoutModal(false);
       navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
     }
   };
 
-  const stats = [
-    { label: "Total Revenue", value: "$45,231", change: "+20.1%", positive: true, icon: "💰" },
-    { label: "Active Users", value: "2,543", change: "+12.5%", positive: true, icon: "👥" },
-    { label: "Projects", value: "42", change: "-3.2%", positive: false, icon: "📊" },
-    { label: "Tasks Completed", value: "156", change: "+8.4%", positive: true, icon: "✓" },
-  ];
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
+  };
 
-  const recentActivities = [
-    { action: "New project created", time: "2 minutes ago", icon: "📁" },
-    { action: "Report generated", time: "1 hour ago", icon: "📄" },
-    { action: "Team member added", time: "3 hours ago", icon: "👤" },
-    { action: "Payment processed", time: "5 hours ago", icon: "💳" },
-  ];
+  const handleServiceClick = (serviceId) => {
+    navigate(`/rate-service/${serviceId}`);
+  };
+
+  const getImageUrl = (serviceId) => {
+    return `http://localhost:8080/api/services/${serviceId}/image`;
+  };
+
+  function getUniqueCategories() {
+    const cats = services.map(service => service.serviceCategory);
+    return [...new Set(cats)];
+  }
 
   return (
     <div className="dashboard-layout">
@@ -61,16 +103,8 @@ function Dashboard() {
       <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
           <div className="logo">
-            <span className="logo-icon">⚡</span>
             {!sidebarCollapsed && <span className="logo-text">Dashboard</span>}
           </div>
-          <button 
-            className="collapse-btn" 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            aria-label="Toggle sidebar"
-          >
-            {sidebarCollapsed ? "→" : "←"}
-          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -82,16 +116,14 @@ function Dashboard() {
           </button>
           <button 
             className={`nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
-            onClick={() => setActiveTab("My Ratings")}
+            onClick={() => navigate("/my-ratings")}
           >
-  
             {!sidebarCollapsed && <span className="nav-label">My Ratings</span>}
           </button>
         </nav>
 
         <div className="sidebar-footer">
-          <button className="logout-sidebar-btn" onClick={handleLogout}>
-            <span className="nav-icon">🚪</span>
+          <button className="logout-sidebar-btn" onClick={handleLogoutClick}>
             {!sidebarCollapsed && <span className="nav-label">Logout</span>}
           </button>
         </div>
@@ -101,76 +133,90 @@ function Dashboard() {
       <main className="main-content">
         <header className="dashboard-header">
           <div className="header-content">
-            <div>
-              <h1 className="page-title">
-                Welcome back, {user ? user.username : "User"}
-              </h1>
-              <p className="page-subtitle">
-                Here's what's happening with your projects today
-              </p>
+            <h1 className="page-title">Services</h1>
+            <div className="header-search">
+              <input
+                type="text"
+                placeholder="Search services..."
+                className="search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
             <div className="header-actions">
-              <button className="icon-btn notification-btn">
-                <span className="notification-badge">3</span>
-                🔔
-              </button>
-              <div className="user-avatar"
-                onClick={() => navigate("/profile")}
-                style={{ cursor: "pointer" }}
-                >
-                  {user ? user.username.charAt(0).toUpperCase() : "U"}
-                </div>
+              <div className="user-avatar" onClick={() => navigate("/profile")}>
+                {user ? user.username.charAt(0).toUpperCase() : "U"}
+              </div>
             </div>
           </div>
         </header>
 
-        <section className="stats-grid">
-          {stats.map((stat, index) => (
-            <div key={index} className="stat-card">
-              <div className="stat-icon">{stat.icon}</div>
-              <div className="stat-content">
-                <p className="stat-label">{stat.label}</p>
-                <h3 className="stat-value">{stat.value}</h3>
-                <p className={`stat-change ${stat.positive ? "positive" : "negative"}`}>
-                  {stat.change} from last month
-                </p>
+        {/* Filter Section */}
+        <section className="filter-section">
+          <h3 className="filter-title">Filter Category</h3>
+          <div className="filter-buttons">
+            {categories.map((category) => (
+              <button
+                key={category}
+                className={`filter-btn ${selectedCategory === category ? "active" : ""}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Services Grid */}
+        <section className="services-grid">
+          {!loading && filteredServices.map((service) => (
+            <div key={service.serviceId} className="service-card">
+              {service.image && (
+                <div className="service-image">
+                  <img 
+                    src={getImageUrl(service.serviceId)} 
+                    alt={service.serviceName}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/70x70?text=No+Image";
+                    }}
+                  />
+                </div>
+              )}
+              <div className="service-info">
+                <h3 className="service-name">{service.serviceName}</h3>
+                <p className="service-category">{service.serviceCategory}</p>
+                <button className="rate-btn" onClick={() => handleServiceClick(service.serviceId)}>
+                  Rate Service
+                </button>
               </div>
             </div>
           ))}
         </section>
 
-        <section className="content-grid">
-          <div className="chart-card">
-            <div className="card-header">
-              <h3 className="card-title">Revenue Services</h3>
-              <select className="time-selector">
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-              </select>
-            </div>
-            <div className="chart-placeholder"></div>
+        {!loading && filteredServices.length === 0 && (
+          <div className="no-results">
+            No services found matching "{searchTerm}" in category "{selectedCategory === "All" ? "all categories" : selectedCategory}"
           </div>
+        )}
 
-          <div className="activity-card">
-            <div className="card-header">
-              <h3 className="card-title">Recent Activity</h3>
-              <button className="view-all-btn">View All →</button>
-            </div>
-            <div className="activity-list">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="activity-item">
-                  <div className="activity-icon">{activity.icon}</div>
-                  <div className="activity-content">
-                    <p className="activity-action">{activity.action}</p>
-                    <p className="activity-time">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
+        {loading && (
+          <div className="loading-state">Loading services...</div>
+        )}
+      </main>
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="logout-modal-overlay">
+          <div className="logout-modal">
+            <div className="logout-text">Are you sure you want to logout?</div>
+            <div className="logout-buttons">
+              <button className="confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="cancel-btn" onClick={cancelLogout}>Cancel</button>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      )}
     </div>
   );
 }
