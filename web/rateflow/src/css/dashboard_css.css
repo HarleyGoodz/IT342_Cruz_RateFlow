@@ -3,11 +3,9 @@
 :root {
   --primary: #38bdf8;
   --primary-dark: #0ea5e9;
-  --primary-darker: #0284c7;
   --bg-primary: #0a0a0a;
   --bg-secondary: #111827;
   --bg-tertiary: #0f172a;
-  --card-bg: rgba(15, 23, 42, 0.95);
   --card-border: rgba(56, 189, 248, 0.1);
   --text-primary: #e5e7eb;
   --text-secondary: #94a3b8;
@@ -24,7 +22,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;
@@ -105,7 +103,6 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: 'Outfit', sans-serif;
 }
 
 .dashboard-logo-icon {
@@ -119,7 +116,6 @@ body {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
   white-space: nowrap;
 }
 
@@ -129,7 +125,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow-y: auto;
 }
 
 .dashboard-nav-item {
@@ -142,11 +137,9 @@ body {
   border-radius: 12px;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   font-size: 15px;
   font-weight: 500;
-  position: relative;
-  overflow: hidden;
   text-align: left;
 }
 
@@ -222,7 +215,6 @@ body {
 /* Dashboard Panel (Main Content) */
 .dashboard-panel {
   flex: 1;
-  padding: 0;
   position: relative;
   z-index: 1;
   overflow-y: auto;
@@ -250,6 +242,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
 }
 
 .dashboard-page-title {
@@ -260,7 +253,6 @@ body {
   background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .dashboard-topbar-actions {
@@ -278,7 +270,7 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--bg-primary);
   cursor: pointer;
   transition: all 0.3s ease;

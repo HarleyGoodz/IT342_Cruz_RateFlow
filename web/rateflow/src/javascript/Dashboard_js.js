@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 import "../css/dashboard_css.css";
 
 // PREDEFINED CATEGORIES
@@ -12,6 +13,7 @@ const PREDEFINED_CATEGORIES = [
 
 function Dashboard() {
   const navigate = useNavigate();
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("Services");
   const [user, setUser] = useState(null);
@@ -30,27 +32,32 @@ function Dashboard() {
 
   // Check authentication and fetch services
   useEffect(() => {
-    fetch("http://localhost:8080/api/auth/me", {
-      credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Not authenticated");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (data.role === "ADMIN") {
-          navigate("/admindashboard");
-          return;
-        }
-        setUser(data);
-        fetchServices();
-      })
-      .catch(() => {
-        navigate("/");
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/me", {
+        credentials: "include",
       });
-  }, [navigate]);
+      
+      if (!response.ok) {
+        throw new Error("Not authenticated");
+      }
+      
+      const data = await response.json();
+      
+      if (data.role === "ADMIN") {
+        navigate("/admindashboard");
+        return;
+      }
+      
+      setUser(data);
+      fetchServices();
+    } catch (error) {
+      navigate("/");
+    }
+  };
 
   const fetchServices = async () => {
     try {
@@ -75,9 +82,9 @@ function Dashboard() {
 
   const confirmLogout = async () => {
     try {
-      await fetch("http://localhost:8080/api/auth/logout", {
+      const response = await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
-        credentials: "include",
+        credentials: "include"
       });
       setShowLogoutModal(false);
       navigate("/");
@@ -116,6 +123,7 @@ function Dashboard() {
           
             {!sidebarCollapsed && <span className="dashboard-logo-text">Dashboard</span>}
           </div>
+
         </div>
 
         <nav className="dashboard-nav">
@@ -198,9 +206,8 @@ function Dashboard() {
                   <img 
                     src={getImageUrl(service.serviceId)} 
                     alt={service.serviceName}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
                     onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/70x70?text=No+Image";
+                      e.target.src = "https://via.placeholder.com/80x80?text=No+Image";
                     }}
                   />
                 </div>

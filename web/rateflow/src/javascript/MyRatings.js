@@ -150,6 +150,12 @@ function MyRatings() {
             
             {!sidebarCollapsed && <span className="myratings-logo-text">My Ratings</span>}
           </div>
+          <button 
+            className="myratings-collapse-btn" 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          >
+            {sidebarCollapsed ? "→" : "←"}
+          </button>
         </div>
 
         <nav className="myratings-nav">
@@ -231,9 +237,8 @@ function MyRatings() {
                 <img 
                   src={getImageUrl(rating.serviceId)} 
                   alt={rating.service?.serviceName || "Service"}
-                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
                   onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/70x70?text=No+Image";
+                    e.target.src = "https://via.placeholder.com/100x100?text=No+Image";
                   }}
                 />
               </div>

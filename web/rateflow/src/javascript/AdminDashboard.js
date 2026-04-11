@@ -19,12 +19,14 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState(null);
   const [editingService, setEditingService] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     serviceName: "",
-    serviceCategory: PREDEFINED_CATEGORIES[0], // Set default to first category
+    serviceCategory: PREDEFINED_CATEGORIES[0],
     createdBy: "",
     image: null
   });
@@ -107,6 +109,39 @@ function AdminDashboard() {
 
   const cancelLogout = () => setShowLogoutModal(false);
 
+  const handleDeleteClick = (service) => {
+    setServiceToDelete(service);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!serviceToDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/services/delete/${serviceToDelete.serviceId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        alert("Service deleted successfully!");
+        setShowDeleteModal(false);
+        setServiceToDelete(null);
+        fetchServices();
+      } else {
+        alert("Failed to delete service");
+      }
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("Error deleting service");
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setServiceToDelete(null);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -181,28 +216,6 @@ function AdminDashboard() {
     } catch (error) {
       console.error("Error updating service:", error);
       alert("Error updating service");
-    }
-  };
-
-  const handleDeleteService = async (serviceId) => {
-    const confirmed = window.confirm("Are you sure you want to delete this service?");
-    if (!confirmed) return;
-
-    try {
-      const response = await fetch(`http://localhost:8080/api/services/delete/${serviceId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        alert("Service deleted successfully!");
-        fetchServices();
-      } else {
-        alert("Failed to delete service");
-      }
-    } catch (error) {
-      console.error("Error deleting service:", error);
-      alert("Error deleting service");
     }
   };
 
@@ -349,7 +362,7 @@ function AdminDashboard() {
                   </button>
                   <button 
                     className="admin-record-action-btn delete"
-                    onClick={() => handleDeleteService(service.serviceId)}
+                    onClick={() => handleDeleteClick(service)}
                   >
                     Delete
                   </button>
@@ -366,99 +379,127 @@ function AdminDashboard() {
         )}
       </main>
 
-      {/* Create/Edit Modal - Only one modal, placed here */}
-      {(showCreateModal || editingService) && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal">
-            <div className="admin-modal-header">
-              <h2>{editingService ? "Edit Service" : "Create New Service"}</h2>
-              <button 
-                className="admin-modal-close"
-                onClick={() => {
-                  setShowCreateModal(false);
-                  setEditingService(null);
-                  resetForm();
-                }}
-              >
-                ×
-              </button>
+      {/* Edit Modal - Redesigned to match CreateService UI */}
+{editingService && (
+  <div className="admin-modal-overlay">
+    <div className="admin-modal edit-modal">
+      <div className="admin-modal-header">
+        <h2>Edit Service</h2>
+        <button 
+          className="admin-modal-close"
+          onClick={() => {
+            setEditingService(null);
+            resetForm();
+          }}
+        >
+          ×
+        </button>
+      </div>
+      <form onSubmit={handleUpdateService}>
+        <div className="admin-modal-body">
+          {/* Image Upload Section - Similar to CreateService */}
+          <div className="admin-edit-image-section">
+            <label className="admin-edit-image-upload" htmlFor="edit-image-file">
+              {formData.image ? (
+                <img src={URL.createObjectURL(formData.image)} alt="Service preview" />
+              ) : editingService.image ? (
+                <img src={getImageUrl(editingService.serviceId)} alt={editingService.serviceName} />
+              ) : (
+                <span>📸 Upload Image</span>
+              )}
+              <input
+                id="edit-image-file"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleImageChange}
+              />
+            </label>
+            <p className="admin-form-hint">Click to change image (leave empty to keep current)</p>
+          </div>
+
+          {/* Form Fields */}
+          <div className="admin-edit-form-fields">
+            <div className="admin-form-group">
+              <label>Service Name</label>
+              <input
+                type="text"
+                name="serviceName"
+                value={formData.serviceName}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter service name"
+                className="admin-field-input"
+              />
             </div>
-            <form onSubmit={editingService ? handleUpdateService : handleCreateService}>
-              <div className="admin-modal-body">
-                <div className="admin-form-group">
-                  <label>Service Name</label>
-                  <input
-                    type="text"
-                    name="serviceName"
-                    value={formData.serviceName}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Enter service name"
-                  />
-                </div>
 
-                <div className="admin-form-group">
-                  <label>Service Category</label>
-                  <div className="admin-category-chips">
-                    {PREDEFINED_CATEGORIES.map(category => (
-                      <button
-                        key={category}
-                        type="button"
-                        className={`admin-category-chip ${formData.serviceCategory === category ? "active" : ""}`}
-                        onClick={() => setFormData(prev => ({ ...prev, serviceCategory: category }))}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            <div className="admin-form-group">
+              <label>Service Category</label>
+              <select
+                name="serviceCategory"
+                value={formData.serviceCategory}
+                onChange={handleInputChange}
+                className="admin-category-select"
+                required
+              >
+                {PREDEFINED_CATEGORIES.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                <div className="admin-form-group">
-                  <label>Created By</label>
-                  <input
-                    type="text"
-                    name="createdBy"
-                    value={formData.createdBy}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Enter creator name"
-                  />
-                </div>
+            <div className="admin-form-group">
+              <label>Created By</label>
+              <input
+                type="text"
+                name="createdBy"
+                value={formData.createdBy}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter creator name"
+                className="admin-field-input"
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="admin-modal-footer">
+          <button
+            type="button"
+            className="admin-btn-cancel"
+            onClick={() => {
+              setEditingService(null);
+              resetForm();
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="admin-btn-submit"
+          >
+            Update Service
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
 
-                <div className="admin-form-group">
-                  <label>Service Image</label>
-                  <input
-                    type="file"
-                    name="image"
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    required={!editingService}
-                  />
-                  {editingService && (
-                    <p className="admin-form-hint">Leave empty to keep current image</p>
-                  )}
-                </div>
-              </div>
-              <div className="admin-modal-footer">
-                <button
-                  type="button"
-                  className="admin-btn-cancel"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setEditingService(null);
-                    resetForm();
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="admin-btn-submit"
-                >
-                  {editingService ? "Update" : "Create"}
-                </button>
-              </div>
-            </form>
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="admin-logout-overlay">
+          <div className="admin-logout-modal">
+            <div className="admin-logout-modal-text">
+              Are you sure you want to delete "{serviceToDelete?.serviceName}"?
+            </div>
+            <div className="admin-logout-modal-actions">
+              <button className="admin-confirm-btn" onClick={confirmDelete}>Confirm</button>
+              <button className="admin-cancel-btn" onClick={cancelDelete}>Cancel</button>
+            </div>
           </div>
         </div>
       )}
