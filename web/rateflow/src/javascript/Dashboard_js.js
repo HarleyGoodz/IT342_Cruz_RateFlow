@@ -2,8 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/dashboard_css.css";
 
+// PREDEFINED CATEGORIES
+const PREDEFINED_CATEGORIES = [
+  "Food & Hospitality",
+  "Medical & Health",
+  "Retail & Commercial",
+  "Personal & Lifestyle"
+];
+
 function Dashboard() {
   const navigate = useNavigate();
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("Services");
   const [user, setUser] = useState(null);
@@ -43,8 +52,26 @@ function Dashboard() {
       })
       .catch(() => {
         navigate("/");
-      });
-  }, [navigate]);
+      }
+      if (session) {
+        setUser({
+          username: session.user.user_metadata?.full_name || session.user.email,
+        });
+      }
+    });
+
+    } catch (error) {
+      console.error("Session check failed:", error);
+      navigate("/login");
+    }
+  };
+
+  loadUser();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
   const fetchServices = async () => {
     try {
@@ -69,9 +96,9 @@ function Dashboard() {
 
   const confirmLogout = async () => {
     try {
-      await fetch("http://localhost:8080/api/auth/logout", {
+      const response = await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
-        credentials: "include",
+        credentials: "include"
       });
       setShowLogoutModal(false);
       navigate("/");
@@ -107,38 +134,42 @@ function Dashboard() {
           </div>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="dashboard-nav">
           <button 
-            className={`nav-item ${activeTab === "Services" ? "active" : ""}`}
+            className={`dashboard-nav-item ${activeTab === "Services" ? "active" : ""}`}
             onClick={() => setActiveTab("Services")}
           >
-            {!sidebarCollapsed && <span className="nav-label">Services</span>}
+            {!sidebarCollapsed && <span className="dashboard-nav-label">Services</span>}
           </button>
           <button 
-            className={`nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
+            className="dashboard-nav-item"
             onClick={() => navigate("/my-ratings")}
           >
-            {!sidebarCollapsed && <span className="nav-label">My Ratings</span>}
+            {!sidebarCollapsed && <span className="dashboard-nav-label">My Ratings</span>}
           </button>
         </nav>
 
-        <div className="sidebar-footer">
-          <button className="logout-sidebar-btn" onClick={handleLogoutClick}>
-            {!sidebarCollapsed && <span className="nav-label">Logout</span>}
+        <div className="dashboard-sidebar-footer">
+          <button className="dashboard-logout-btn" onClick={handleLogoutClick}>
+            {!sidebarCollapsed && <span className="dashboard-nav-label">Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="main-content">
-        <header className="dashboard-header">
-          <div className="header-content">
-            <h1 className="page-title">Services</h1>
-            <div className="header-search">
+      {/* Main Panel */}
+      <main className="dashboard-panel">
+        {/* Topbar */}
+        <header className="dashboard-topbar">
+          <div className="dashboard-topbar-content">
+            <div>
+              <h1 className="dashboard-page-title">Services</h1>
+            </div>
+
+            <div className="dashboard-search-wrapper">
               <input
                 type="text"
                 placeholder="Search services..."
-                className="search-input"
+                className="dashboard-search-input"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -151,14 +182,20 @@ function Dashboard() {
           </div>
         </header>
 
-        {/* Filter Section */}
-        <section className="filter-section">
-          <h3 className="filter-title">Filter Category</h3>
-          <div className="filter-buttons">
-            {categories.map((category) => (
+        {/* Filter Bar */}
+        <section className="dashboard-filter-bar">
+          <h3 className="dashboard-filter-label">Filter by Category</h3>
+          <div className="dashboard-filter-group">
+            <button
+              className={`dashboard-filter-chip ${selectedCategory === "All" ? "active" : ""}`}
+              onClick={() => setSelectedCategory("All")}
+            >
+              All
+            </button>
+            {PREDEFINED_CATEGORIES.map(category => (
               <button
                 key={category}
-                className={`filter-btn ${selectedCategory === category ? "active" : ""}`}
+                className={`dashboard-filter-chip ${selectedCategory === category ? "active" : ""}`}
                 onClick={() => setSelectedCategory(category)}
               >
                 {category}
@@ -207,12 +244,12 @@ function Dashboard() {
 
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="logout-modal-overlay">
-          <div className="logout-modal">
-            <div className="logout-text">Are you sure you want to logout?</div>
-            <div className="logout-buttons">
-              <button className="confirm-btn" onClick={confirmLogout}>Confirm</button>
-              <button className="cancel-btn" onClick={cancelLogout}>Cancel</button>
+        <div className="dashboard-logout-overlay">
+          <div className="dashboard-logout-modal">
+            <div className="dashboard-logout-modal-text">Are you sure you want to logout?</div>
+            <div className="dashboard-logout-modal-actions">
+              <button className="dashboard-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="dashboard-cancel-btn" onClick={cancelLogout}>Cancel</button>
             </div>
           </div>
         </div>
