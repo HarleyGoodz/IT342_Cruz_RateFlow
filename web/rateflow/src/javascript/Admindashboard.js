@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import "../css/admin_dashboard.css";
 
 function AdminDashboard() {
@@ -12,6 +11,7 @@ function AdminDashboard() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Sample services data
   const [services] = useState([
@@ -35,29 +35,43 @@ function AdminDashboard() {
     return matchesSearch && matchesCategory;
   });
 
+  // Check authentication status on mount
   useEffect(() => {
     let isMounted = true;
 
-    const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!isMounted) return;
-      if (session) {
-        setUser({ username: session.user.user_metadata?.full_name || session.user.email });
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/auth/me", {
+          method: "GET",
+          credentials: "include", // Important: sends HTTP cookies
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!isMounted) return;
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          // Not authenticated, redirect to login
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        navigate("/login");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    init();
-
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") navigate("/");
-      if (session) {
-        setUser({ username: session.user.user_metadata?.full_name || session.user.email });
-      }
-    });
+    checkAuth();
 
     return () => {
       isMounted = false;
-      listener.subscription.unsubscribe();
     };
   }, [navigate]);
 
@@ -68,21 +82,39 @@ function AdminDashboard() {
       const response = await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
       if (!response.ok) {
-        alert("Logout failed");
-        return;
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Logout failed");
       }
+
+      // Clear user state
       setUser(null);
       setShowLogoutModal(false);
-      navigate("/");
+      
+      // Redirect to login page
+      navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
-      alert("Logout failed");
+      alert(error.message || "Logout failed. Please try again.");
     }
   };
 
   const cancelLogout = () => setShowLogoutModal(false);
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="admin-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-layout">
@@ -96,21 +128,38 @@ function AdminDashboard() {
         </div>
 
         <nav className="admin-nav">
-          <button className={`admin-nav-item ${activeTab === "Services" ? "active" : ""}`} onClick={() => setActiveTab("Services")}>
+          <button 
+            className={`admin-nav-item ${activeTab === "Services" ? "active" : ""}`} 
+            onClick={() => setActiveTab("Services")}
+          >
             {!sidebarCollapsed && <span className="admin-nav-label">Services</span>}
           </button>
-          <button className={`admin-nav-item ${activeTab === "Create-Service" ? "active" : ""}`} onClick={() => navigate("/admin/create-service")}>
+          <button 
+            className={`admin-nav-item ${activeTab === "Create-Service" ? "active" : ""}`} 
+            onClick={() => navigate("/admin/create-service")}
+          >
             {!sidebarCollapsed && <span className="admin-nav-label">Create Service</span>}
           </button>
-          <button className={`admin-nav-item ${activeTab === "Manage-Services" ? "active" : ""}`} onClick={() => navigate("/admin/manage-services")}>
+          <button 
+            className={`admin-nav-item ${activeTab === "Manage-Services" ? "active" : ""}`} 
+            onClick={() => navigate("/admin/manage-services")}
+          >
             {!sidebarCollapsed && <span className="admin-nav-label">Manage Services</span>}
           </button>
-          <button className={`admin-nav-item ${activeTab === "Access-Control" ? "active" : ""}`} onClick={() => navigate("/admin/access-control")}>
+          <button 
+            className={`admin-nav-item ${activeTab === "Access-Control" ? "active" : ""}`} 
+            onClick={() => navigate("/admin/access-control")}
+          >
             {!sidebarCollapsed && <span className="admin-nav-label">Access Control</span>}
           </button>
         </nav>
 
         <div className="admin-sidebar-footer">
+          {user && !sidebarCollapsed && (
+            <div className="admin-user-info">
+              <span className="admin-user-name">{user.username || user.email}</span>
+            </div>
+          )}
           <button className="admin-logout-btn" onClick={handleLogoutClick}>
             {!sidebarCollapsed && <span className="admin-nav-label">Logout</span>}
           </button>
@@ -169,10 +218,7 @@ function AdminDashboard() {
               <div className="admin-record-details">
                 <h3 className="admin-record-name">{service.name}</h3>
                 <p className="admin-record-category">{service.category}</p>
-                <button 
-                  className="admin-record-action-btn"
-            
-                >
+                <button className="admin-record-action-btn">
                   View Ratings
                 </button>
               </div>

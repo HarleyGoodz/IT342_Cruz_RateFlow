@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import "../css/login_css.css";
 
 function Login() {
@@ -55,19 +54,6 @@ function Login() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: "http://localhost:3000/dashboard"
-    }
-  });
-
-  if (error) {
-    console.error("Google login error:", error.message);
-  }
-};
-
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
@@ -111,7 +97,6 @@ function Login() {
         <button
           type="button"
           className="google-btn"
-          onClick={handleGoogleSignIn}
         >
           <svg className="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
