@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/myratings_css.css";
 
+// PREDEFINED CATEGORIES
+const PREDEFINED_CATEGORIES = [
+  "Food & Hospitality",
+  "Medical & Health",
+  "Retail & Commercial",
+  "Personal & Lifestyle"
+];
+
 function MyRatings() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -10,7 +18,17 @@ function MyRatings() {
   const [myRatings, setMyRatings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Filter ratings based on search term and category
+  const filteredRatings = myRatings.filter(rating => {
+    const serviceName = rating.service?.serviceName || "";
+    const serviceCategory = rating.service?.serviceCategory || "";
+    const matchesSearch = serviceName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || serviceCategory === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   // Check authentication and fetch user's ratings
   useEffect(() => {
@@ -69,12 +87,6 @@ function MyRatings() {
     fetchUserRatings();
   }, [navigate]);
 
-  // Filter ratings based on search term
-  const filteredRatings = myRatings.filter(rating => {
-    const serviceName = rating.service?.serviceName || "";
-    return serviceName.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-
   const handleLogoutClick = () => setShowLogoutModal(true);
 
   const confirmLogout = async () => {
@@ -102,7 +114,7 @@ function MyRatings() {
       stars.push(
         <span
           key={i}
-          className={`star ${i <= rating ? "active" : ""}`}
+          className={`myratings-star ${i <= rating ? "active" : ""}`}
         >
           ★
         </span>
@@ -122,7 +134,7 @@ function MyRatings() {
 
   if (loading) {
     return (
-      <div className="loading-container">
+      <div className="myratings-loading">
         <div className="loading-spinner"></div>
         <p>Loading your ratings...</p>
       </div>
@@ -130,64 +142,92 @@ function MyRatings() {
   }
 
   return (
-    <div className="dashboard-layout">
+    <div className="myratings-layout">
       {/* Sidebar */}
-      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
-        <div className="sidebar-header">
-          <div className="logo">
-            {!sidebarCollapsed && <span className="logo-text">Dashboard</span>}
+      <aside className={`myratings-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="myratings-sidebar-header">
+          <div className="myratings-logo">
+            
+            {!sidebarCollapsed && <span className="myratings-logo-text">My Ratings</span>}
           </div>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="myratings-nav">
           <button 
-            className={`nav-item ${activeTab === "Services" ? "active" : ""}`}
+            className={`myratings-nav-item ${activeTab === "Services" ? "active" : ""}`}
             onClick={() => navigate("/dashboard")}
           >
-            {!sidebarCollapsed && <span className="nav-label">Services</span>}
+            {!sidebarCollapsed && <span className="myratings-nav-label">Services</span>}
           </button>
           <button 
-            className={`nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
+            className={`myratings-nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
             onClick={() => setActiveTab("My Ratings")}
           >
-            {!sidebarCollapsed && <span className="nav-label">My Ratings</span>}
+            {!sidebarCollapsed && <span className="myratings-nav-label">My Ratings</span>}
           </button>
         </nav>
 
-        <div className="sidebar-footer">
-          <button className="logout-sidebar-btn" onClick={handleLogoutClick}>
-            {!sidebarCollapsed && <span className="nav-label">Logout</span>}
+        <div className="myratings-sidebar-footer">
+          <button className="myratings-logout-btn" onClick={handleLogoutClick}>
+            {!sidebarCollapsed && <span className="myratings-nav-label">Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="main-content">
-        <header className="dashboard-header">
-          <div className="header-content">
-            <h1 className="page-title">My Ratings</h1>
-            <div className="header-search">
+      {/* Main Panel */}
+      <main className="myratings-panel">
+        {/* Topbar */}
+        <header className="myratings-topbar">
+          <div className="myratings-topbar-content">
+            <div>
+              <h1 className="myratings-page-title">My Ratings</h1>
+            </div>
+
+            <div className="myratings-search-wrapper">
               <input
                 type="text"
                 placeholder="Search ratings..."
-                className="search-input"
+                className="myratings-search-input"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="header-actions">
-              <div className="user-avatar" onClick={() => navigate("/profile")}>
+
+            <div className="myratings-topbar-actions">
+              <div className="myratings-avatar" onClick={() => navigate("/profile")}>
                 {user ? user.username.charAt(0).toUpperCase() : "U"}
               </div>
             </div>
           </div>
         </header>
 
+        {/* Filter Bar */}
+        <section className="myratings-filter-bar">
+          <h3 className="myratings-filter-label">Filter by Category</h3>
+          <div className="myratings-filter-group">
+            <button
+              className={`myratings-filter-chip ${selectedCategory === "All" ? "active" : ""}`}
+              onClick={() => setSelectedCategory("All")}
+            >
+              All
+            </button>
+            {PREDEFINED_CATEGORIES.map(category => (
+              <button
+                key={category}
+                className={`myratings-filter-chip ${selectedCategory === category ? "active" : ""}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* Ratings Grid */}
-        <section className="services-grid">
-          {!loading && filteredRatings.map((rating) => (
-            <div key={rating.ratingId} className="service-card">
-              <div className="service-image">
+        <section className="myratings-records-grid">
+          {filteredRatings.map((rating) => (
+            <div key={rating.ratingId} className="myratings-record-card">
+              <div className="myratings-record-thumbnail">
                 <img 
                   src={getImageUrl(rating.serviceId)} 
                   alt={rating.service?.serviceName || "Service"}
@@ -197,52 +237,53 @@ function MyRatings() {
                   }}
                 />
               </div>
-              <div className="service-info">
-                <h3 className="service-name">
+              <div className="myratings-record-details">
+                <h3 className="myratings-record-name">
                   {rating.service?.serviceName || `Service #${rating.serviceId}`}
                 </h3>
-                <p className="service-category">
+                <p className="myratings-record-category">
                   {rating.service?.serviceCategory || "Unknown Category"}
                 </p>
-                <div className="rating-stars">
+                <div className="myratings-rating-stars">
                   {renderStars(rating.starRate)}
-                  <span className="rating-value">{rating.starRate}.0 / 5.0</span>
+                  <span className="myratings-rating-value">{rating.starRate}.0 / 5.0</span>
                 </div>
                 {rating.feedbackText && (
-                  <div className="rating-feedback">
+                  <div className="myratings-rating-feedback">
                     <p>"{rating.feedbackText}"</p>
                   </div>
                 )}
-                <div className="rating-date">
+                <div className="myratings-rating-date">
                   Rated on {formatDate(rating.dateCreated)}
                 </div>
-                <button className="rate-btn" onClick={() => navigate(`/rate-service/${rating.serviceId}`)}>
-                  View Service
-                </button>
+                <div className="myratings-record-actions">
+                  <button 
+                    className="myratings-record-action-btn view"
+                    onClick={() => navigate(`/rate-service/${rating.serviceId}`)}
+                  >
+                    View Service
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </section>
 
-        {!loading && filteredRatings.length === 0 && (
-          <div className="no-results">
-            No ratings found matching "{searchTerm}"
+        {filteredRatings.length === 0 && (
+          <div className="myratings-no-results">
+            No ratings found matching your criteria.
           </div>
-        )}
-
-        {loading && (
-          <div className="loading-state">Loading your ratings...</div>
         )}
       </main>
 
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="logout-modal-overlay">
-          <div className="logout-modal">
-            <div className="logout-text">Are you sure you want to logout?</div>
-            <div className="logout-buttons">
-              <button className="confirm-btn" onClick={confirmLogout}>Confirm</button>
-              <button className="cancel-btn" onClick={cancelLogout}>Cancel</button>
+        <div className="myratings-logout-overlay">
+          <div className="myratings-logout-modal">
+            <div className="myratings-logout-modal-text">Are you sure you want to logout?</div>
+            <div className="myratings-logout-modal-actions">
+              <button className="myratings-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="myratings-cancel-btn" onClick={cancelLogout}>Cancel</button>
             </div>
           </div>
         </div>
