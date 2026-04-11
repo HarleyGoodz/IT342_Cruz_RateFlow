@@ -1,0 +1,317 @@
+/* =========================================================
+   RATE SERVICE PAGE — SAFE NAMESPACE
+   Uses existing dashboard layout
+   No conflicts with other pages
+========================================================= */
+
+.rate-service-page .rate-card {
+  margin: 32px 40px;
+
+  padding: 24px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.95),
+    rgba(30, 41, 59, 0.9)
+  );
+
+  border-radius: 16px;
+
+  display: flex;
+
+  gap: 20px;
+
+  border: 1px solid var(--card-border);
+
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+
+/* IMAGE */
+
+.rate-service-page .service-image {
+  width: 120px;
+  height: 120px;
+
+  background: #9ca3af;
+
+  border-radius: 10px;
+}
+
+
+/* INFO */
+
+.rate-service-page .rate-info {
+  flex: 1;
+}
+
+.rate-service-page .service-name {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.rate-service-page .service-category {
+  font-size: 14px;
+
+  color: var(--text-secondary);
+
+  margin-bottom: 14px;
+}
+
+
+/* STARS */
+
+.rate-service-page .stars {
+  font-size: 24px;
+
+  margin-bottom: 14px;
+}
+
+.rate-service-page .star {
+  cursor: pointer;
+
+  color: var(--text-muted);
+
+  transition: 0.2s;
+}
+
+.rate-service-page .star.active {
+  color: gold;
+}
+
+
+/* FEEDBACK */
+
+.rate-service-page .feedback-input {
+  width: 100%;
+
+  height: 90px;
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  border: 1px solid var(--card-border);
+
+  background: rgba(56, 189, 248, 0.1);
+
+  color: var(--text-primary);
+
+  margin-bottom: 14px;
+
+  resize: none;
+}
+
+
+/* SUBMIT BUTTON */
+
+.rate-service-page .submit-btn {
+  padding: 10px 18px;
+
+  border-radius: 10px;
+
+  border: none;
+
+  background: rgba(56, 189, 248, 0.2);
+
+  color: var(--primary);
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.rate-service-page .submit-btn:hover {
+  background: rgba(56, 189, 248, 0.35);
+}
+
+
+/* LOWER GRID */
+
+.rate-service-page .lower-grid {
+  display: grid;
+
+  grid-template-columns: 280px 1fr;
+
+  gap: 24px;
+
+  padding: 0 40px 40px;
+}
+
+
+/* CARDS */
+
+.rate-service-page .stats-card,
+.rate-service-page .description-card,
+.rate-service-page .feedbacks-card {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.95),
+    rgba(30, 41, 59, 0.9)
+  );
+
+  border-radius: 16px;
+
+  padding: 18px;
+
+  border: 1px solid var(--card-border);
+}
+
+
+.rate-service-page .feedbacks-card {
+  grid-column: span 2;
+}
+
+
+/* RATING VALUE */
+
+.rate-service-page .rating-value {
+  font-size: 20px;
+
+  margin-top: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+/* DESCRIPTION */
+
+.rate-service-page .description-box {
+  width: 100%;
+
+  height: 120px;
+
+  margin-top: 10px;
+
+  border-radius: 10px;
+
+  background: rgba(255,255,255,0.08);
+}
+
+
+/* FEEDBACK LIST */
+
+.rate-service-page .feedback-item {
+  display: flex;
+
+  gap: 12px;
+
+  margin-top: 14px;
+}
+
+.rate-service-page .avatar {
+  width: 40px;
+  height: 40px;
+
+  background: var(--primary);
+
+  border-radius: 50%;
+}
+
+.rate-service-page .feedback-text {
+  background: white;
+
+  color: black;
+
+  padding: 10px;
+
+  border-radius: 8px;
+}
+/* Feedback Success Modal */
+.feedback-success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  backdrop-filter: blur(8px);
+}
+
+.feedback-success-modal {
+  background: #2b456b;
+  padding: 40px 60px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: feedbackModalSlideIn 0.3s ease-out;
+}
+
+@keyframes feedbackModalSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.feedback-success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #16a34a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  color: white;
+}
+
+.feedback-success-message {
+  font-size: 22px;
+  font-weight: 600;
+  color: #6fd3ff;
+  background: #3f5f8f;
+  padding: 14px 28px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.feedback-success-btn {
+  padding: 12px 32px;
+  background: #4f6fa1;
+  color: #6fd3ff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.feedback-success-btn:hover {
+  background: #5d82ba;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .feedback-success-modal {
+    padding: 30px 40px;
+    width: 90%;
+  }
+  
+  .feedback-success-message {
+    font-size: 18px;
+    padding: 12px 20px;
+  }
+  
+  .feedback-success-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+  }
+}

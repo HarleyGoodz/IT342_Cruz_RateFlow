@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 import "../css/dashboard_css.css";
 
 // PREDEFINED CATEGORIES
@@ -12,6 +13,7 @@ const PREDEFINED_CATEGORIES = [
 
 function Dashboard() {
   const navigate = useNavigate();
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("Services");
   const [user, setUser] = useState(null);
@@ -80,9 +82,9 @@ function Dashboard() {
 
   const confirmLogout = async () => {
     try {
-      await fetch("http://localhost:8080/api/auth/logout", {
+      const response = await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
-        credentials: "include",
+        credentials: "include"
       });
       setShowLogoutModal(false);
       navigate("/");

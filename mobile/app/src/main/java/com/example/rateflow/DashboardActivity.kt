@@ -40,12 +40,19 @@ class DashboardActivity : AppCompatActivity() {
                         // Set first letter in avatar
                         userAvatar.text = user.username.first().uppercase()
 
+                        NotificationHelper.show(
+                            this@DashboardActivity,
+                            "Welcome back, ${user.username}!",
+                            NotificationHelper.Type.SUCCESS
+                        )
+
                     } else {
-                        Toast.makeText(
+                        NotificationHelper.show(
                             this@DashboardActivity,
                             "Session expired. Please login again.",
-                            Toast.LENGTH_LONG
-                        ).show()
+                            NotificationHelper.Type.WARNING
+                        )
+
 
                         startActivity(Intent(this@DashboardActivity, LoginActivity::class.java))
                         finish()
@@ -53,11 +60,11 @@ class DashboardActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<User>, t: Throwable) {
-                    Toast.makeText(
+                    NotificationHelper.show(
                         this@DashboardActivity,
                         "Server error: ${t.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                        NotificationHelper.Type.ERROR
+                    )
                 }
             })
     }
