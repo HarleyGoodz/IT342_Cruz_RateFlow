@@ -22,6 +22,8 @@ function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  const categories = ["All", "Food & Hospitality", "Medical & Health", "Retail & Commercial", "Personal & Lifestyle"];
+
   // Filter services based on search term and category
   const filteredServices = services.filter(service => {
     const matchesSearch = service.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -29,34 +31,34 @@ function Dashboard() {
     return matchesSearch && matchesCategory;
   });
 
-useEffect(() => {
-  let isMounted = true;
-
-  const loadUser = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:8080/api/auth/me",
-        {
-          method: "GET",
-          credentials: "include"
+  // Check authentication and fetch services
+  useEffect(() => {
+    fetch("http://localhost:8080/api/auth/me", {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Not authenticated");
         }
-      );
-
-      if (!response.ok) {
-        navigate("/login");
-        return;
+        return res.json();
+      })
+      .then((data) => {
+        if (data.role === "ADMIN") {
+          navigate("/admindashboard");
+          return;
+        }
+        setUser(data);
+        fetchServices();
+      })
+      .catch(() => {
+        navigate("/");
       }
-
-      const data = await response.json();
-
-      if (!isMounted) return;
-
-      setUser({
-        username: data.username,
-        email: data.email
-      });
-
-      console.log("Loaded from HTTP session");
+      if (session) {
+        setUser({
+          username: session.user.user_metadata?.full_name || session.user.email,
+        });
+      }
+    });
 
     } catch (error) {
       console.error("Session check failed:", error);
@@ -70,6 +72,23 @@ useEffect(() => {
     isMounted = false;
   };
 }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/services", {
+        credentials: "include",
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true);
@@ -100,25 +119,19 @@ useEffect(() => {
     return `http://localhost:8080/api/services/${serviceId}/image`;
   };
 
-  if (loading) {
-    return (
-      <div className="dashboard-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading...</p>
-      </div>
-    );
+  function getUniqueCategories() {
+    const cats = services.map(service => service.serviceCategory);
+    return [...new Set(cats)];
   }
 
   return (
     <div className="dashboard-layout">
       {/* Sidebar */}
-      <aside className={`dashboard-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
-        <div className="dashboard-sidebar-header">
-          <div className="dashboard-logo">
-          
-            {!sidebarCollapsed && <span className="dashboard-logo-text">Dashboard</span>}
+      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="sidebar-header">
+          <div className="logo">
+            {!sidebarCollapsed && <span className="logo-text">Dashboard</span>}
           </div>
-
         </div>
 
         <nav className="dashboard-nav">
@@ -161,10 +174,9 @@ useEffect(() => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-
-            <div className="dashboard-topbar-actions">
-              <div className="dashboard-avatar" onClick={() => navigate("/profile")}>
-                {user?.username?.charAt(0).toUpperCase()}
+            <div className="header-actions">
+              <div className="user-avatar" onClick={() => navigate("/profile")}>
+                {user ? user.username.charAt(0).toUpperCase() : "U"}
               </div>
             </div>
           </div>
@@ -193,41 +205,40 @@ useEffect(() => {
         </section>
 
         {/* Services Grid */}
-        <section className="dashboard-records-grid">
-          {filteredServices.map((service) => (
-            <div key={service.serviceId} className="dashboard-record-card">
+        <section className="services-grid">
+          {!loading && filteredServices.map((service) => (
+            <div key={service.serviceId} className="service-card">
               {service.image && (
-                <div className="dashboard-record-thumbnail">
+                <div className="service-image">
                   <img 
                     src={getImageUrl(service.serviceId)} 
                     alt={service.serviceName}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
                     onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/80x80?text=No+Image";
+                      e.target.src = "https://via.placeholder.com/70x70?text=No+Image";
                     }}
                   />
                 </div>
               )}
-              <div className="dashboard-record-details">
-                <h3 className="dashboard-record-name">{service.serviceName}</h3>
-                <p className="dashboard-record-category">{service.serviceCategory}</p>
-                <p className="dashboard-record-provider">by {service.createdBy}</p>
-                <div className="dashboard-record-actions">
-                  <button 
-                    className="dashboard-record-action-btn rate"
-                    onClick={() => handleServiceClick(service.serviceId)}
-                  >
-                    Rate Service
-                  </button>
-                </div>
+              <div className="service-info">
+                <h3 className="service-name">{service.serviceName}</h3>
+                <p className="service-category">{service.serviceCategory}</p>
+                <button className="rate-btn" onClick={() => handleServiceClick(service.serviceId)}>
+                  Rate Service
+                </button>
               </div>
             </div>
           ))}
         </section>
 
-        {filteredServices.length === 0 && (
-          <div className="dashboard-no-results">
-            No services found matching your criteria.
+        {!loading && filteredServices.length === 0 && (
+          <div className="no-results">
+            No services found matching "{searchTerm}" in category "{selectedCategory === "All" ? "all categories" : selectedCategory}"
           </div>
+        )}
+
+        {loading && (
+          <div className="loading-state">Loading services...</div>
         )}
       </main>
 

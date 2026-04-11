@@ -52,24 +52,38 @@ function CreateService() {
 
   // Check authentication
   useEffect(() => {
-  let isMounted = true;
+    checkAuth();
+  }, []);
 
-  const loadUser = async () => {
+  const checkAuth = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/auth/me",
-        {
-          method: "GET",
-          credentials: "include"
-        }
-      );
-
+      const response = await fetch("http://localhost:8080/api/auth/me", {
+        credentials: "include",
+      });
+      
       if (!response.ok) {
-        navigate("/login");
+        throw new Error("Not authenticated");
+      }
+      
+      const data = await response.json();
+      
+      if (data.role !== "ADMIN") {
+        alert("Access denied. Admin only.");
+        navigate("/dashboard");
         return;
       }
-
-      const data = await response.json();
+      
+      setUser(data);
+      setFormData(prev => ({
+        ...prev,
+        createdBy: data.username
+      }));
+    } catch (error) {
+      navigate("/");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -79,27 +93,6 @@ function CreateService() {
     }));
   };
 
-      setUser({
-        username: data.username,
-        email: data.email
-      });
-
-      console.log("Loaded from HTTP session");
-
-    } catch (error) {
-      console.error("Session check failed:", error);
-      navigate("/login");
-    }
-  };
-
-  loadUser();
-
-  return () => {
-    isMounted = false;
-  };
-}, []);
-
-  /* IMAGE UPLOAD */
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
