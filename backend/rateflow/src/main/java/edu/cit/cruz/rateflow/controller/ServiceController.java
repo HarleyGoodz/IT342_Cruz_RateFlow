@@ -1,6 +1,8 @@
 package edu.cit.cruz.rateflow.controller;
 
 import edu.cit.cruz.rateflow.entity.Service;
+import edu.cit.cruz.rateflow.entity.Rating;
+import edu.cit.cruz.rateflow.repository.RatingRepository;
 import edu.cit.cruz.rateflow.service.ServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,7 +21,10 @@ public class ServiceController {
     @Autowired
     private ServiceService serviceService;
 
-    // CREATE SERVICE - ADD serviceDescription parameter
+    @Autowired
+    private RatingRepository ratingRepository;
+
+    // CREATE SERVICE
     @PostMapping("/create")
     public ResponseEntity<?> createService(
             @RequestParam("serviceName") String serviceName,
@@ -77,7 +82,7 @@ public class ServiceController {
         return ResponseEntity.notFound().build();
     }
 
-    // UPDATE SERVICE - ADD serviceDescription parameter
+    // UPDATE SERVICE
     @PutMapping("/update/{serviceId}")
     public ResponseEntity<?> updateService(
             @PathVariable Integer serviceId,
@@ -111,15 +116,21 @@ public class ServiceController {
         return ResponseEntity.notFound().build();
     }
 
-    // DELETE SERVICE
+    // DELETE SERVICE - Updated to delete ratings first
     @DeleteMapping("/delete/{serviceId}")
     public ResponseEntity<?> deleteService(@PathVariable Integer serviceId) {
 
         if (serviceService.exists(serviceId)) {
-
+            // First, delete all ratings associated with this service
+            List<Rating> ratings = ratingRepository.findByServiceIdOrderByDateCreatedDesc(serviceId);
+            if (!ratings.isEmpty()) {
+                ratingRepository.deleteAll(ratings);
+            }
+            
+            // Then delete the service
             serviceService.deleteService(serviceId);
 
-            return ResponseEntity.ok("Service deleted successfully");
+            return ResponseEntity.ok("Service and its associated ratings deleted successfully");
         }
 
         return ResponseEntity.notFound().build();

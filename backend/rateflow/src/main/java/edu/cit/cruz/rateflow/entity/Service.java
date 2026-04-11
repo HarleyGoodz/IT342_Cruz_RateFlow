@@ -17,10 +17,10 @@ public class Service {
     @Column(name = "serviceId")
     private Integer serviceId;
 
-
     private String serviceName;
     private String serviceCategory;
-     private String serviceDescription;
+    private String serviceDescription;
+    
     @Lob
     @Column(name = "image")
     private byte[] image;
@@ -55,7 +55,6 @@ public class Service {
         this.serviceName = serviceName;
     }
 
- 
     public String getServiceDescription() {
         return serviceDescription;
     }
@@ -80,7 +79,6 @@ public class Service {
         this.image = image;
     }
 
-
     public String getCreatedBy() {
         return createdBy;
     }
@@ -88,7 +86,4 @@ public class Service {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
-
- 
-   
 }

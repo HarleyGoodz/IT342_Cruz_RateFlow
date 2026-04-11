@@ -99,14 +99,13 @@ public class RatingController {
     }
     
     // Get user's all ratings
-    // Get user's all ratings
-@GetMapping("/user/{userId}")
-public ResponseEntity<?> getUserRatings(@PathVariable Integer userId) {
-    try {
-        List<Rating> ratings = ratingRepository.findByUserIdOrderByDateCreatedDesc(userId);
-        return ResponseEntity.ok(ratings);
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body(Map.of("error", "Error fetching user ratings: " + e.getMessage()));
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUserRatings(@PathVariable Integer userId) {
+        try {
+            List<Rating> ratings = ratingRepository.findByUserIdOrderByDateCreatedDesc(userId);
+            return ResponseEntity.ok(ratings);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error fetching user ratings: " + e.getMessage()));
+        }
     }
-}
 }
