@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import "../css/AccessControlStyles.css";
 
 function AccessControl() {
@@ -31,31 +30,47 @@ function AccessControl() {
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  useEffect(() => {
-    let isMounted = true;
+useEffect(() => {
+  let isMounted = true;
 
-    const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+  const loadUser = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
+        }
+      );
+
+      if (!response.ok) {
+        navigate("/login");
+        return;
+      }
+
+      const data = await response.json();
+
       if (!isMounted) return;
-      if (session) {
-        setUser({ username: session.user.user_metadata?.full_name || session.user.email });
-      }
-    };
 
-    init();
+      setUser({
+        username: data.username,
+        email: data.email
+      });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") navigate("/");
-      if (session) {
-        setUser({ username: session.user.user_metadata?.full_name || session.user.email });
-      }
-    });
+      console.log("Loaded from HTTP session");
 
-    return () => {
-      isMounted = false;
-      listener.subscription.unsubscribe();
-    };
-  }, [navigate]);
+    } catch (error) {
+      console.error("Session check failed:", error);
+      navigate("/login");
+    }
+  };
+
+  loadUser();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
   // Handle grant admin access
   const handleGrantAdmin = (userId) => {

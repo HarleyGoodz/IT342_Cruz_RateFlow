@@ -1,6 +1,5 @@
     import React, { useState, useEffect } from "react";
     import { useNavigate } from "react-router-dom";
-    import { supabase } from "./supabaseClient";
     import "../css/myRatings_css.css";
 
     function MyRatings() {
@@ -18,50 +17,47 @@
     const [showLogoutModal, setShowLogoutModal] =
     useState(false);
 
-    useEffect(() => {
-        let isMounted = true;
+useEffect(() => {
+  let isMounted = true;
 
-        const init = async () => {
-        const {
-            data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!isMounted) return;
-
-        if (session) {
-            setUser({
-            username:
-                session.user.user_metadata?.full_name ||
-                session.user.email,
-            });
+  const loadUser = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
         }
-        };
+      );
 
-        init();
+      if (!response.ok) {
+        navigate("/login");
+        return;
+      }
 
-        const { data: listener } =
-        supabase.auth.onAuthStateChange(
-            (event, session) => {
-            if (event === "SIGNED_OUT") {
-                navigate("/");
-            }
+      const data = await response.json();
 
-            if (session) {
-                setUser({
-                username:
-                    session.user.user_metadata
-                    ?.full_name ||
-                    session.user.email,
-                });
-            }
-            }
-        );
+      if (!isMounted) return;
 
-        return () => {
-        isMounted = false;
-        listener.subscription.unsubscribe();
-        };
-    }, [navigate]);
+      setUser({
+        username: data.username,
+        email: data.email
+      });
+
+      console.log("Loaded from HTTP session");
+
+    } catch (error) {
+      console.error("Session check failed:", error);
+      navigate("/login");
+    }
+  };
+
+  loadUser();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
     /* LOGOUT MODAL FUNCTIONS */
     

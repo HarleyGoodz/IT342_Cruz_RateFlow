@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import "../css/RateServiceStyles.css";
 
 function RateService() {
@@ -13,48 +12,47 @@ function RateService() {
   const [showFeedbackSuccessModal, setShowFeedbackSuccessModal] = useState(false);
   const [feedbackSuccessMessage, setFeedbackSuccessMessage] = useState("");
 
-  useEffect(() => {
-    let isMounted = true;
+useEffect(() => {
+  let isMounted = true;
 
-    const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+  const loadUser = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
+        }
+      );
+
+      if (!response.ok) {
+        navigate("/login");
+        return;
+      }
+
+      const data = await response.json();
 
       if (!isMounted) return;
 
-      if (session) {
-        setUser({
-          username:
-            session.user.user_metadata?.full_name ||
-            session.user.email,
-        });
-      }
-    };
+      setUser({
+        username: data.username,
+        email: data.email
+      });
 
-    init();
+      console.log("Loaded from HTTP session");
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_OUT") {
-          navigate("/");
-        }
+    } catch (error) {
+      console.error("Session check failed:", error);
+      navigate("/login");
+    }
+  };
 
-        if (session) {
-          setUser({
-            username:
-              session.user.user_metadata?.full_name ||
-              session.user.email,
-          });
-        }
-      }
-    );
+  loadUser();
 
-    return () => {
-      isMounted = false;
-      listener.subscription.unsubscribe();
-    };
-  }, [navigate]);
+  return () => {
+    isMounted = false;
+  };
+}, [navigate]);
 
   /* LOGOUT */
   const handleLogoutClick = () => {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import "../css/notifications_css.css";
 
 function Notification() {
@@ -35,51 +34,46 @@ function Notification() {
   /* SESSION CHECK */
 
   useEffect(() => {
-    let isMounted = true;
+  let isMounted = true;
 
-    const init = async () => {
-      const {
-        data: { session },
-      } =
-        await supabase.auth.getSession();
-
-      if (!isMounted) return;
-
-      if (session) {
-        setUser({
-          username:
-            session.user.user_metadata
-              ?.full_name ||
-            session.user.email,
-        });
-      }
-    };
-
-    init();
-
-    const { data: listener } =
-      supabase.auth.onAuthStateChange(
-        (event, session) => {
-          if (event === "SIGNED_OUT") {
-            navigate("/");
-          }
-
-          if (session) {
-            setUser({
-              username:
-                session.user.user_metadata
-                  ?.full_name ||
-                session.user.email,
-            });
-          }
+  const loadUser = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
         }
       );
 
-    return () => {
-      isMounted = false;
-      listener.subscription.unsubscribe();
-    };
-  }, [navigate]);
+      if (!response.ok) {
+        navigate("/login");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!isMounted) return;
+
+      setUser({
+        username: data.username,
+        email: data.email
+      });
+
+      console.log("Loaded from HTTP session");
+
+    } catch (error) {
+      console.error("Session check failed:", error);
+      navigate("/login");
+    }
+  };
+
+  loadUser();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
   /* LOGOUT */
   /* LOGOUT MODAL FUNCTIONS */
