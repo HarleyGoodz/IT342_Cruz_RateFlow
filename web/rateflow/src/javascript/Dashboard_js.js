@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 import "../css/dashboard_css.css";
 
 function Dashboard() {
   const navigate = useNavigate();
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("Services");
   const [user, setUser] = useState(null);
@@ -43,7 +45,18 @@ function Dashboard() {
       })
       .catch(() => {
         navigate("/");
-      });
+      }
+      if (session) {
+        setUser({
+          username: session.user.user_metadata?.full_name || session.user.email,
+        });
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const fetchServices = async () => {
@@ -69,9 +82,9 @@ function Dashboard() {
 
   const confirmLogout = async () => {
     try {
-      await fetch("http://localhost:8080/api/auth/logout", {
+      const response = await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
-        credentials: "include",
+        credentials: "include"
       });
       setShowLogoutModal(false);
       navigate("/");
@@ -108,13 +121,13 @@ function Dashboard() {
         </div>
 
         <nav className="sidebar-nav">
-          <button 
+          <button
             className={`nav-item ${activeTab === "Services" ? "active" : ""}`}
             onClick={() => setActiveTab("Services")}
           >
             {!sidebarCollapsed && <span className="nav-label">Services</span>}
           </button>
-          <button 
+          <button
             className={`nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
             onClick={() => navigate("/my-ratings")}
           >
@@ -131,6 +144,7 @@ function Dashboard() {
 
       {/* Main Content */}
       <main className="main-content">
+        {/* Header */}
         <header className="dashboard-header">
           <div className="header-content">
             <h1 className="page-title">Services</h1>
