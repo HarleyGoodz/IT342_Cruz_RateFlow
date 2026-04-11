@@ -1,0 +1,523 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "../css/admin_dashboard.css";
+
+// PREDEFINED CATEGORIES - Add this at the top
+const PREDEFINED_CATEGORIES = [
+  "Food & Hospitality",
+  "Medical & Health",
+  "Retail & Commercial",
+  "Personal & Lifestyle"
+];
+
+function AdminDashboard() {
+  const navigate = useNavigate();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState("Services");
+  const [services, setServices] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState(null);
+  const [editingService, setEditingService] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [formData, setFormData] = useState({
+    serviceName: "",
+    serviceCategory: PREDEFINED_CATEGORIES[0],
+    createdBy: "",
+    image: null
+  });
+
+  // Get unique categories from services (for filter)
+  const getUniqueCategories = () => {
+    const categories = services.map(service => service.serviceCategory);
+    return ["All", ...new Set(categories)];
+  };
+
+  // Filter services based on search and category
+  const filteredServices = services.filter(service => {
+    const matchesSearch = service.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || service.serviceCategory === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Check authentication
+  useEffect(() => {
+    checkAuth();
+    fetchServices();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/me", {
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Not authenticated");
+      }
+      
+      const data = await response.json();
+      
+      if (data.role !== "ADMIN") {
+        alert("Access denied. Admin only.");
+        navigate("/dashboard");
+        return;
+      }
+      
+      setUser(data);
+      setFormData(prev => ({ ...prev, createdBy: data.username }));
+    } catch (error) {
+      navigate("/");
+    }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/services", {
+        credentials: "include",
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogoutClick = () => setShowLogoutModal(true);
+
+  const confirmLogout = async () => {
+    try {
+      await fetch("http://localhost:8080/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setShowLogoutModal(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  const cancelLogout = () => setShowLogoutModal(false);
+
+  const handleDeleteClick = (service) => {
+    setServiceToDelete(service);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!serviceToDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/services/delete/${serviceToDelete.serviceId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        alert("Service deleted successfully!");
+        setShowDeleteModal(false);
+        setServiceToDelete(null);
+        fetchServices();
+      } else {
+        alert("Failed to delete service");
+      }
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("Error deleting service");
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setServiceToDelete(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      image: e.target.files[0]
+    }));
+  };
+
+  const handleCreateService = async (e) => {
+    e.preventDefault();
+    
+    const formDataToSend = new FormData();
+    formDataToSend.append("serviceName", formData.serviceName);
+    formDataToSend.append("serviceCategory", formData.serviceCategory);
+    formDataToSend.append("createdBy", formData.createdBy);
+    formDataToSend.append("image", formData.image);
+
+    try {
+      const response = await fetch("http://localhost:8080/api/services/create", {
+        method: "POST",
+        body: formDataToSend,
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        alert("Service created successfully!");
+        setShowCreateModal(false);
+        resetForm();
+        fetchServices();
+      } else {
+        alert("Failed to create service");
+      }
+    } catch (error) {
+      console.error("Error creating service:", error);
+      alert("Error creating service");
+    }
+  };
+
+  const handleUpdateService = async (e) => {
+    e.preventDefault();
+    
+    const formDataToSend = new FormData();
+    formDataToSend.append("serviceName", formData.serviceName);
+    formDataToSend.append("serviceCategory", formData.serviceCategory);
+    formDataToSend.append("createdBy", formData.createdBy);
+    if (formData.image) {
+      formDataToSend.append("image", formData.image);
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/services/update/${editingService.serviceId}`, {
+        method: "PUT",
+        body: formDataToSend,
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        alert("Service updated successfully!");
+        setEditingService(null);
+        resetForm();
+        fetchServices();
+      } else {
+        alert("Failed to update service");
+      }
+    } catch (error) {
+      console.error("Error updating service:", error);
+      alert("Error updating service");
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      serviceName: "",
+      serviceCategory: PREDEFINED_CATEGORIES[0],
+      createdBy: user?.username || "",
+      image: null
+    });
+  };
+
+  const openEditModal = (service) => {
+    setEditingService(service);
+    setFormData({
+      serviceName: service.serviceName,
+      serviceCategory: service.serviceCategory,
+      createdBy: service.createdBy,
+      image: null
+    });
+  };
+
+  const getImageUrl = (serviceId) => {
+    return `http://localhost:8080/api/services/${serviceId}/image`;
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-layout">
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="admin-sidebar-header">
+          <div className="admin-logo">
+            <span className="admin-logo-icon">🛡️</span>
+            {!sidebarCollapsed && <span className="admin-logo-text">Admin Panel</span>}
+          </div>
+        </div>
+
+        <nav className="admin-nav">
+          <button 
+            className={`admin-nav-item ${activeTab === "Services" ? "active" : ""}`} 
+            onClick={() => setActiveTab("Services")}
+          >
+            {!sidebarCollapsed && <span className="admin-nav-label">Services</span>}
+          </button>
+          <button 
+            className="admin-nav-item"
+            onClick={() => navigate("/createservice")}
+          >
+            {!sidebarCollapsed && <span className="admin-nav-label">Create Service</span>}
+          </button>
+        </nav>
+
+        <div className="admin-sidebar-footer">
+          <button className="admin-logout-btn" onClick={handleLogoutClick}>
+            {!sidebarCollapsed && <span className="admin-nav-label">Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Panel */}
+      <main className="admin-panel">
+        {/* Topbar */}
+        <header className="admin-topbar">
+          <div className="admin-topbar-content">
+            <div>
+              <h1 className="admin-page-title">Services</h1>
+            </div>
+
+            <div className="admin-search-wrapper">
+              <input
+                type="text"
+                placeholder="Search services..."
+                className="admin-search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="admin-topbar-actions">
+              <div className="admin-avatar" onClick={() => navigate("/profile")}>
+                {user?.username?.charAt(0).toUpperCase()}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Filter Bar */}
+        <section className="admin-filter-bar">
+          <h3 className="admin-filter-label">Filter by Category</h3>
+          <div className="admin-filter-group">
+            <button
+              className={`admin-filter-chip ${selectedCategory === "All" ? "active" : ""}`}
+              onClick={() => setSelectedCategory("All")}
+            >
+              All
+            </button>
+            {PREDEFINED_CATEGORIES.map(category => (
+              <button
+                key={category}
+                className={`admin-filter-chip ${selectedCategory === category ? "active" : ""}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Services Grid */}
+        <section className="admin-records-grid">
+          {filteredServices.map((service) => (
+            <div key={service.serviceId} className="admin-record-card">
+              {service.image && (
+                <div className="admin-record-thumbnail">
+                  <img 
+                    src={getImageUrl(service.serviceId)} 
+                    alt={service.serviceName}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/70x70?text=No+Image";
+                    }}
+                  />
+                </div>
+              )}
+              <div className="admin-record-details">
+                <h3 className="admin-record-name">{service.serviceName}</h3>
+                <p className="admin-record-category">{service.serviceCategory}</p>
+                <p className="admin-record-provider">by {service.createdBy}</p>
+                <div className="admin-record-actions">
+                  <button 
+                    className="admin-record-action-btn edit"
+                    onClick={() => openEditModal(service)}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    className="admin-record-action-btn delete"
+                    onClick={() => handleDeleteClick(service)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {filteredServices.length === 0 && (
+          <div className="admin-no-results">
+            No services found matching your criteria.
+          </div>
+        )}
+      </main>
+
+      {/* Edit Modal - Redesigned to match CreateService UI */}
+{editingService && (
+  <div className="admin-modal-overlay">
+    <div className="admin-modal edit-modal">
+      <div className="admin-modal-header">
+        <h2>Edit Service</h2>
+        <button 
+          className="admin-modal-close"
+          onClick={() => {
+            setEditingService(null);
+            resetForm();
+          }}
+        >
+          ×
+        </button>
+      </div>
+      <form onSubmit={handleUpdateService}>
+        <div className="admin-modal-body">
+          {/* Image Upload Section - Similar to CreateService */}
+          <div className="admin-edit-image-section">
+            <label className="admin-edit-image-upload" htmlFor="edit-image-file">
+              {formData.image ? (
+                <img src={URL.createObjectURL(formData.image)} alt="Service preview" />
+              ) : editingService.image ? (
+                <img src={getImageUrl(editingService.serviceId)} alt={editingService.serviceName} />
+              ) : (
+                <span>📸 Upload Image</span>
+              )}
+              <input
+                id="edit-image-file"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleImageChange}
+              />
+            </label>
+            <p className="admin-form-hint">Click to change image (leave empty to keep current)</p>
+          </div>
+
+          {/* Form Fields */}
+          <div className="admin-edit-form-fields">
+            <div className="admin-form-group">
+              <label>Service Name</label>
+              <input
+                type="text"
+                name="serviceName"
+                value={formData.serviceName}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter service name"
+                className="admin-field-input"
+              />
+            </div>
+
+            <div className="admin-form-group">
+              <label>Service Category</label>
+              <select
+                name="serviceCategory"
+                value={formData.serviceCategory}
+                onChange={handleInputChange}
+                className="admin-category-select"
+                required
+              >
+                {PREDEFINED_CATEGORIES.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="admin-form-group">
+              <label>Created By</label>
+              <input
+                type="text"
+                name="createdBy"
+                value={formData.createdBy}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter creator name"
+                className="admin-field-input"
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="admin-modal-footer">
+          <button
+            type="button"
+            className="admin-btn-cancel"
+            onClick={() => {
+              setEditingService(null);
+              resetForm();
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="admin-btn-submit"
+          >
+            Update Service
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="admin-logout-overlay">
+          <div className="admin-logout-modal">
+            <div className="admin-logout-modal-text">
+              Are you sure you want to delete "{serviceToDelete?.serviceName}"?
+            </div>
+            <div className="admin-logout-modal-actions">
+              <button className="admin-confirm-btn" onClick={confirmDelete}>Confirm</button>
+              <button className="admin-cancel-btn" onClick={cancelDelete}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="admin-logout-overlay">
+          <div className="admin-logout-modal">
+            <div className="admin-logout-modal-text">Are you sure you want to logout?</div>
+            <div className="admin-logout-modal-actions">
+              <button className="admin-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="admin-cancel-btn" onClick={cancelLogout}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default AdminDashboard;

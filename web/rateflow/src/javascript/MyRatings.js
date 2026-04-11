@@ -59,240 +59,212 @@ useEffect(() => {
   };
 }, []);
 
-    /* LOGOUT MODAL FUNCTIONS */
-    
-        const handleLogoutClick = () => {
-        setShowLogoutModal(true);
-        };
-    
-        const confirmLogout = async () => {
-  try {
-    const response = await fetch(
-      "http://localhost:8080/api/auth/logout",
-      {
+  const confirmLogout = async () => {
+    try {
+      await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
-        credentials: "include"
-      }
-    );
-
-    if (!response.ok) {
-      alert("Logout failed");
-      return;
+        credentials: "include",
+      });
+      setShowLogoutModal(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
     }
+  };
 
-    // Clear local state
-    setUser(null);
+  const cancelLogout = () => setShowLogoutModal(false);
 
-    setShowLogoutModal(false);
+  const getImageUrl = (serviceId) => {
+    return `http://localhost:8080/api/services/${serviceId}/image`;
+  };
 
-    navigate("/");
-
-  } catch (error) {
-    console.error("Logout error:", error);
-    alert("Logout failed");
-  }
-};
-    
-        const cancelLogout = () => {
-        setShowLogoutModal(false);
-        };
-
-    return (
-        <div className="dashboard-layout">
-
-        {/* SIDEBAR */}
-
-        <aside
-            className={`sidebar ${
-            sidebarCollapsed ? "collapsed" : ""
-            }`}
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <span
+          key={i}
+          className={`myratings-star ${i <= rating ? "active" : ""}`}
         >
-            <div className="sidebar-header">
+          ★
+        </span>
+      );
+    }
+    return stars;
+  };
 
-            <div className="logo">
+  const formatDate = (dateString) => {
+    if (!dateString) return "Recently";
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
-                {!sidebarCollapsed && (
-                <span className="logo-text">
-                    Dashboard
-                </span>
-                )}
-            </div>
+  if (loading) {
+    return (
+      <div className="myratings-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading your ratings...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="myratings-layout">
+      {/* Sidebar */}
+      <aside className={`myratings-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="myratings-sidebar-header">
+          <div className="myratings-logo">
             
-
-            </div>
-
-            {/* NAVIGATION */}
-
-            <nav className="sidebar-nav">
-
-            {/* SERVICES */}
-
-            <button
-                className={`nav-item ${
-                activeTab === "Services"
-                    ? "active"
-                    : ""
-                }`}
-                onClick={() => {
-                setActiveTab("Services");
-                navigate("/dashboard");
-                }}
-            >
-                {!sidebarCollapsed && (
-                <span className="nav-label">
-                    Services
-                </span>
-                )}
-            </button>
-
-            {/* MY RATINGS */}
-
-            <button
-                className={`nav-item ${
-                activeTab === "My Ratings"
-                    ? "active"
-                    : ""
-                }`}
-                onClick={() => {
-                setActiveTab("My Ratings");
-                }}
-            >
-                {!sidebarCollapsed && (
-                <span className="nav-label">
-                    My Ratings
-                </span>
-                )}
-            </button>
-
-            </nav>
-
-            {/* LOGOUT */}
-
-            <div className="sidebar-footer">
-
-            <button
-                className="logout-sidebar-btn"
-                onClick={handleLogoutClick}
-            >
-
-
-                {!sidebarCollapsed && (
-                <span className="nav-label">
-                    Logout
-                </span>
-                )}
-            </button>
-
-            </div>
-
-        </aside>
-
-        {/* MAIN CONTENT */}
-
-        <main className="main-content">
-
-            {/* HEADER */}
-
-            <header className="dashboard-header">
-
-            <div className="header-content">
-
-                {/* LEFT */}
-
-                <h1 className="page-title">
-                My Ratings
-                </h1>
-
-                {/* CENTER SEARCH */}
-
-                <div className="header-search">
-
-                <input
-                    type="text"
-                    placeholder="Search ratings..."
-                    className="search-input"
-                />
-
-                </div>
-
-                {/* RIGHT */}
-
-                <div className="header-actions">
-
-                <button
-                className="notifications-btn"
-                onClick={() => navigate("/notifications")}
-                >
-    🔔
-                </button>
-
-                <div
-                    className="user-avatar"
-                    onClick={() =>
-                    navigate("/profile")
-                    }
-                    style={{
-                    cursor: "pointer",
-                    }}
-                >
-                👤
-                </div>
-
-                </div>
-
-            </div>
-
-            </header>
-
-            {/* CONTENT */}
-
-            <section
-            style={{
-                padding: "40px",
-                fontSize: "18px",
-            }}
-            >
-            Your ratings will appear here.
-            </section>
-
-        </main>
-
-        {/* LOGOUT MODAL */}
-
-      {showLogoutModal && (
-        <div className="logout-modal-overlay">
-
-          <div className="logout-modal">
-
-            <div className="logout-text">
-              Are you sure you want to logout?
-            </div>
-
-            <div className="logout-buttons">
-
-              <button
-                className="confirm-btn"
-                onClick={confirmLogout}
-              >
-                Confirm
-              </button>
-
-              <button
-                className="cancel-btn"
-                onClick={cancelLogout}
-              >
-                Cancel
-              </button>
-
-            </div>
-
+            {!sidebarCollapsed && <span className="myratings-logo-text">My Ratings</span>}
           </div>
+          <button 
+            className="myratings-collapse-btn" 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          >
+            {sidebarCollapsed ? "→" : "←"}
+          </button>
+        </div>
 
+        <nav className="myratings-nav">
+          <button 
+            className={`myratings-nav-item ${activeTab === "Services" ? "active" : ""}`}
+            onClick={() => navigate("/dashboard")}
+          >
+            {!sidebarCollapsed && <span className="myratings-nav-label">Services</span>}
+          </button>
+          <button 
+            className={`myratings-nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
+            onClick={() => setActiveTab("My Ratings")}
+          >
+            {!sidebarCollapsed && <span className="myratings-nav-label">My Ratings</span>}
+          </button>
+        </nav>
+
+        <div className="myratings-sidebar-footer">
+          <button className="myratings-logout-btn" onClick={handleLogoutClick}>
+            {!sidebarCollapsed && <span className="myratings-nav-label">Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Panel */}
+      <main className="myratings-panel">
+        {/* Topbar */}
+        <header className="myratings-topbar">
+          <div className="myratings-topbar-content">
+            <div>
+              <h1 className="myratings-page-title">My Ratings</h1>
+            </div>
+
+            <div className="myratings-search-wrapper">
+              <input
+                type="text"
+                placeholder="Search ratings..."
+                className="myratings-search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="myratings-topbar-actions">
+              <div className="myratings-avatar" onClick={() => navigate("/profile")}>
+                {user ? user.username.charAt(0).toUpperCase() : "U"}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Filter Bar */}
+        <section className="myratings-filter-bar">
+          <h3 className="myratings-filter-label">Filter by Category</h3>
+          <div className="myratings-filter-group">
+            <button
+              className={`myratings-filter-chip ${selectedCategory === "All" ? "active" : ""}`}
+              onClick={() => setSelectedCategory("All")}
+            >
+              All
+            </button>
+            {PREDEFINED_CATEGORIES.map(category => (
+              <button
+                key={category}
+                className={`myratings-filter-chip ${selectedCategory === category ? "active" : ""}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Ratings Grid */}
+        <section className="myratings-records-grid">
+          {filteredRatings.map((rating) => (
+            <div key={rating.ratingId} className="myratings-record-card">
+              <div className="myratings-record-thumbnail">
+                <img 
+                  src={getImageUrl(rating.serviceId)} 
+                  alt={rating.service?.serviceName || "Service"}
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/100x100?text=No+Image";
+                  }}
+                />
+              </div>
+              <div className="myratings-record-details">
+                <h3 className="myratings-record-name">
+                  {rating.service?.serviceName || `Service #${rating.serviceId}`}
+                </h3>
+                <p className="myratings-record-category">
+                  {rating.service?.serviceCategory || "Unknown Category"}
+                </p>
+                <div className="myratings-rating-stars">
+                  {renderStars(rating.starRate)}
+                  <span className="myratings-rating-value">{rating.starRate}.0 / 5.0</span>
+                </div>
+                {rating.feedbackText && (
+                  <div className="myratings-rating-feedback">
+                    <p>"{rating.feedbackText}"</p>
+                  </div>
+                )}
+                <div className="myratings-rating-date">
+                  Rated on {formatDate(rating.dateCreated)}
+                </div>
+                <div className="myratings-record-actions">
+                  <button 
+                    className="myratings-record-action-btn view"
+                    onClick={() => navigate(`/rate-service/${rating.serviceId}`)}
+                  >
+                    View Service
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {filteredRatings.length === 0 && (
+          <div className="myratings-no-results">
+            No ratings found matching your criteria.
+          </div>
+        )}
+      </main>
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="myratings-logout-overlay">
+          <div className="myratings-logout-modal">
+            <div className="myratings-logout-modal-text">Are you sure you want to logout?</div>
+            <div className="myratings-logout-modal-actions">
+              <button className="myratings-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="myratings-cancel-btn" onClick={cancelLogout}>Cancel</button>
+            </div>
+          </div>
         </div>
       )}
-
     </div>
-    );
-    }
+  );
+}
 
-    export default MyRatings;
+export default MyRatings;

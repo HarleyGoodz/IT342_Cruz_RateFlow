@@ -17,7 +17,8 @@ function Login() {
     setSuccessMessage("");
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
+      // Use the single admin login endpoint for all users
+      const response = await fetch("http://localhost:8080/api/auth/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,13 +38,12 @@ function Login() {
       const data = await response.json();
       console.log(data);
 
-      localStorage.setItem("role", data.role);
+      setSuccessMessage("Login successful! Redirecting...");
 
-      setSuccessMessage("Login successful! Redirecting to dashboard...");
-
+      // Automatically redirect based on role from backend
       setTimeout(() => {
         if (data.role === "ADMIN") {
-          navigate("/admin");
+          navigate("/admindashboard");
         } else {
           navigate("/dashboard");
         }
