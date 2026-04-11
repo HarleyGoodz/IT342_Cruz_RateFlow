@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import "../css/dashboard_css.css";
 
 // PREDEFINED CATEGORIES
@@ -30,51 +29,47 @@ function Dashboard() {
     return matchesSearch && matchesCategory;
   });
 
-  // Check authentication and fetch services
-  useEffect(() => {
-    checkAuth();
-  }, []);
+useEffect(() => {
+  let isMounted = true;
 
-  const checkAuth = async () => {
+  const loadUser = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/auth/me", {
-        credentials: "include",
-      });
-      
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
+        }
+      );
+
       if (!response.ok) {
-        throw new Error("Not authenticated");
-      }
-      
-      const data = await response.json();
-      
-      if (data.role === "ADMIN") {
-        navigate("/admindashboard");
+        navigate("/login");
         return;
       }
-      
-      setUser(data);
-      fetchServices();
+
+      const data = await response.json();
+
+      if (!isMounted) return;
+
+      setUser({
+        username: data.username,
+        email: data.email
+      });
+
+      console.log("Loaded from HTTP session");
+
     } catch (error) {
-      navigate("/");
+      console.error("Session check failed:", error);
+      navigate("/login");
     }
   };
 
-  const fetchServices = async () => {
-    try {
-      const response = await fetch("http://localhost:8080/api/services", {
-        credentials: "include",
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setServices(data);
-      }
-    } catch (error) {
-      console.error("Error fetching services:", error);
-    } finally {
-      setLoading(false);
-    }
+  loadUser();
+
+  return () => {
+    isMounted = false;
   };
+}, []);
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true);

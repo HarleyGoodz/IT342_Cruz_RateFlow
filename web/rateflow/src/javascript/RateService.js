@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import "../css/rateservice_css.css";
+import { useNavigate } from "react-router-dom";
+import "../css/RateServiceStyles.css";
 
 function RateService() {
   const navigate = useNavigate();
@@ -24,120 +24,47 @@ function RateService() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("Services");
 
-  // Check authentication and fetch data
-  useEffect(() => {
-    const authenticateAndFetch = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/auth/me", {
-          credentials: "include",
-        });
-        
-        if (!res.ok) {
-          throw new Error("Not authenticated");
+useEffect(() => {
+  let isMounted = true;
+
+  const loadUser = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
         }
-        
-        const data = await res.json();
-        
-        if (data.role === "ADMIN") {
-          navigate("/admindashboard");
-          return;
-        }
-        
-        setUser(data);
-        await fetchServiceDetails(data.id);
-        
-      } catch (error) {
-        console.error("Auth error:", error);
-        navigate("/");
-      }
-    };
-    
-    authenticateAndFetch();
-  }, [serviceId, navigate]);
+      );
 
-  const fetchServiceDetails = async (userId) => {
-    try {
-      const serviceResponse = await fetch(`http://localhost:8080/api/services/${serviceId}`, {
-        credentials: "include",
-      });
-      
-      if (serviceResponse.ok) {
-        const serviceData = await serviceResponse.json();
-        setService(serviceData);
-        
-        await Promise.all([
-          fetchRatingStats(),
-          fetchFeedbacks(),
-          checkUserRating(userId)
-        ]);
-      } else {
-        navigate("/dashboard");
+      if (!response.ok) {
+        navigate("/login");
+        return;
       }
+
+      const data = await response.json();
+
+      if (!isMounted) return;
+
+      setUser({
+        username: data.username,
+        email: data.email
+      });
+
+      console.log("Loaded from HTTP session");
+
     } catch (error) {
-      console.error("Error fetching service:", error);
-    } finally {
-      setLoading(false);
+      console.error("Session check failed:", error);
+      navigate("/login");
     }
   };
 
-  const fetchRatingStats = async () => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/ratings/service/${serviceId}/stats`, {
-        credentials: "include",
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setRatingStats(data);
-      }
-    } catch (error) {
-      console.error("Error fetching rating stats:", error);
-    }
-  };
+  loadUser();
 
-  const fetchFeedbacks = async () => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/ratings/service/${serviceId}/feedbacks`, {
-        credentials: "include",
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setFeedbacks(data);
-      }
-    } catch (error) {
-      console.error("Error fetching feedbacks:", error);
-    }
+  return () => {
+    isMounted = false;
   };
-
-  const checkUserRating = async (userId) => {
-    if (!userId) return;
-    
-    try {
-      const response = await fetch(`http://localhost:8080/api/ratings/check/user/${userId}/service/${serviceId}`, {
-        credentials: "include",
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.hasRated) {
-          setHasRated(true);
-          setUserRating(data.rating);
-          if (data.feedback) {
-            setFeedback(data.feedback);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error checking user rating:", error);
-    }
-  };
-
-  const handleRatingSubmit = async () => {
-    if (userRating === 0) {
-      alert("Please select a rating before submitting.");
-      return;
-    }
+}, [navigate]);
 
     if (hasRated) {
       alert("You have already rated this service!");

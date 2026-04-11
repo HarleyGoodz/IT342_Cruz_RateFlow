@@ -1,93 +1,63 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import "../css/myratings_css.css";
+    import React, { useState, useEffect } from "react";
+    import { useNavigate } from "react-router-dom";
+    import "../css/myRatings_css.css";
 
-// PREDEFINED CATEGORIES
-const PREDEFINED_CATEGORIES = [
-  "Food & Hospitality",
-  "Medical & Health",
-  "Retail & Commercial",
-  "Personal & Lifestyle"
-];
+    function MyRatings() {
+    const navigate = useNavigate();
 
-function MyRatings() {
-  const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState("My Ratings");
-  const [user, setUser] = useState(null);
-  const [myRatings, setMyRatings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] =
+        useState(false);
 
-  // Filter ratings based on search term and category
-  const filteredRatings = myRatings.filter(rating => {
-    const serviceName = rating.service?.serviceName || "";
-    const serviceCategory = rating.service?.serviceCategory || "";
-    const matchesSearch = serviceName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || serviceCategory === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    /* FIXED */
+    const [activeTab, setActiveTab] =
+        useState("My Ratings");
 
-  // Check authentication and fetch user's ratings
-  useEffect(() => {
-    const fetchUserRatings = async () => {
-      try {
-        const authRes = await fetch("http://localhost:8080/api/auth/me", {
-          credentials: "include",
-        });
-        
-        if (!authRes.ok) {
-          navigate("/");
-          return;
+    const [user, setUser] = useState(null);
+
+    const [showLogoutModal, setShowLogoutModal] =
+    useState(false);
+
+useEffect(() => {
+  let isMounted = true;
+
+  const loadUser = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/me",
+        {
+          method: "GET",
+          credentials: "include"
         }
-        
-        const userData = await authRes.json();
-        
-        if (userData.role === "ADMIN") {
-          navigate("/admindashboard");
-          return;
-        }
-        
-        setUser(userData);
-        
-        const ratingsRes = await fetch(`http://localhost:8080/api/ratings/user/${userData.id}`, {
-          credentials: "include",
-        });
-        
-        if (ratingsRes.ok) {
-          const ratingsData = await ratingsRes.json();
-          
-          const ratingsWithServices = await Promise.all(
-            ratingsData.map(async (rating) => {
-              const serviceRes = await fetch(`http://localhost:8080/api/services/${rating.serviceId}`, {
-                credentials: "include",
-              });
-              if (serviceRes.ok) {
-                const serviceData = await serviceRes.json();
-                return {
-                  ...rating,
-                  service: serviceData
-                };
-              }
-              return rating;
-            })
-          );
-          
-          setMyRatings(ratingsWithServices);
-        }
-      } catch (error) {
-        console.error("Error fetching ratings:", error);
-      } finally {
-        setLoading(false);
+      );
+
+      if (!response.ok) {
+        navigate("/login");
+        return;
       }
-    };
-    
-    fetchUserRatings();
-  }, [navigate]);
 
-  const handleLogoutClick = () => setShowLogoutModal(true);
+      const data = await response.json();
+
+      if (!isMounted) return;
+
+      setUser({
+        username: data.username,
+        email: data.email
+      });
+
+      console.log("Loaded from HTTP session");
+
+    } catch (error) {
+      console.error("Session check failed:", error);
+      navigate("/login");
+    }
+  };
+
+  loadUser();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
   const confirmLogout = async () => {
     try {

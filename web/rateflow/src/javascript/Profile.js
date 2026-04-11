@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import "../css/Profile_css.css";
 import Dashboard from "./Dashboard_js";
 
@@ -17,11 +16,7 @@ useEffect(() => {
   let isMounted = true;
 
   const loadUser = async () => {
-
     try {
-
-      /* STEP 1 — Try Spring session */
-
       const response = await fetch(
         "http://localhost:8080/api/auth/me",
         {
@@ -30,83 +25,32 @@ useEffect(() => {
         }
       );
 
-      if (response.ok) {
-
-        const data = await response.json();
-
-        if (!isMounted) return;
-
-        setUser({
-          username: data.username || "user",
-          email: data.email
-        });
-
-        console.log("Loaded from Spring session");
+      if (!response.ok) {
+        navigate("/login");
         return;
       }
 
-    } catch (err) {
-      console.log("Spring session not found");
-    }
-
-    /* STEP 2 — Try Supabase session */
-
-    try {
-
-      const {
-        data: { session }
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        console.log("No Supabase session");
-        return;
-      }
+      const data = await response.json();
 
       if (!isMounted) return;
 
-      const username =
-        session.user?.user_metadata?.username ||
-        session.user?.user_metadata?.full_name ||
-        "user";
-
       setUser({
-        username,
-        email: session.user.email
+        username: data.username || "user",
+        email: data.email
       });
 
-      console.log("Loaded from Supabase session");
+      console.log("Loaded from HTTP session");
 
     } catch (error) {
-      console.error("Failed to load user:", error);
+      console.error("Session check failed:", error);
+      navigate("/login");
     }
   };
 
   loadUser();
 
-  const { data: listener } =
-    supabase.auth.onAuthStateChange(
-      (event, session) => {
-
-        if (event === "SIGNED_OUT") {
-          navigate("/");
-          return;
-        }
-
-        if (!session) return;
-
-        setUser({
-          username:
-            session.user?.user_metadata?.username ||
-            session.user?.user_metadata?.full_name ||
-            "user",
-          email: session.user.email
-        });
-      }
-    );
-
   return () => {
     isMounted = false;
-    listener.subscription.unsubscribe();
   };
 
 }, [navigate]);
