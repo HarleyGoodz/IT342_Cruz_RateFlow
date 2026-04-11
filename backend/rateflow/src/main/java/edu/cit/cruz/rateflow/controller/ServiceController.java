@@ -14,18 +14,17 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/services")
-@CrossOrigin(origins = "*")
 public class ServiceController {
 
     @Autowired
     private ServiceService serviceService;
 
-
-    // CREATE SERVICE
+    // CREATE SERVICE - ADD serviceDescription parameter
     @PostMapping("/create")
     public ResponseEntity<?> createService(
             @RequestParam("serviceName") String serviceName,
             @RequestParam("serviceCategory") String serviceCategory,
+            @RequestParam(value = "serviceDescription", required = false) String serviceDescription,
             @RequestParam("createdBy") String createdBy,
             @RequestParam("image") MultipartFile image
     ) throws IOException {
@@ -33,6 +32,7 @@ public class ServiceController {
         Service service = new Service();
         service.setServiceName(serviceName);
         service.setServiceCategory(serviceCategory);
+        service.setServiceDescription(serviceDescription != null ? serviceDescription : "");
         service.setCreatedBy(createdBy);
         service.setImage(image.getBytes());
 
@@ -41,13 +41,11 @@ public class ServiceController {
         return ResponseEntity.ok("Service created successfully");
     }
 
-
     // GET ALL SERVICES
     @GetMapping
     public List<Service> getAllServices() {
         return serviceService.getAllServices();
     }
-
 
     // GET SERVICE BY ID
     @GetMapping("/{serviceId}")
@@ -61,7 +59,6 @@ public class ServiceController {
             return ResponseEntity.notFound().build();
         }
     }
-
 
     // GET SERVICE IMAGE
     @GetMapping("/{serviceId}/image")
@@ -80,13 +77,13 @@ public class ServiceController {
         return ResponseEntity.notFound().build();
     }
 
-
-    // UPDATE SERVICE
+    // UPDATE SERVICE - ADD serviceDescription parameter
     @PutMapping("/update/{serviceId}")
     public ResponseEntity<?> updateService(
             @PathVariable Integer serviceId,
             @RequestParam String serviceName,
             @RequestParam String serviceCategory,
+            @RequestParam(value = "serviceDescription", required = false) String serviceDescription,
             @RequestParam String createdBy,
             @RequestParam(required = false) MultipartFile image
     ) throws IOException {
@@ -99,6 +96,7 @@ public class ServiceController {
 
             service.setServiceName(serviceName);
             service.setServiceCategory(serviceCategory);
+            service.setServiceDescription(serviceDescription != null ? serviceDescription : "");
             service.setCreatedBy(createdBy);
 
             if (image != null) {
@@ -113,7 +111,6 @@ public class ServiceController {
         return ResponseEntity.notFound().build();
     }
 
-
     // DELETE SERVICE
     @DeleteMapping("/delete/{serviceId}")
     public ResponseEntity<?> deleteService(@PathVariable Integer serviceId) {
@@ -127,5 +124,4 @@ public class ServiceController {
 
         return ResponseEntity.notFound().build();
     }
-
 }

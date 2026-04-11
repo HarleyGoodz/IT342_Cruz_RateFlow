@@ -4,17 +4,10 @@ import Registration from "./Registration_js";
 import Dashboard from "./Dashboard_js";
 import Profile from "./Profile";
 import MyRatings from "./MyRatings";
-import Notification from "./Notification";
-import RateService from "./RateService";
-import AdminDashboard from "./Admindashboard"; 
-import AdminRoute from "./AdminRoute";
+import AdminDashboard from "./AdminDashboard";
 import CreateService from "./CreateService";
-import ManageServices from "./ManageServices";
-import AccessControl from "./AccessControl";
-import AdminProfile from "./AdminProfile";
-import AdminNotif from "./AdminNotif";
+import RateService from "./RateService";
 import '../css/App.css';
-
 
 function App() {
   return (
@@ -25,14 +18,11 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/my-ratings" element={<MyRatings />} />
-        <Route path="/notifications" element={<Notification />} />
-        <Route path="/rate-service" element={<RateService />} />
-        <Route path="/admin" element={ <AdminRoute> <AdminDashboard /></AdminRoute>}/>
-        <Route path="/admin/create-service" element={ <AdminRoute> <CreateService /></AdminRoute>}/>
-        <Route path="/admin/manage-services" element={ <AdminRoute> <ManageServices /></AdminRoute>}/>
-        <Route path="/admin/access-control" element={ <AdminRoute> <AccessControl /></AdminRoute>}/>
-        <Route path="/admin/profile" element={ <AdminRoute> <AdminProfile /></AdminRoute>}/>
-        <Route path="/admin/notifications" element={ <AdminRoute> <AdminNotif /></AdminRoute>}/>
+
+        <Route path="/admindashboard" element={<AdminDashboard />} />
+        <Route path="/createservice" element={<CreateService />} />
+        <Route path="/rate-service/:serviceId" element={<RateService />} />
+
       </Routes>
     </Router>
   );
