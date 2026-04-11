@@ -148,7 +148,7 @@ function MyRatings() {
         <div className="myratings-sidebar-header">
           <div className="myratings-logo">
             
-            {!sidebarCollapsed && <span className="myratings-logo-text">Dashboard</span>}
+            {!sidebarCollapsed && <span className="myratings-logo-text">My Ratings</span>}
           </div>
           <button 
             className="myratings-collapse-btn" 
@@ -180,26 +180,26 @@ function MyRatings() {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="myratings-main-content">
-        <header className="myratings-header">
-          <div className="myratings-header-content">
+      {/* Main Panel */}
+      <main className="myratings-panel">
+        {/* Topbar */}
+        <header className="myratings-topbar">
+          <div className="myratings-topbar-content">
             <div>
               <h1 className="myratings-page-title">My Ratings</h1>
-              
             </div>
 
             <div className="myratings-search-wrapper">
               <input
                 type="text"
-                placeholder="Search rated services..."
+                placeholder="Search ratings..."
                 className="myratings-search-input"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <div className="myratings-header-actions">
+            <div className="myratings-topbar-actions">
               <div className="myratings-avatar" onClick={() => navigate("/profile")}>
                 {user ? user.username.charAt(0).toUpperCase() : "U"}
               </div>
@@ -207,9 +207,9 @@ function MyRatings() {
           </div>
         </header>
 
-        {/* Filter Section */}
-        <section className="myratings-filter-section">
-          <h3 className="myratings-filter-title">Filter by Category</h3>
+        {/* Filter Bar */}
+        <section className="myratings-filter-bar">
+          <h3 className="myratings-filter-label">Filter by Category</h3>
           <div className="myratings-filter-group">
             <button
               className={`myratings-filter-chip ${selectedCategory === "All" ? "active" : ""}`}
@@ -217,7 +217,7 @@ function MyRatings() {
             >
               All
             </button>
-            {PREDEFINED_CATEGORIES.map((category) => (
+            {PREDEFINED_CATEGORIES.map(category => (
               <button
                 key={category}
                 className={`myratings-filter-chip ${selectedCategory === category ? "active" : ""}`}
@@ -230,10 +230,10 @@ function MyRatings() {
         </section>
 
         {/* Ratings Grid */}
-        <section className="myratings-grid">
+        <section className="myratings-records-grid">
           {filteredRatings.map((rating) => (
-            <div key={rating.ratingId} className="myratings-card">
-              <div className="myratings-card-image">
+            <div key={rating.ratingId} className="myratings-record-card">
+              <div className="myratings-record-thumbnail">
                 <img 
                   src={getImageUrl(rating.serviceId)} 
                   alt={rating.service?.serviceName || "Service"}
@@ -242,33 +242,33 @@ function MyRatings() {
                   }}
                 />
               </div>
-              <div className="myratings-card-info">
-                <h3 className="myratings-service-name">
+              <div className="myratings-record-details">
+                <h3 className="myratings-record-name">
                   {rating.service?.serviceName || `Service #${rating.serviceId}`}
                 </h3>
-                <p className="myratings-service-category">
+                <p className="myratings-record-category">
                   {rating.service?.serviceCategory || "Unknown Category"}
                 </p>
-                <div className="myratings-stars-container">
-                  <div className="myratings-stars">
-                    {renderStars(rating.starRate)}
-                  </div>
+                <div className="myratings-rating-stars">
+                  {renderStars(rating.starRate)}
                   <span className="myratings-rating-value">{rating.starRate}.0 / 5.0</span>
                 </div>
                 {rating.feedbackText && (
-                  <div className="myratings-feedback">
+                  <div className="myratings-rating-feedback">
                     <p>"{rating.feedbackText}"</p>
                   </div>
                 )}
-                <div className="myratings-date">
+                <div className="myratings-rating-date">
                   Rated on {formatDate(rating.dateCreated)}
                 </div>
-                <button 
-                  className="myratings-view-btn"
-                  onClick={() => navigate(`/rate-service/${rating.serviceId}`)}
-                >
-                  View Service
-                </button>
+                <div className="myratings-record-actions">
+                  <button 
+                    className="myratings-record-action-btn view"
+                    onClick={() => navigate(`/rate-service/${rating.serviceId}`)}
+                  >
+                    View Service
+                  </button>
+                </div>
               </div>
             </div>
           ))}

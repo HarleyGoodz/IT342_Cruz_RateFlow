@@ -120,7 +120,7 @@ function Dashboard() {
       <aside className={`dashboard-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="dashboard-sidebar-header">
           <div className="dashboard-logo">
-            
+          
             {!sidebarCollapsed && <span className="dashboard-logo-text">Dashboard</span>}
           </div>
 
@@ -134,7 +134,7 @@ function Dashboard() {
             {!sidebarCollapsed && <span className="dashboard-nav-label">Services</span>}
           </button>
           <button 
-            className={`dashboard-nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
+            className="dashboard-nav-item"
             onClick={() => navigate("/my-ratings")}
           >
             {!sidebarCollapsed && <span className="dashboard-nav-label">My Ratings</span>}
@@ -148,10 +148,11 @@ function Dashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="dashboard-main-content">
-        <header className="dashboard-header">
-          <div className="dashboard-header-content">
+      {/* Main Panel */}
+      <main className="dashboard-panel">
+        {/* Topbar */}
+        <header className="dashboard-topbar">
+          <div className="dashboard-topbar-content">
             <div>
               <h1 className="dashboard-page-title">Services</h1>
             </div>
@@ -166,17 +167,17 @@ function Dashboard() {
               />
             </div>
 
-            <div className="dashboard-header-actions">
+            <div className="dashboard-topbar-actions">
               <div className="dashboard-avatar" onClick={() => navigate("/profile")}>
-                {user ? user.username.charAt(0).toUpperCase() : "U"}
+                {user?.username?.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Filter Section */}
-        <section className="dashboard-filter-section">
-          <h3 className="dashboard-filter-title">Filter by Category</h3>
+        {/* Filter Bar */}
+        <section className="dashboard-filter-bar">
+          <h3 className="dashboard-filter-label">Filter by Category</h3>
           <div className="dashboard-filter-group">
             <button
               className={`dashboard-filter-chip ${selectedCategory === "All" ? "active" : ""}`}
@@ -184,7 +185,7 @@ function Dashboard() {
             >
               All
             </button>
-            {PREDEFINED_CATEGORIES.map((category) => (
+            {PREDEFINED_CATEGORIES.map(category => (
               <button
                 key={category}
                 className={`dashboard-filter-chip ${selectedCategory === category ? "active" : ""}`}
@@ -197,11 +198,11 @@ function Dashboard() {
         </section>
 
         {/* Services Grid */}
-        <section className="dashboard-services-grid">
+        <section className="dashboard-records-grid">
           {filteredServices.map((service) => (
-            <div key={service.serviceId} className="dashboard-service-card">
+            <div key={service.serviceId} className="dashboard-record-card">
               {service.image && (
-                <div className="dashboard-service-image">
+                <div className="dashboard-record-thumbnail">
                   <img 
                     src={getImageUrl(service.serviceId)} 
                     alt={service.serviceName}
@@ -211,13 +212,13 @@ function Dashboard() {
                   />
                 </div>
               )}
-              <div className="dashboard-service-info">
-                <h3 className="dashboard-service-name">{service.serviceName}</h3>
-                <p className="dashboard-service-category">{service.serviceCategory}</p>
-                <p className="dashboard-service-provider">by {service.createdBy}</p>
-                <div className="dashboard-service-actions">
+              <div className="dashboard-record-details">
+                <h3 className="dashboard-record-name">{service.serviceName}</h3>
+                <p className="dashboard-record-category">{service.serviceCategory}</p>
+                <p className="dashboard-record-provider">by {service.createdBy}</p>
+                <div className="dashboard-record-actions">
                   <button 
-                    className="dashboard-rate-btn"
+                    className="dashboard-record-action-btn rate"
                     onClick={() => handleServiceClick(service.serviceId)}
                   >
                     Rate Service
@@ -228,7 +229,7 @@ function Dashboard() {
           ))}
         </section>
 
-        {filteredServices.length === 0 && !loading && (
+        {filteredServices.length === 0 && (
           <div className="dashboard-no-results">
             No services found matching your criteria.
           </div>
