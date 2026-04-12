@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/dashboard_css.css";
 
+// PREDEFINED CATEGORIES
+const PREDEFINED_CATEGORIES = [
+  "Food & Hospitality",
+  "Medical & Health",
+  "Retail & Commercial",
+  "Personal & Lifestyle"
+];
+
 function Dashboard() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -13,38 +21,41 @@ function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const categories = ["All", "Food & Hospitality", "Medical & Health", "Retail & Commercial", "Personal & Lifestyle"];
-
   // Filter services based on search term and category
   const filteredServices = services.filter(service => {
-    const matchesSearch = service.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = service.serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
     const matchesCategory = selectedCategory === "All" || service.serviceCategory === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   // Check authentication and fetch services
   useEffect(() => {
-    fetch("http://localhost:8080/api/auth/me", {
-      credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Not authenticated");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (data.role === "ADMIN") {
-          navigate("/admindashboard");
-          return;
-        }
-        setUser(data);
-        fetchServices();
-      })
-      .catch(() => {
-        navigate("/");
+    checkAuth();
+    fetchServices();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/me", {
+        credentials: "include",
       });
-  }, [navigate]);
+      
+      if (!response.ok) {
+        throw new Error("Not authenticated");
+      }
+      
+      const data = await response.json();
+      
+      if (data.role === "ADMIN") {
+        navigate("/admindashboard");
+        return;
+      }
+      
+      setUser(data);
+    } catch (error) {
+      navigate("/");
+    }
+  };
 
   const fetchServices = async () => {
     try {
@@ -63,9 +74,7 @@ function Dashboard() {
     }
   };
 
-  const handleLogoutClick = () => {
-    setShowLogoutModal(true);
-  };
+  const handleLogoutClick = () => setShowLogoutModal(true);
 
   const confirmLogout = async () => {
     try {
@@ -80,9 +89,7 @@ function Dashboard() {
     }
   };
 
-  const cancelLogout = () => {
-    setShowLogoutModal(false);
-  };
+  const cancelLogout = () => setShowLogoutModal(false);
 
   const handleServiceClick = (serviceId) => {
     navigate(`/rate-service/${serviceId}`);
@@ -92,73 +99,89 @@ function Dashboard() {
     return `http://localhost:8080/api/services/${serviceId}/image`;
   };
 
-  function getUniqueCategories() {
-    const cats = services.map(service => service.serviceCategory);
-    return [...new Set(cats)];
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (
     <div className="dashboard-layout">
       {/* Sidebar */}
-      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
-        <div className="sidebar-header">
-          <div className="logo">
-            {!sidebarCollapsed && <span className="logo-text">Dashboard</span>}
+      <aside className={`dashboard-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="dashboard-sidebar-header">
+          <div className="dashboard-logo">
+            
+            {!sidebarCollapsed && <span className="dashboard-logo-text">User Panel</span>}
           </div>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="dashboard-nav">
           <button 
-            className={`nav-item ${activeTab === "Services" ? "active" : ""}`}
+            className={`dashboard-nav-item ${activeTab === "Services" ? "active" : ""}`} 
             onClick={() => setActiveTab("Services")}
           >
-            {!sidebarCollapsed && <span className="nav-label">Services</span>}
+            {!sidebarCollapsed && <span className="dashboard-nav-label">Services</span>}
           </button>
           <button 
-            className={`nav-item ${activeTab === "My Ratings" ? "active" : ""}`}
+            className="dashboard-nav-item"
             onClick={() => navigate("/my-ratings")}
           >
-            {!sidebarCollapsed && <span className="nav-label">My Ratings</span>}
+            {!sidebarCollapsed && <span className="dashboard-nav-label">My Ratings</span>}
           </button>
         </nav>
 
-        <div className="sidebar-footer">
-          <button className="logout-sidebar-btn" onClick={handleLogoutClick}>
-            {!sidebarCollapsed && <span className="nav-label">Logout</span>}
+        <div className="dashboard-sidebar-footer">
+          <button className="dashboard-logout-btn" onClick={handleLogoutClick}>
+            {!sidebarCollapsed && <span className="dashboard-nav-label">Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="main-content">
-        <header className="dashboard-header">
-          <div className="header-content">
-            <h1 className="page-title">Services</h1>
-            <div className="header-search">
+      {/* Main Panel */}
+      <main className="dashboard-panel">
+        {/* Topbar */}
+        <header className="dashboard-topbar">
+          <div className="dashboard-topbar-content">
+            <div>
+              <h1 className="dashboard-page-title">Services</h1>
+            </div>
+
+            <div className="dashboard-search-wrapper">
               <input
                 type="text"
                 placeholder="Search services..."
-                className="search-input"
+                className="dashboard-search-input"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="header-actions">
-              <div className="user-avatar" onClick={() => navigate("/profile")}>
-                {user ? user.username.charAt(0).toUpperCase() : "U"}
+
+            <div className="dashboard-topbar-actions">
+              <div className="dashboard-avatar" onClick={() => navigate("/profile")}>
+                {user?.username?.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Filter Section */}
-        <section className="filter-section">
-          <h3 className="filter-title">Filter Category</h3>
-          <div className="filter-buttons">
-            {categories.map((category) => (
+        {/* Filter Bar */}
+        <section className="dashboard-filter-bar">
+          <h3 className="dashboard-filter-label">Filter by Category</h3>
+          <div className="dashboard-filter-group">
+            <button
+              className={`dashboard-filter-chip ${selectedCategory === "All" ? "active" : ""}`}
+              onClick={() => setSelectedCategory("All")}
+            >
+              All
+            </button>
+            {PREDEFINED_CATEGORIES.map(category => (
               <button
                 key={category}
-                className={`filter-btn ${selectedCategory === category ? "active" : ""}`}
+                className={`dashboard-filter-chip ${selectedCategory === category ? "active" : ""}`}
                 onClick={() => setSelectedCategory(category)}
               >
                 {category}
@@ -168,11 +191,11 @@ function Dashboard() {
         </section>
 
         {/* Services Grid */}
-        <section className="services-grid">
-          {!loading && filteredServices.map((service) => (
-            <div key={service.serviceId} className="service-card">
+        <section className="dashboard-records-grid">
+          {filteredServices.map((service) => (
+            <div key={service.serviceId} className="dashboard-record-card">
               {service.image && (
-                <div className="service-image">
+                <div className="dashboard-record-thumbnail">
                   <img 
                     src={getImageUrl(service.serviceId)} 
                     alt={service.serviceName}
@@ -183,36 +206,38 @@ function Dashboard() {
                   />
                 </div>
               )}
-              <div className="service-info">
-                <h3 className="service-name">{service.serviceName}</h3>
-                <p className="service-category">{service.serviceCategory}</p>
-                <button className="rate-btn" onClick={() => handleServiceClick(service.serviceId)}>
-                  Rate Service
-                </button>
+              <div className="dashboard-record-details">
+                <h3 className="dashboard-record-name">{service.serviceName}</h3>
+                <p className="dashboard-record-category">{service.serviceCategory}</p>
+                <p className="dashboard-record-provider">by {service.createdBy || "Provider"}</p>
+                <div className="dashboard-record-actions">
+                  <button 
+                    className="dashboard-record-action-btn rate"
+                    onClick={() => handleServiceClick(service.serviceId)}
+                  >
+                    Rate Service
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </section>
 
-        {!loading && filteredServices.length === 0 && (
-          <div className="no-results">
-            No services found matching "{searchTerm}" in category "{selectedCategory === "All" ? "all categories" : selectedCategory}"
+        {filteredServices.length === 0 && (
+          <div className="dashboard-no-results">
+            No services found matching your criteria.
           </div>
-        )}
-
-        {loading && (
-          <div className="loading-state">Loading services...</div>
         )}
       </main>
 
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="logout-modal-overlay">
-          <div className="logout-modal">
-            <div className="logout-text">Are you sure you want to logout?</div>
-            <div className="logout-buttons">
-              <button className="confirm-btn" onClick={confirmLogout}>Confirm</button>
-              <button className="cancel-btn" onClick={cancelLogout}>Cancel</button>
+        <div className="dashboard-logout-overlay">
+          <div className="dashboard-logout-modal">
+            <div className="dashboard-logout-modal-text">Are you sure you want to logout?</div>
+            <div className="dashboard-logout-modal-actions">
+              <button className="dashboard-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="dashboard-cancel-btn" onClick={cancelLogout}>Cancel</button>
             </div>
           </div>
         </div>

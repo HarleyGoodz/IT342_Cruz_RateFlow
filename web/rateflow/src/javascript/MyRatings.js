@@ -152,7 +152,7 @@ function MyRatings() {
           </div>
           <button 
             className="myrating-collapse-btn" 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={() => navigate("/dashboard")}
           >
             {sidebarCollapsed ? "→" : "←"}
           </button>
@@ -186,7 +186,7 @@ function MyRatings() {
           <div className="myrating-header-content">
             <div>
               <h1 className="myrating-page-title">My Ratings</h1>
-              <p className="myrating-page-subtitle">View and manage your service ratings</p>
+              
             </div>
 
             <div className="myrating-search-wrapper">

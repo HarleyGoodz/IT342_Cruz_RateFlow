@@ -236,7 +236,7 @@ function RateService() {
       <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
           <div className="logo">
-            <span className="logo-icon">⚡</span>
+            
             {!sidebarCollapsed && <span className="logo-text">Dashboard</span>}
           </div>
           <button className="collapse-btn" onClick={() => navigate("/dashboard")}>
