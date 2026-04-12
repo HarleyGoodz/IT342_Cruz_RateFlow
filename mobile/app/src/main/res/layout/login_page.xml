@@ -36,15 +36,12 @@
                     android:padding="48dp">
 
                     <!-- Decorative Icon -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="⚡"
-                        android:textSize="48sp"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="16dp"
-                        android:shadowColor="#38bdf8"
-                        android:shadowRadius="8" />
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginLeft="77dp"
+                        android:layout_marginBottom="30dp"
+                        android:src="@drawable/logo3" />
 
                     <!-- Title -->
                     <TextView
@@ -169,6 +166,7 @@
                         android:layout_marginTop="24dp"
                         android:layout_marginBottom="24dp">
 
+
                         <View
                             android:layout_width="0dp"
                             android:layout_height="1dp"
@@ -189,7 +187,30 @@
                             android:layout_height="1dp"
                             android:layout_weight="1"
                             android:background="#1e293b" />
+
+
                     </LinearLayout>
+
+                    <!-- Google Sign In Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGoogleSignIn"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Sign in with Google"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#e5e7eb"
+                        android:letterSpacing="0.02"
+                        app:backgroundTint="#1e293b"
+                        app:cornerRadius="12dp"
+                        app:elevation="4dp"
+                        app:strokeColor="#334155"
+                        app:strokeWidth="1dp"
+                        app:icon="@drawable/ic_google"
+                        app:iconGravity="textStart"
+                        app:iconTint="@null"
+                        app:iconPadding="12dp"
+                        android:layout_marginBottom="24dp" />
 
                     <!-- Register Text -->
                     <LinearLayout

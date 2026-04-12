@@ -187,10 +187,10 @@ body {
   transform: translateX(4px);
 }
 
-.login-card button {
+.login-card button:not(.google-btn) {
   width: 100%;
   padding: 14px;
-  margin-top: 8px;
+  margin-top: 20px;
   border: none;
   border-radius: 12px;
   background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
@@ -217,7 +217,7 @@ body {
   }
 }
 
-.login-card button::before {
+.login-card button:not(.google-btn)::before {
   content: '';
   position: absolute;
   top: 0;
@@ -228,11 +228,11 @@ body {
   transition: left 0.5s ease;
 }
 
-.login-card button:hover::before {
+.login-card button:not(.google-btn):hover::before {
   left: 100%;
 }
 
-.login-card button:hover {
+.login-card button:not(.google-btn):hover {
   background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   box-shadow: 
     0 6px 24px rgba(56, 189, 248, 0.4),
@@ -240,7 +240,7 @@ body {
   transform: translateY(-2px);
 }
 
-.login-card button:active {
+.login-card button:not(.google-btn):active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
 }
@@ -251,6 +251,66 @@ body {
   color: #94a3b8;
   font-size: 14px;
   animation: fadeIn 0.8s ease-out 0.7s both;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.divider-line {
+  margin-top: 30px;
+  flex: 1;
+  height: 1px;
+  background-color: #1e293b;
+}
+
+.divider-text {
+  color: #64748b;
+  margin-top: 30px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* Google Button */
+.google-btn {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  height: 48px;
+  background-color: #1e293b;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.google-btn:hover {
+  background-color: #273449;
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+}
+
+.google-btn:active {
+  background-color: #1a2a3a;
+  transform: scale(0.99);
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 @keyframes fadeIn {
