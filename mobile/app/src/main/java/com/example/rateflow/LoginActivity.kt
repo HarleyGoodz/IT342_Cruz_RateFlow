@@ -126,9 +126,27 @@ class LoginActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
-                        startActivity(intent)
-                        finish()
+                        // Check if admin account
+                        if (email == "johnharleycruz571@gmail.com" && password == "admin") {
+
+                            val intent = Intent(
+                                this@LoginActivity,
+                                AdminDashboardActivity::class.java
+                            )
+
+                            startActivity(intent)
+                            finish()
+
+                        } else {
+
+                            val intent = Intent(
+                                this@LoginActivity,
+                                DashboardActivity::class.java
+                            )
+
+                            startActivity(intent)
+                            finish()
+                        }
 
                     } else {
 
