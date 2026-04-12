@@ -1,109 +1,195 @@
 package com.example.rateflow
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.InputFilter
+import android.util.Patterns
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
-import android.util.Patterns
+import com.example.rateflow.network.LoginRequest
+import com.example.rateflow.network.LoginResponse
+import com.example.rateflow.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
+    private lateinit var etEmail: EditText
+    private lateinit var etPassword: EditText
+    private lateinit var btnLogin: Button
+    private lateinit var tvSignUp: TextView
+    private lateinit var tvForgotPassword: TextView
+
+    private lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.login_page)
+        setContentView(R.layout.login)
 
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val txtRegister = findViewById<TextView>(R.id.txtRegister)
+        sharedPreferences =
+            getSharedPreferences("UserProfiles", Context.MODE_PRIVATE)
 
-        val editTextUsername = findViewById<TextInputEditText>(R.id.editTextUsername)
-        val editTextPassword = findViewById<TextInputEditText>(R.id.editTextPassword)
+        etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        btnLogin = findViewById(R.id.btnLogin)
+        tvSignUp = findViewById(R.id.tvSignUp)
+        tvForgotPassword = findViewById(R.id.tvForgotPassword)
 
-        val usernameInputLayout = findViewById<TextInputLayout>(R.id.usernameInputLayout)
-        val passwordInputLayout = findViewById<TextInputLayout>(R.id.passwordInputLayout)
+        disableEnterKey(etEmail)
+        disableEnterKey(etPassword)
 
+        etEmail.filters = arrayOf(emojiFilter)
+        etPassword.filters = arrayOf(emojiFilter)
+
+        // LOGIN BUTTON
         btnLogin.setOnClickListener {
-
-            val email = editTextUsername.text.toString().trim()
-            val password = editTextPassword.text.toString().trim()
-
-            usernameInputLayout.error = null
-            passwordInputLayout.error = null
-
-            when {
-
-                email.isEmpty() -> {
-                    usernameInputLayout.error = "Email is required"
-                }
-
-                !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                    usernameInputLayout.error = "Enter a valid email address"
-                }
-
-                password.isEmpty() -> {
-                    passwordInputLayout.error = "Password is required"
-                }
-
-                password.length < 8 -> {
-                    passwordInputLayout.error = "Password must be at least 8 characters"
-                }
-
-                else -> {
-
-                    val loginRequest = LoginRequest(
-                        email = email,   // temporarily using username field to carry email
-                        password = password
-                    )
-
-                    RetrofitClient.instance.loginUser(loginRequest)
-                        .enqueue(object : Callback<User> {
-
-                            override fun onResponse(call: Call<User>, response: Response<User>) {
-
-                                if (response.isSuccessful) {
-
-                                    Toast.makeText(
-                                        this@LoginActivity,
-                                        "Login successful!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
-                                    startActivity(intent)
-                                    finish()
-
-                                } else {
-                                    Toast.makeText(
-                                        this@LoginActivity,
-                                        "Invalid email or password",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-
-                            override fun onFailure(call: Call<User>, t: Throwable) {
-
-                                Toast.makeText(
-                                    this@LoginActivity,
-                                    "Server error: ${t.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        })
-                }
-            }
+            loginUser()
         }
 
-        txtRegister.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
+        // SIGN UP
+        tvSignUp.setOnClickListener {
+
+            val intent = Intent(
+                this,
+                RegisterActivity::class.java
+            )
+
             startActivity(intent)
         }
+
+        // FORGOT PASSWORD
+        tvForgotPassword.setOnClickListener {
+
+            Toast.makeText(
+                this,
+                "Forgot password feature coming soon",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
+
+    private fun loginUser() {
+
+        val email = etEmail.text.toString().trim()
+        val password = etPassword.text.toString().trim()
+
+        if (email.isEmpty() || password.isEmpty()) {
+
+            Toast.makeText(
+                this,
+                "Please enter email and password",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+
+            Toast.makeText(
+                this,
+                "Invalid email format",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        val request = LoginRequest(
+            email,
+            password
+        )
+
+        RetrofitClient.instance
+            .loginUser(request)
+            .enqueue(object : Callback<LoginResponse> {
+
+                override fun onResponse(
+                    call: Call<LoginResponse>,
+                    response: Response<LoginResponse>
+                ) {
+
+                    if (response.isSuccessful) {
+
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Login successful",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else {
+
+                        val errorBody =
+                            response.errorBody()?.string()
+
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Server error: $errorBody",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+
+                override fun onFailure(
+                    call: Call<LoginResponse>,
+                    t: Throwable
+                ) {
+
+                    t.printStackTrace()
+
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Error: " + t.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            })
+    }
+
+    private fun disableEnterKey(editText: EditText) {
+
+        editText.setOnEditorActionListener { _, actionId, _ ->
+
+            if (
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_NEXT
+            ) {
+                return@setOnEditorActionListener true
+            }
+
+            false
+        }
+    }
+
+    private val emojiFilter =
+        InputFilter { source, start, end, _, _, _ ->
+
+            for (i in start until end) {
+
+                val type =
+                    Character.getType(source[i])
+
+                if (
+                    type == Character.SURROGATE.toInt() ||
+                    type == Character.OTHER_SYMBOL.toInt()
+                ) {
+                    return@InputFilter ""
+                }
+            }
+
+            null
+        }
 }

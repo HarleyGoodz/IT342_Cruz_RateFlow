@@ -2,107 +2,191 @@ package com.example.rateflow
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputFilter
 import android.util.Patterns
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
-import com.google.android.material.button.MaterialButton
-import android.widget.TextView
+import com.example.rateflow.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class RegisterActivity : AppCompatActivity() {
 
+    private lateinit var etUsername: EditText
+    private lateinit var etEmail: EditText
+    private lateinit var etPassword: EditText
+    private lateinit var etConfirmPassword: EditText
+    private lateinit var btnRegister: Button
+    private lateinit var tvSignIn: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.register_page)
 
-        val btnRegister = findViewById<MaterialButton>(R.id.btnRegister)
-        val txtLogin = findViewById<TextView>(R.id.txtLogin)
+        setContentView(R.layout.register)
 
+        etUsername = findViewById(R.id.etUsername)
+        etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        etConfirmPassword = findViewById(R.id.etConfirmPassword)
+        btnRegister = findViewById(R.id.btnRegister)
+        tvSignIn = findViewById(R.id.tvSignIn)
 
-        val editTextEmail = findViewById<TextInputEditText>(R.id.editTextEmail)
-        val editTextUsername = findViewById<TextInputEditText>(R.id.editTextUsername)
-        val editTextPassword = findViewById<TextInputEditText>(R.id.editTextPassword)
-        val editTextConfirmPassword = findViewById<TextInputEditText>(R.id.editTextConfirmPassword)
+        disableEnterKey(etUsername)
+        disableEnterKey(etEmail)
+        disableEnterKey(etPassword)
+        disableEnterKey(etConfirmPassword)
 
-        val emailInputLayout = findViewById<TextInputLayout>(R.id.emailInputLayout)
-        val usernameInputLayout = findViewById<TextInputLayout>(R.id.usernameInputLayout)
-        val passwordInputLayout = findViewById<TextInputLayout>(R.id.passwordInputLayout)
-        val confirmPasswordInputLayout = findViewById<TextInputLayout>(R.id.confirmPasswordInputLayout)
-
-        txtLogin.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
-        }
+        val filters = arrayOf(emojiFilter)
+        etUsername.filters = filters
+        etEmail.filters = filters
+        etPassword.filters = filters
+        etConfirmPassword.filters = filters
 
         btnRegister.setOnClickListener {
+            registerUser()
+        }
 
-            val email = editTextEmail.text.toString().trim()
-            val username = editTextUsername.text.toString().trim()
-            val password = editTextPassword.text.toString().trim()
-            val confirmPassword = editTextConfirmPassword.text.toString().trim()
-
-            emailInputLayout.error = null
-            usernameInputLayout.error = null
-            passwordInputLayout.error = null
-            confirmPasswordInputLayout.error = null
-
-            when {
-
-                !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                    emailInputLayout.error = "Invalid email address"
-                }
-                username.length < 4 -> {
-                    usernameInputLayout.error = "Username must be at least 4 characters"
-                }
-                password.length < 8 -> {
-                    passwordInputLayout.error = "Password must be at least 8 characters"
-                }
-                password != confirmPassword -> {
-                    confirmPasswordInputLayout.error = "Passwords do not match"
-                }
-                else -> {
-
-                    val user = User(
-                        username = username,
-                        email = email,
-                        password = password
-                    )
-
-                    RetrofitClient.instance.registerUser(user)
-                        .enqueue(object : Callback<User> {
-
-                            override fun onResponse(call: Call<User>, response: Response<User>) {
-                                if (response.isSuccessful) {
-                                    Toast.makeText(
-                                        this@RegisterActivity,
-                                        "Registration successful!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
-                                    finish()
-                                } else {
-                                    Toast.makeText(
-                                        this@RegisterActivity,
-                                        "Registration failed",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-
-                            override fun onFailure(call: Call<User>, t: Throwable) {
-                                Toast.makeText(
-                                    this@RegisterActivity,
-                                    "Server error: ${t.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        })
-                }
-            }
+        tvSignIn.setOnClickListener {
+            finish()
         }
     }
+
+    private fun registerUser() {
+
+        val username = etUsername.text.toString().trim()
+        val email = etEmail.text.toString().trim()
+        val password = etPassword.text.toString().trim()
+        val confirmPassword =
+            etConfirmPassword.text.toString().trim()
+
+        if (
+            username.isEmpty() ||
+            email.isEmpty() ||
+            password.isEmpty() ||
+            confirmPassword.isEmpty()
+        ) {
+            Toast.makeText(
+                this,
+                "Please fill in all fields",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(
+                this,
+                "Invalid email format",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        if (password.length < 6) {
+            Toast.makeText(
+                this,
+                "Password must be at least 6 characters",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        if (password != confirmPassword) {
+            Toast.makeText(
+                this,
+                "Passwords do not match",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val request =
+            RegisterRequest(
+                username,
+                email,
+                password
+            )
+
+        RetrofitClient.instance
+            .registerUser(request)
+            .enqueue(object : Callback<RegisterResponse> {
+
+                override fun onResponse(
+                    call: Call<RegisterResponse>,
+                    response: Response<RegisterResponse>
+                ) {
+
+                    if (response.isSuccessful) {
+
+                        Toast.makeText(
+                            this@RegisterActivity,
+                            "Registration successful",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        finish()
+                    }
+                    else {
+
+                        Toast.makeText(
+                            this@RegisterActivity,
+                            "Registration failed",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onFailure(
+                    call: Call<RegisterResponse>,
+                    t: Throwable
+                ) {
+
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "Cannot connect to server",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            })
+    }
+
+    private fun disableEnterKey(editText: EditText) {
+
+        editText.setOnEditorActionListener { _, actionId, _ ->
+
+            if (
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_NEXT
+            ) {
+                return@setOnEditorActionListener true
+            }
+
+            false
+        }
+    }
+
+    private val emojiFilter =
+        InputFilter { source, start, end, _, _, _ ->
+
+            for (i in start until end) {
+
+                val type =
+                    Character.getType(source[i])
+
+                if (
+                    type == Character.SURROGATE.toInt() ||
+                    type == Character.OTHER_SYMBOL.toInt()
+                ) {
+                    return@InputFilter ""
+                }
+            }
+
+            null
+        }
 }

@@ -1,64 +1,100 @@
 package com.example.rateflow
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class DashboardActivity : AppCompatActivity() {
+
+    private lateinit var tvWelcome: TextView
+    private lateinit var btnMenu: TextView
+    private lateinit var btnNotification: TextView
+    private lateinit var btnProfile: TextView
+    private lateinit var btnViewAll: Button
+    private lateinit var etSearch: EditText
+
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.dashboard_page)
+        setContentView(R.layout.dashboard)
 
-        val userAvatar = findViewById<TextView>(R.id.userAvatar)
-        val txtUserName = findViewById<TextView>(R.id.txtUserName)
+        sharedPreferences =
+            getSharedPreferences("UserProfiles", Context.MODE_PRIVATE)
 
-        userAvatar.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
+        tvWelcome = findViewById(R.id.tvWelcome)
+        btnMenu = findViewById(R.id.btnMenu)
+        btnNotification = findViewById(R.id.btnNotification)
+        btnProfile = findViewById(R.id.btnProfile)
+        btnViewAll = findViewById(R.id.btnViewAll)
+        etSearch = findViewById(R.id.etSearch)
+
+        loadUser()
+
+        btnMenu.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Menu clicked",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        // 🔥 Fetch logged-in user from backend
-        RetrofitClient.instance.getCurrentUser()
-            .enqueue(object : Callback<User> {
+        btnNotification.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Notifications clicked",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 
-                override fun onResponse(call: Call<User>, response: Response<User>) {
+        btnProfile.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Profile clicked",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 
-                    if (response.isSuccessful && response.body() != null) {
+        btnViewAll.setOnClickListener {
+            Toast.makeText(
+                this,
+                "View All clicked",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
-                        val user = response.body()!!
+    private fun loadUser() {
 
-                        // Set username in welcome card
-                        txtUserName.text = user.username
+        val email =
+            sharedPreferences.getString("current_user", null)
 
-                        // Set first letter in avatar
-                        userAvatar.text = user.username.first().uppercase()
+        if (email != null) {
 
-                    } else {
-                        Toast.makeText(
-                            this@DashboardActivity,
-                            "Session expired. Please login again.",
-                            Toast.LENGTH_LONG
-                        ).show()
+            val username =
+                sharedPreferences.getString(
+                    "${email}_username",
+                    "User"
+                )
 
-                        startActivity(Intent(this@DashboardActivity, LoginActivity::class.java))
-                        finish()
-                    }
-                }
+            tvWelcome.text = "Welcome $username!"
+        }
+    }
 
-                override fun onFailure(call: Call<User>, t: Throwable) {
-                    Toast.makeText(
-                        this@DashboardActivity,
-                        "Server error: ${t.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            })
+    override fun onBackPressed() {
+        super.onBackPressed()
+
+        Toast.makeText(
+            this,
+            "Logout first to exit",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
