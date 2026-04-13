@@ -128,32 +128,6 @@ body {
   animation: titleFade 0.8s ease-out 0.3s both;
 }
 
-
-.input-group {
-  position: relative;
-  margin-bottom: 20px;
-  animation: inputSlide 0.6s ease-out both;
-}
-
-.input-group:nth-child(2) {
-  animation-delay: 0.4s;
-}
-
-.input-group:nth-child(3) {
-  animation-delay: 0.5s;
-}
-
-@keyframes inputSlide {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 .login-card input {
   width: 100%;
   padding: 14px 16px;
@@ -165,7 +139,7 @@ body {
   font-weight: 400;
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  margin-bottom: 16px;
 }
 
 .login-card input::placeholder {
@@ -187,10 +161,11 @@ body {
   transform: translateX(4px);
 }
 
-.login-card button {
+.login-card button[type="submit"] {
   width: 100%;
   padding: 14px;
   margin-top: 8px;
+  margin-bottom: 20px;
   border: none;
   border-radius: 12px;
   background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
@@ -217,7 +192,7 @@ body {
   }
 }
 
-.login-card button::before {
+.login-card button[type="submit"]::before {
   content: '';
   position: absolute;
   top: 0;
@@ -228,11 +203,11 @@ body {
   transition: left 0.5s ease;
 }
 
-.login-card button:hover::before {
+.login-card button[type="submit"]:hover::before {
   left: 100%;
 }
 
-.login-card button:hover {
+.login-card button[type="submit"]:hover {
   background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   box-shadow: 
     0 6px 24px rgba(56, 189, 248, 0.4),
@@ -240,89 +215,11 @@ body {
   transform: translateY(-2px);
 }
 
-.login-card button:active {
+.login-card button[type="submit"]:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
 }
 
-.signup-text {
-  text-align: center;
-  margin-top: 24px;
-  color: #94a3b8;
-  font-size: 14px;
-  animation: fadeIn 0.8s ease-out 0.7s both;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.signup-link {
-  color: #38bdf8;
-  text-decoration: none;
-  font-weight: 600;
-  position: relative;
-  transition: color 0.3s ease;
-}
-
-.signup-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -2px;
-  left: 0;
-  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.signup-link:hover {
-  color: #0ea5e9;
-}
-
-.signup-link:hover::after {
-  width: 100%;
-}
-
-.success-message {
-  background-color: #d4edda;
-  color: #155724;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  font-size: 14px;
-  border: 1px solid #c3e6cb;
-  text-align: center;
-}
-
-.error-message {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  font-size: 14px;
-  border: 1px solid #f5c6cb;
-  text-align: center;
-}
-
-
-/* Responsive adjustments */
-@media (max-width: 480px) {
-  .login-card {
-    width: 90%;
-    padding: 36px 28px;
-  }
-  
-  .login-card h2 {
-    font-size: 28px;
-  }
-}
 /* Divider styling */
 .divider {
   display: flex;
@@ -344,251 +241,35 @@ body {
   font-size: 14px;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500&display=swap');
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: "DM Sans", -apple-system, sans-serif;
-}
-
-.login-container {
-  position: relative;
-  height: 100vh;
-  background: linear-gradient(135deg, #0a0a0a 0%, #111827 50%, #0f172a 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-
-/* Animated background elements */
-.login-container::before {
-  content: '';
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
-  border-radius: 50%;
-  top: -200px;
-  right: -200px;
-  animation: float 20s ease-in-out infinite;
-}
-
-.login-container::after {
-  content: '';
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, transparent 70%);
-  border-radius: 50%;
-  bottom: -150px;
-  left: -150px;
-  animation: float 15s ease-in-out infinite reverse;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(30px, 30px) scale(1.1);
-  }
-}
-
-.login-card {
-  position: relative;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
-  backdrop-filter: blur(20px);
-  padding: 48px;
-  width: 420px;
-  border-radius: 24px;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 1px rgba(56, 189, 248, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(56, 189, 248, 0.1);
-  animation: cardEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 10;
-}
-
-@keyframes cardEntrance {
-  0% {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Decorative corner accent */
-.login-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
-  border-radius: 0 24px 0 100%;
-  pointer-events: none;
-}
-
-.login-card h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  color: #38bdf8;
-  margin-bottom: 8px;
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: titleFade 0.8s ease-out 0.2s both;
-}
-
-@keyframes titleFade {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.subtitle {
-  color: #94a3b8;
-  margin-bottom: 32px;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 1.6;
-  animation: titleFade 0.8s ease-out 0.3s both;
-}
-
-
-.input-group {
-  position: relative;
-  margin-bottom: 20px;
-  animation: inputSlide 0.6s ease-out both;
-}
-
-.input-group:nth-child(2) {
-  animation-delay: 0.4s;
-}
-
-.input-group:nth-child(3) {
-  animation-delay: 0.5s;
-}
-
-@keyframes inputSlide {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.login-card input {
+/* Google Login Wrapper */
+.google-login-wrapper {
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1.5px solid rgba(30, 41, 59, 0.8);
-  background: linear-gradient(135deg, rgba(2, 6, 23, 0.6) 0%, rgba(15, 23, 42, 0.4) 100%);
-  color: #e5e7eb;
-  font-size: 15px;
-  font-weight: 400;
-  outline: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-.login-card input::placeholder {
-  color: #475569;
+  margin: 20px 0;
   transition: all 0.3s ease;
 }
 
-.login-card input:focus {
-  border-color: #38bdf8;
-  background: rgba(2, 6, 23, 0.8);
-  box-shadow: 
-    0 0 0 3px rgba(56, 189, 248, 0.1),
-    0 4px 12px rgba(56, 189, 248, 0.15);
-  transform: translateY(-1px);
+.google-login-wrapper.loading {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
-.login-card input:focus::placeholder {
-  color: #64748b;
-  transform: translateX(4px);
+/* Custom styling for Google button container */
+.google-login-wrapper > div {
+  width: 100% !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.login-card button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-  color: #020617;
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
-  position: relative;
-  overflow: hidden;
-  animation: buttonSlide 0.6s ease-out 0.6s both;
-}
-
-@keyframes buttonSlide {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-card button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s ease;
-}
-
-.login-card button:hover::before {
-  left: 100%;
-}
-
-.login-card button:hover {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-  box-shadow: 
-    0 6px 24px rgba(56, 189, 248, 0.4),
-    0 0 0 3px rgba(56, 189, 248, 0.1);
+.google-login-wrapper > div:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2);
 }
 
-.login-card button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
+/* Override Google button styles */
+.google-login-wrapper iframe {
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
 }
 
 .signup-text {
@@ -636,27 +317,194 @@ body {
 }
 
 .success-message {
-  background-color: #d4edda;
-  color: #155724;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+  color: #10b981;
   padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
   font-size: 14px;
-  border: 1px solid #c3e6cb;
+  border: 1px solid rgba(16, 185, 129, 0.2);
   text-align: center;
+  backdrop-filter: blur(10px);
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+  color: #f87171;
   padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
   font-size: 14px;
-  border: 1px solid #f5c6cb;
+  border: 1px solid rgba(239, 68, 68, 0.2);
   text-align: center;
+  backdrop-filter: blur(10px);
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.96) 100%);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 28px 32px 32px;
+  width: 400px;
+  max-width: 90vw;
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(56, 189, 248, 0.05);
+  animation: modalEntrance 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-close-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.modal-x {
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: #94a3b8;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-x:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  transform: scale(1.05);
+}
+
+.modal-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes iconPop {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.modal-icon-circle.success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05));
+  border: 2px solid rgba(16, 185, 129, 0.4);
+}
+
+.modal-icon-circle.error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.05));
+  border: 2px solid rgba(239, 68, 68, 0.4);
+}
+
+.modal-title {
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.modal-title.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-title.error {
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-desc {
+  color: #94a3b8;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.modal-action-btn {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.modal-action-btn.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.modal-action-btn.success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.modal-action-btn.error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.modal-action-btn.error:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.15));
+  transform: translateY(-2px);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.modal-action-btn:active {
+  transform: translateY(0);
+}
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
@@ -668,65 +516,18 @@ body {
   .login-card h2 {
     font-size: 28px;
   }
-}
-.login-card .google-signin-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 14px;
-  background: #ffffff;
-  color: #000000;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 20px;
-  margin-top: 0; /* Override the margin-top from .login-card button */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
 
-.login-card .google-signin-btn:hover {
-  background: #f8f9fa;
-  border-color: #d0d0d0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+  .modal-content {
+    padding: 24px 24px 28px;
+    width: 90%;
+  }
 
-.login-card .google-signin-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
+  .modal-title {
+    font-size: 20px;
+  }
 
-.login-card .google-icon {
-  margin-right: 8px;
-}
-
-/* Optional: Animation for the Google button */
-.login-card .google-signin-btn {
-  animation: buttonSlide 0.6s ease-out 0.65s both;
-}
-
-.google-signin-btn:hover {
-  background: #f8f9fa;
-  border-color: #d0d0d0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.google-signin-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.google-icon {
-  margin-right: 8px;
-}
-
-/* Optional: Animation for the Google button */
-.google-signin-btn {
-  animation: buttonSlide 0.6s ease-out 0.65s both;
+  .modal-icon-circle {
+    width: 56px;
+    height: 56px;
+  }
 }
