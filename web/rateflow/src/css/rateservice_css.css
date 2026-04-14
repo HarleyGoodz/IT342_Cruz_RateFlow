@@ -492,3 +492,34 @@
     grid-column: span 1;
   }
 }
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.delete-feedback-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.delete-feedback-btn:hover {
+  background-color: #fee2e2;
+  transform: scale(1.05);
+}
+
+.delete-feedback-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

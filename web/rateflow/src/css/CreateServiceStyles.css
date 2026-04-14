@@ -259,8 +259,7 @@ body {
 
 /* Topbar */
 .cs-topbar {
-  padding: 0 40px;
-  height: var(--cs-header-height);
+  padding: 32px 40px;
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--cs-card-border);
@@ -279,14 +278,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 100%;
 }
 
 .cs-page-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 36px;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--cs-primary) 0%, var(--cs-primary-dark) 100%);
+  font-size: 56px;
+  font-weight: 100;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, var(--cs-text-primary) 0%, var(--cs-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1131,4 +1130,23 @@ body {
 
 .cs-textarea-input::placeholder {
   color: var(--cs-text-muted);
+}
+
+.cs-nav-item.active {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--cs-primary);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+  position: relative;
+}
+
+.cs-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: var(--cs-primary);
+  transform: scaleY(1);
+  transition: transform 0.3s ease;
 }

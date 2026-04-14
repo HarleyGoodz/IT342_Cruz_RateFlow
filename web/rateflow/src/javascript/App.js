@@ -8,6 +8,7 @@ import AdminDashboard from "./AdminDashboard";
 import CreateService from "./CreateService";
 import RateService from "./RateService";
 import ManageServices from "./ManageServices";
+import AdminRateService from "./AdminRateService";
 import '../css/App.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path="/createservice" element={<CreateService />} />
         <Route path="/rate-service/:serviceId" element={<RateService />} />
         <Route path="/manageservices" element={<ManageServices />} />
+        <Route path="/admin/rateservice/:serviceId" element={<AdminRateService />} />
 
       </Routes>
     </Router>

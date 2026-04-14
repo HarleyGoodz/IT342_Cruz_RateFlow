@@ -108,4 +108,26 @@ public class RatingController {
             return ResponseEntity.status(500).body(Map.of("error", "Error fetching user ratings: " + e.getMessage()));
         }
     }
+
+    // Delete a rating/feedback (admin only)
+@DeleteMapping("/delete/{ratingId}")
+public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId) {
+    try {
+        Optional<Rating> rating = ratingRepository.findById(ratingId);
+        if (rating.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        ratingRepository.deleteById(ratingId);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Feedback deleted successfully"
+        ));
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(Map.of(
+            "error", "Error deleting feedback: " + e.getMessage()
+        ));
+    }
+}
+
 }

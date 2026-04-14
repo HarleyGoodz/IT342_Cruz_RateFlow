@@ -115,7 +115,7 @@ function Dashboard() {
         <div className="dashboard-sidebar-header">
           <div className="dashboard-logo">
             
-            {!sidebarCollapsed && <span className="dashboard-logo-text">User Panel</span>}
+            {!sidebarCollapsed && <span className="dashboard-logo-text">Dashboard</span>}
           </div>
         </div>
 
