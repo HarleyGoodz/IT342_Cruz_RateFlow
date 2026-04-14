@@ -16,7 +16,6 @@ function LoginContent() {
 
   const navigate = useNavigate();
 
-  // Email/Password Login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
@@ -25,14 +24,9 @@ function LoginContent() {
     try {
       const response = await fetch("http://localhost:8080/api/auth/admin/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
@@ -47,11 +41,8 @@ function LoginContent() {
       setShowSuccessModal(true);
 
       setTimeout(() => {
-        if (data.role === "ADMIN") {
-          navigate("/admindashboard");
-        } else {
-          navigate("/dashboard");
-        }
+        if (data.role === "ADMIN") navigate("/admindashboard");
+        else navigate("/dashboard");
       }, 2000);
 
     } catch (err) {
@@ -59,19 +50,14 @@ function LoginContent() {
     }
   };
 
-  // Google Login Handler
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsGoogleLoading(true);
     try {
       const response = await fetch("http://localhost:8080/api/auth/google", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          idToken: credentialResponse.credential
-        })
+        body: JSON.stringify({ idToken: credentialResponse.credential }),
       });
 
       const data = await response.json();
@@ -83,19 +69,14 @@ function LoginContent() {
         return;
       }
 
-      if (!response.ok) {
-        throw new Error(data.error || "Google login failed");
-      }
+      if (!response.ok) throw new Error(data.error || "Google login failed");
 
       setSuccessModalMessage(`Welcome ${data.name || 'User'}! Successfully signed in with Google.`);
       setShowSuccessModal(true);
-      
+
       setTimeout(() => {
-        if (data.role === "ADMIN") {
-          navigate("/admindashboard");
-        } else {
-          navigate("/dashboard");
-        }
+        if (data.role === "ADMIN") navigate("/admindashboard");
+        else navigate("/dashboard");
       }, 2000);
 
     } catch (error) {
@@ -111,51 +92,62 @@ function LoginContent() {
     setShowErrorModal(true);
   };
 
-  const closeErrorModal = () => {
-    setShowErrorModal(false);
-    setErrorModalMessage("");
-  };
-
-  const closeSuccessModal = () => {
-    setShowSuccessModal(false);
-    setSuccessModalMessage("");
-  };
+  const closeErrorModal = () => { setShowErrorModal(false); setErrorModalMessage(""); };
+  const closeSuccessModal = () => { setShowSuccessModal(false); setSuccessModalMessage(""); };
 
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h2>Welcome!</h2>
-        <p className="subtitle">Sign in to your account</p>
 
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}
 
-        {errorMessage && (
-          <div className="error-message">{errorMessage}</div>
-        )}
+    <div class="App-Title">
+      <h2>RateFlow</h2>
+    </div>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        {successMessage && <div className="success-message">{successMessage}</div>}
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-        <button type="submit">Login</button>
-
-        <div className="divider">
-          <span>or</span>
+        {/* Email field */}
+        <div className="login-field-group">
+          <label className="login-field-label">Email address</label>
+          <div className="login-field-wrap">
+            <svg className="login-field-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
+              <rect x="1" y="3" width="14" height="10" rx="2"/><path d="M1 5.5l7 4.5 7-4.5"/>
+            </svg>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
         </div>
+
+        {/* Password field */}
+        <div className="login-field-group">
+          <label className="login-field-label">Password</label>
+          <div className="login-field-wrap">
+            <svg className="login-field-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
+              <rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 016 0v2"/>
+              <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
+            </svg>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+
+        <a href="#" className="login-forgot">Forgot password?</a>
+
+        <button type="submit">Sign in</button>
+
+        <div className="divider"><span>or continue with</span></div>
 
         <div className={`google-login-wrapper ${isGoogleLoading ? 'loading' : ''}`}>
           <GoogleLogin
@@ -173,9 +165,7 @@ function LoginContent() {
 
         <p className="signup-text">
           Don't have an account?{" "}
-          <Link to="/register" className="signup-link">
-            Sign Up
-          </Link>
+          <Link to="/register" className="signup-link">Create one</Link>
         </p>
       </form>
 
@@ -187,16 +177,14 @@ function LoginContent() {
               <button className="modal-x" onClick={closeErrorModal}>×</button>
             </div>
             <div className="modal-icon-circle error">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
                   stroke="#f87171" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </div>
             <h3 className="modal-title error">Authentication Failed</h3>
             <p className="modal-desc">{errorModalMessage}</p>
-            <button onClick={closeErrorModal} className="modal-action-btn error">
-              Try Again
-            </button>
+            <button onClick={closeErrorModal} className="modal-action-btn error">Try Again</button>
           </div>
         </div>
       )}
@@ -209,16 +197,14 @@ function LoginContent() {
               <button className="modal-x" onClick={closeSuccessModal}>×</button>
             </div>
             <div className="modal-icon-circle success">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
                   stroke="#10b981" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </div>
             <h3 className="modal-title success">Welcome!</h3>
             <p className="modal-desc">{successModalMessage}</p>
-            <button onClick={closeSuccessModal} className="modal-action-btn success">
-              Continue
-            </button>
+            <button onClick={closeSuccessModal} className="modal-action-btn success">Continue</button>
           </div>
         </div>
       )}
@@ -226,10 +212,8 @@ function LoginContent() {
   );
 }
 
-// Wrap with GoogleOAuthProvider
 function Login() {
   const googleClientId = "253632602120-fh2ff76jia74rc9m62kpvagcn2pmlrf2.apps.googleusercontent.com";
-  
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <LoginContent />
