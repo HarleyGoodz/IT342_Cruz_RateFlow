@@ -85,6 +85,14 @@ function CreateService() {
     }
   };
 
+  const handleManageServices = () => {
+  navigate("/manageservices");
+};
+
+const handleAccessControls = () => {
+  navigate("/accesscontrols");
+};
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -180,21 +188,36 @@ function CreateService() {
         </div>
 
         <nav className="cs-nav">
-          <button
-            className={`cs-nav-item ${activeTab === "Services" ? "active" : ""}`}
-            onClick={() => {
-              setActiveTab("Services");
-              navigate("/admindashboard");
-            }}
+          <button 
+            className={`cs-nav-item ${activeTab === "Services" ? "active" : ""}`} 
+            onClick={() => setActiveTab("Services")}
           >
+            
             {!sidebarCollapsed && <span className="cs-nav-label">Services</span>}
           </button>
 
-          <button
-            className={`cs-nav-item ${activeTab === "Create-Service" ? "active" : ""}`}
-            onClick={() => setActiveTab("Create-Service")}
+          <button 
+            className="cs-nav-item"
+            onClick={() => navigate("/createservice")}
           >
+            
             {!sidebarCollapsed && <span className="cs-nav-label">Create Service</span>}
+          </button>
+          
+          <button 
+            className="cs-nav-item"
+            onClick={handleManageServices}
+          >
+            
+            {!sidebarCollapsed && <span className="cs-nav-label">Manage Services</span>}
+          </button>
+
+          <button 
+            className="cs-nav-item"
+            onClick={handleAccessControls}
+          >
+            
+            {!sidebarCollapsed && <span className="cs-nav-label">Access Controls</span>}
           </button>
         </nav>
 

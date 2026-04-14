@@ -24,16 +24,10 @@ function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     serviceName: "",
-    serviceCategory: PREDEFINED_CATEGORIES[0], // Set default to first category
+    serviceCategory: PREDEFINED_CATEGORIES[0],
     createdBy: "",
     image: null
   });
-
-  // Get unique categories from services (for filter)
-  const getUniqueCategories = () => {
-    const categories = services.map(service => service.serviceCategory);
-    return ["All", ...new Set(categories)];
-  };
 
   // Filter services based on search and category
   const filteredServices = services.filter(service => {
@@ -229,6 +223,21 @@ function AdminDashboard() {
     return `http://localhost:8080/api/services/${serviceId}/image`;
   };
 
+  // Handle navigation to Manage Services
+  const handleManageServices = () => {
+    navigate("/manageservices");
+  };
+
+  // Handle navigation to Access Controls (coming soon)
+  const handleAccessControls = () => {
+    alert("Access Controls feature is coming soon!");
+  };
+
+  // Handle view ratings (not functional yet)
+  const handleViewRatings = () => {
+    alert("View Ratings feature is coming soon!");
+  };
+
   if (loading) {
     return (
       <div className="admin-loading">
@@ -254,18 +263,39 @@ function AdminDashboard() {
             className={`admin-nav-item ${activeTab === "Services" ? "active" : ""}`} 
             onClick={() => setActiveTab("Services")}
           >
+            
             {!sidebarCollapsed && <span className="admin-nav-label">Services</span>}
           </button>
+
           <button 
             className="admin-nav-item"
             onClick={() => navigate("/createservice")}
           >
+            
             {!sidebarCollapsed && <span className="admin-nav-label">Create Service</span>}
           </button>
+          
+          <button 
+            className="admin-nav-item"
+            onClick={handleManageServices}
+          >
+            
+            {!sidebarCollapsed && <span className="admin-nav-label">Manage Services</span>}
+          </button>
+
+          <button 
+            className="admin-nav-item"
+            onClick={handleAccessControls}
+          >
+            
+            {!sidebarCollapsed && <span className="admin-nav-label">Access Controls</span>}
+          </button>
+        
         </nav>
 
         <div className="admin-sidebar-footer">
           <button className="admin-logout-btn" onClick={handleLogoutClick}>
+            <span className="admin-nav-icon">🚪</span>
             {!sidebarCollapsed && <span className="admin-nav-label">Logout</span>}
           </button>
         </div>
@@ -278,6 +308,7 @@ function AdminDashboard() {
           <div className="admin-topbar-content">
             <div>
               <h1 className="admin-page-title">Services</h1>
+              <p className="admin-page-subtitle">View all services and their ratings</p>
             </div>
 
             <div className="admin-search-wrapper">
@@ -291,6 +322,7 @@ function AdminDashboard() {
             </div>
 
             <div className="admin-topbar-actions">
+              
               <div className="admin-avatar" onClick={() => navigate("/profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
@@ -342,16 +374,10 @@ function AdminDashboard() {
                 <p className="admin-record-provider">by {service.createdBy}</p>
                 <div className="admin-record-actions">
                   <button 
-                    className="admin-record-action-btn edit"
-                    onClick={() => openEditModal(service)}
+                    className="admin-record-action-btn view-ratings"
+                    onClick={() => handleViewRatings()}
                   >
-                    Edit
-                  </button>
-                  <button 
-                    className="admin-record-action-btn delete"
-                    onClick={() => handleDeleteService(service.serviceId)}
-                  >
-                    Delete
+                    View Ratings
                   </button>
                 </div>
               </div>
@@ -366,7 +392,7 @@ function AdminDashboard() {
         )}
       </main>
 
-      {/* Create/Edit Modal - Only one modal, placed here */}
+      {/* Create/Edit Modal */}
       {(showCreateModal || editingService) && (
         <div className="admin-modal-overlay">
           <div className="admin-modal">
