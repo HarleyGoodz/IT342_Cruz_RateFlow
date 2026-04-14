@@ -13,7 +13,7 @@ const PREDEFINED_SERVICE_CATEGORIES = [
 function ManageServices() {
   const navigate = useNavigate();
   const [manageSidebarCollapsed, setManageSidebarCollapsed] = useState(false);
-  const [manageActiveTab, setManageActiveTab] = useState("Services");
+  const [manageActiveTab, setManageActiveTab] = useState("Manage Services");
   const [manageServicesList, setManageServicesList] = useState([]);
   const [manageCurrentUser, setManageCurrentUser] = useState(null);
   const [manageLoading, setManageLoading] = useState(true);

@@ -179,46 +179,48 @@ const handleAccessControls = () => {
             <span className="cs-logo-icon">🛡️</span>
             {!sidebarCollapsed && <span className="cs-logo-text">Admin Panel</span>}
           </div>
-          <button 
-            className="cs-collapse-btn" 
-            onClick={() => navigate("/admindashboard")}
-          >
-            {sidebarCollapsed ? "→" : "←"}
-          </button>
         </div>
 
         <nav className="cs-nav">
           <button 
-            className={`cs-nav-item ${activeTab === "Services" ? "active" : ""}`} 
-            onClick={() => setActiveTab("Services")}
-          >
-            
-            {!sidebarCollapsed && <span className="cs-nav-label">Services</span>}
-          </button>
+          className={`cs-nav-item ${activeTab === "Services" ? "active" : ""}`} 
+          onClick={() => {
+            setActiveTab("Services");
+            navigate("/admindashboard");
+          }}
+        >
+          {!sidebarCollapsed && <span className="cs-nav-label">Services</span>}
+        </button>
 
-          <button 
-            className="cs-nav-item"
-            onClick={() => navigate("/createservice")}
-          >
-            
-            {!sidebarCollapsed && <span className="cs-nav-label">Create Service</span>}
-          </button>
-          
-          <button 
-            className="cs-nav-item"
-            onClick={handleManageServices}
-          >
-            
-            {!sidebarCollapsed && <span className="cs-nav-label">Manage Services</span>}
-          </button>
+        <button 
+          className={`cs-nav-item ${activeTab === "Create-Service" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("Create-Service");
+            navigate("/createservice");
+          }}
+        >
+          {!sidebarCollapsed && <span className="cs-nav-label">Create Service</span>}
+        </button>
 
-          <button 
-            className="cs-nav-item"
-            onClick={handleAccessControls}
-          >
-            
-            {!sidebarCollapsed && <span className="cs-nav-label">Access Controls</span>}
-          </button>
+        <button 
+          className={`cs-nav-item ${activeTab === "Manage-Services" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("Manage-Services");
+            navigate("/manageservices");
+          }}
+        >
+          {!sidebarCollapsed && <span className="cs-nav-label">Manage Services</span>}
+        </button>
+
+        <button 
+          className={`cs-nav-item ${activeTab === "Access-Controls" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("Access-Controls");
+            navigate("/accesscontrols");
+          }}
+        >
+          {!sidebarCollapsed && <span className="cs-nav-label">Access Controls</span>}
+        </button>
         </nav>
 
         <div className="cs-sidebar-footer">

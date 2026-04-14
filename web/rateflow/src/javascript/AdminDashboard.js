@@ -234,10 +234,9 @@ function AdminDashboard() {
   };
 
   // Handle view ratings (not functional yet)
-  const handleViewRatings = () => {
-    alert("View Ratings feature is coming soon!");
-  };
-
+  const handleViewRatings = (serviceId) => {
+  navigate(`/admin/rateservice/${serviceId}`);
+};
   if (loading) {
     return (
       <div className="admin-loading">
@@ -295,7 +294,7 @@ function AdminDashboard() {
 
         <div className="admin-sidebar-footer">
           <button className="admin-logout-btn" onClick={handleLogoutClick}>
-            <span className="admin-nav-icon">🚪</span>
+            
             {!sidebarCollapsed && <span className="admin-nav-label">Logout</span>}
           </button>
         </div>
@@ -375,7 +374,7 @@ function AdminDashboard() {
                 <div className="admin-record-actions">
                   <button 
                     className="admin-record-action-btn view-ratings"
-                    onClick={() => handleViewRatings()}
+                    onClick={() => handleViewRatings(service.serviceId)}
                   >
                     View Ratings
                   </button>
