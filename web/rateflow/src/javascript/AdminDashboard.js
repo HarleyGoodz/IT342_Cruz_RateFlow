@@ -228,9 +228,9 @@ function AdminDashboard() {
     navigate("/manageservices");
   };
 
-  // Handle navigation to Access Controls (coming soon)
+  // Handle navigation to Access Controls 
   const handleAccessControls = () => {
-    alert("Access Controls feature is coming soon!");
+    navigate("/access-controls");
   };
 
   // Handle view ratings (not functional yet)

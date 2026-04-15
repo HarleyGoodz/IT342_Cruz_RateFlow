@@ -1,10 +1,13 @@
 package edu.cit.cruz.rateflow.controller;
 
 import java.util.Optional;
+
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +18,7 @@ import edu.cit.cruz.rateflow.service.UserService;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -105,4 +109,82 @@ public class UserController {
 
         return ResponseEntity.ok(user);
     }
+
+    // Get all users (admin only)
+@GetMapping("/users")
+public ResponseEntity<?> getAllUsers(HttpSession session) {
+    Integer userId = (Integer) session.getAttribute("userId");
+    
+    if (userId == null) {
+        return ResponseEntity.status(401).body("Not authenticated");
+    }
+    
+    Optional<User> currentUserOpt = userv.findById(userId);
+    if (currentUserOpt.isEmpty() || currentUserOpt.get().getRole() != Role.ADMIN) {
+        return ResponseEntity.status(403).body("Access denied. Admin only.");
+    }
+    
+    List<User> users = userv.getAllUsers();
+    users.forEach(user -> user.setPassword(null));
+    return ResponseEntity.ok(users);
+}
+
+// Grant admin access to a user (admin only)
+@PutMapping("/grant-admin/{userId}")
+public ResponseEntity<?> grantAdminAccess(@PathVariable Integer userId, HttpSession session) {
+    Integer currentUserId = (Integer) session.getAttribute("userId");
+    
+    if (currentUserId == null) {
+        return ResponseEntity.status(401).body("Not authenticated");
+    }
+    
+    Optional<User> currentUserOpt = userv.findById(currentUserId);
+    if (currentUserOpt.isEmpty() || currentUserOpt.get().getRole() != Role.ADMIN) {
+        return ResponseEntity.status(403).body("Access denied. Admin only.");
+    }
+    
+    Optional<User> targetUserOpt = userv.findById(userId);
+    if (targetUserOpt.isEmpty()) {
+        return ResponseEntity.status(404).body("User not found");
+    }
+    
+    User targetUser = targetUserOpt.get();
+    targetUser.setRole(Role.ADMIN);
+    userv.updateUser(targetUser);
+    targetUser.setPassword(null);
+    
+    return ResponseEntity.ok(targetUser);
+}
+
+// Remove admin access from a user (admin only)
+@PutMapping("/remove-admin/{userId}")
+public ResponseEntity<?> removeAdminAccess(@PathVariable Integer userId, HttpSession session) {
+    Integer currentUserId = (Integer) session.getAttribute("userId");
+    
+    if (currentUserId == null) {
+        return ResponseEntity.status(401).body("Not authenticated");
+    }
+    
+    // Prevent removing own admin access
+    if (currentUserId.equals(userId)) {
+        return ResponseEntity.badRequest().body("Cannot remove your own admin access");
+    }
+    
+    Optional<User> currentUserOpt = userv.findById(currentUserId);
+    if (currentUserOpt.isEmpty() || currentUserOpt.get().getRole() != Role.ADMIN) {
+        return ResponseEntity.status(403).body("Access denied. Admin only.");
+    }
+    
+    Optional<User> targetUserOpt = userv.findById(userId);
+    if (targetUserOpt.isEmpty()) {
+        return ResponseEntity.status(404).body("User not found");
+    }
+    
+    User targetUser = targetUserOpt.get();
+    targetUser.setRole(Role.USER);
+    userv.updateUser(targetUser);
+    targetUser.setPassword(null);
+    
+    return ResponseEntity.ok(targetUser);
+}
 }

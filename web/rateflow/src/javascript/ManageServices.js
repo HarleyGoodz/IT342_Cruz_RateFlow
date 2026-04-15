@@ -258,7 +258,7 @@ function ManageServices() {
   };
 
   const handleAccessControls = () => {
-    alert("Access Controls feature is coming soon!");
+    navigate("/access-controls");
   };
 
   const toggleSidebar = () => {
