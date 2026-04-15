@@ -231,7 +231,7 @@ function AdminRateService() {
               </p>
             </div>
             <div className="admin-rate-header-actions">
-              <div className="admin-rate-user-avatar" onClick={() => navigate("/profile")} style={{ cursor: "pointer" }}>
+              <div className="admin-rate-user-avatar" onClick={() => navigate("/admin-profile")} style={{ cursor: "pointer" }}>
                 {user?.username?.charAt(0).toUpperCase() || "A"}
               </div>
             </div>

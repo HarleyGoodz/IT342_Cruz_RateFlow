@@ -246,7 +246,7 @@ function AccessControls() {
             </div>
 
             <div className="access-topbar-actions">
-              <div className="access-avatar" onClick={() => navigate("/profile")}>
+              <div className="access-avatar" onClick={() => navigate("/admin-profile")}>
                 {accessCurrentUser?.username?.charAt(0).toUpperCase()}
               </div>
             </div>

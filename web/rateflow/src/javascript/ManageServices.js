@@ -30,6 +30,9 @@ function ManageServices() {
   const [manageErrorMessage, setManageErrorMessage] = useState("");
   const [manageShowDeleteConfirmModal, setManageShowDeleteConfirmModal] = useState(false);
   const [manageServiceToDelete, setManageServiceToDelete] = useState(null);
+  const [manageCreating, setManageCreating] = useState(false);
+  const [manageUpdating, setManageUpdating] = useState(false);
+  const [manageDeleting, setManageDeleting] = useState(false);
   
   const [manageServiceFormData, setManageServiceFormData] = useState({
     serviceName: "",
@@ -128,6 +131,7 @@ function ManageServices() {
 
   const handleManageCreateService = async (e) => {
     e.preventDefault();
+    setManageCreating(true); 
     
     const formDataToSend = new FormData();
     formDataToSend.append("serviceName", manageServiceFormData.serviceName);
@@ -158,10 +162,16 @@ function ManageServices() {
       setManageErrorMessage("Error creating service");
       setManageShowErrorModal(true);
     }
+
+    finally {
+    setManageCreating(false);  // Add this in a finally block or after try/catch
+  }
+
   };
 
   const handleManageUpdateService = async (e) => {
     e.preventDefault();
+    setManageUpdating(true);
     
     const formDataToSend = new FormData();
     formDataToSend.append("serviceName", manageServiceFormData.serviceName);
@@ -194,10 +204,16 @@ function ManageServices() {
       setManageErrorMessage("Error updating service");
       setManageShowErrorModal(true);
     }
+
+    finally {
+    setManageUpdating(false);  // Add this in a finally block or after try/catch
+  }
+
   };
 
   const handleManageDeleteService = async () => {
     if (!manageServiceToDelete) return;
+    setManageDeleting(true);
 
     try {
       const response = await fetch(`http://localhost:8080/api/services/delete/${manageServiceToDelete}`, {
@@ -220,6 +236,11 @@ function ManageServices() {
       setManageErrorMessage("Error deleting service");
       setManageShowErrorModal(true);
     }
+
+    finally {
+    setManageDeleting(false);  // Add this in a finally block or after try/catch
+  }
+
   };
 
   const openDeleteConfirmModal = (serviceId) => {
@@ -353,7 +374,7 @@ function ManageServices() {
 
             <div className="manage-topbar-actions">
               
-              <div className="manage-avatar" onClick={() => navigate("/profile")}>
+              <div className="manage-avatar" onClick={() => navigate("/admin-profile")}>
                 {manageCurrentUser?.username?.charAt(0).toUpperCase()}
               </div>
             </div>
@@ -545,11 +566,12 @@ function ManageServices() {
                       Cancel
                     </button>
                     <button
-                      type="submit"
-                      className="manage-btn-submit"
-                    >
-                      {manageEditingServiceItem ? "Update" : "Create"}
-                    </button>
+                    type="submit"
+                    className="manage-btn-submit"
+                    disabled={manageCreating || manageUpdating}
+                  >
+                    {manageCreating ? "Creating..." : manageUpdating ? "Updating..." : (manageEditingServiceItem ? "Update" : "Create")}
+                  </button>
                   </div>
                 </div>
               </div>
@@ -592,8 +614,9 @@ function ManageServices() {
                 type="button"
                 className="manage-btn-delete"
                 onClick={handleManageDeleteService}
+                disabled={manageDeleting}
               >
-                Delete
+                {manageDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
