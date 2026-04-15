@@ -1015,3 +1015,29 @@ body {
 .manage-btn-submit:active {
   transform: translateY(0);
 }
+
+/* Loading State - Match AdminDashboard style */
+.manage-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--manage-bg-primary) 0%, var(--manage-bg-secondary) 100%);
+  color: var(--manage-text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+.manage-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(56, 189, 248, 0.2);
+  border-top-color: var(--manage-primary);
+  border-radius: 50%;
+  animation: manageSpin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes manageSpin {
+  to { transform: rotate(360deg); }
+}

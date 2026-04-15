@@ -246,7 +246,7 @@ const handleAccessControls = () => {
               />
             </div>
             <div className="cs-topbar-actions">
-              <div className="cs-avatar" onClick={() => navigate("/profile")}>
+              <div className="cs-avatar" onClick={() => navigate("/admin-profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
             </div>

@@ -322,7 +322,7 @@ function AdminDashboard() {
 
             <div className="admin-topbar-actions">
               
-              <div className="admin-avatar" onClick={() => navigate("/profile")}>
+              <div className="admin-avatar" onClick={() => navigate("/admin-profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
             </div>
