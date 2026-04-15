@@ -10,6 +10,9 @@ function AdminRateService() {
   const [loading, setLoading] = useState(true);
   const [feedbacks, setFeedbacks] = useState([]);
   const [deletingFeedback, setDeletingFeedback] = useState(false);
+  const [adminRateNotificationCount, setAdminRateNotificationCount] = useState(0);
+const [adminRateShowNotificationToast, setAdminRateShowNotificationToast] = useState(false);
+const [adminRateLatestNotification, setAdminRateLatestNotification] = useState(null);
   const [ratingStats, setRatingStats] = useState({
     average: 0,
     total: 0,
@@ -23,6 +26,11 @@ function AdminRateService() {
 
   useEffect(() => {
     checkAuth();
+
+    fetchAdminRateNotificationCount();
+  const interval = setInterval(fetchAdminRateNotificationCount, 30000);
+  return () => clearInterval(interval);
+
   }, [serviceId]);
 
   const checkAuth = async () => {
@@ -49,6 +57,31 @@ function AdminRateService() {
       navigate("/");
     }
   };
+
+  const fetchAdminRateNotificationCount = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/api/notifications", {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setAdminRateNotificationCount(data.length);
+    }
+  } catch (error) {
+    console.error("Error fetching notification count:", error);
+  }
+};
+
+const showAdminRateNotification = (message) => {
+  setAdminRateLatestNotification({ message, timestamp: new Date() });
+  setAdminRateShowNotificationToast(true);
+  setTimeout(() => {
+    setAdminRateShowNotificationToast(false);
+  }, 3000);
+  fetchAdminRateNotificationCount();
+};
+
+
 
   const fetchServiceDetails = async () => {
     try {
@@ -131,6 +164,7 @@ function AdminRateService() {
           fetchRatingStats()
         ]);
         closeDeleteModal();
+        showAdminRateNotification(`Feedback from ${selectedFeedback.userName} was deleted successfully!`);
       } else {
         const error = await response.json();
         alert(error.error || "Failed to delete feedback");
@@ -231,6 +265,12 @@ function AdminRateService() {
               </p>
             </div>
             <div className="admin-rate-header-actions">
+                <button className="admin-notification-btn" onClick={() => navigate("/admin-notifications")} style={{ position: "relative" }}>
+                    🔔
+                    {adminRateNotificationCount > 0 && (
+                        <span className="adminrate-notification-badge">{adminRateNotificationCount}</span>
+                    )}
+                    </button>
               <div className="admin-rate-user-avatar" onClick={() => navigate("/admin-profile")} style={{ cursor: "pointer" }}>
                 {user?.username?.charAt(0).toUpperCase() || "A"}
               </div>
@@ -339,6 +379,13 @@ function AdminRateService() {
           </div>
         </section>
       </main>
+
+      {adminRateShowNotificationToast && adminRateLatestNotification && (
+            <div className="adminrate-notification-toast">
+                <div className="adminrate-notification-toast-icon">🔔</div>
+                <div className="adminrate-notification-toast-message">{adminRateLatestNotification.message}</div>
+            </div>
+            )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {showDeleteModal && selectedFeedback && (

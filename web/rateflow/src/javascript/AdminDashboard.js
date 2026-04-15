@@ -13,6 +13,7 @@ const PREDEFINED_CATEGORIES = [
 function AdminDashboard() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0); 
   const [activeTab, setActiveTab] = useState("Services");
   const [services, setServices] = useState([]);
   const [user, setUser] = useState(null);
@@ -22,12 +23,23 @@ function AdminDashboard() {
   const [editingService, setEditingService] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [latestNotification, setLatestNotification] = useState(null);
   const [formData, setFormData] = useState({
     serviceName: "",
     serviceCategory: PREDEFINED_CATEGORIES[0],
     createdBy: "",
     image: null
   });
+
+  const showNotification = (message, type) => {
+  setLatestNotification({ message, type, timestamp: new Date() });
+  setShowNotificationModal(true);
+  setTimeout(() => {
+    setShowNotificationModal(false);
+  }, 3000);
+  fetchUnreadCount();
+};
 
   // Filter services based on search and category
   const filteredServices = services.filter(service => {
@@ -40,7 +52,22 @@ function AdminDashboard() {
   useEffect(() => {
     checkAuth();
     fetchServices();
+    fetchUnreadCount();
   }, []);
+
+  const fetchUnreadCount = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/api/notifications/unread-count", {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setUnreadCount(data.count);
+    }
+  } catch (error) {
+    console.error("Error fetching unread count:", error);
+  }
+};
 
   const checkAuth = async () => {
     try {
@@ -321,6 +348,13 @@ function AdminDashboard() {
             </div>
 
             <div className="admin-topbar-actions">
+
+              <button className="admin-notification-btn" onClick={() => navigate("/admin-notifications")} style={{ position: "relative" }}>
+                🔔
+                {unreadCount > 0 && (
+                  <span className="notification-badge">{unreadCount}</span>
+                )}
+              </button>
               
               <div className="admin-avatar" onClick={() => navigate("/admin-profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
@@ -390,6 +424,13 @@ function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {showNotificationModal && latestNotification && (
+        <div className="admin-notification-toast">
+          <div className="admin-notification-toast-icon">🔔</div>
+          <div className="admin-notification-toast-message">{latestNotification.message}</div>
+        </div>
+      )}
 
       {/* Create/Edit Modal */}
       {(showCreateModal || editingService) && (

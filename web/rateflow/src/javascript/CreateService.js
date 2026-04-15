@@ -18,6 +18,9 @@ function CreateService() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [latestNotification, setLatestNotification] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -28,6 +31,29 @@ function CreateService() {
     image: null
   });
   const [imagePreview, setImagePreview] = useState(null);
+
+  const fetchNotificationCount = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/api/notifications", {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setNotificationCount(data.length);
+    }
+  } catch (error) {
+    console.error("Error fetching notification count:", error);
+  }
+};
+
+const showNotification = (message, type) => {
+  setLatestNotification({ message, type, timestamp: new Date() });
+  setShowNotificationModal(true);
+  setTimeout(() => {
+    setShowNotificationModal(false);
+  }, 3000);
+  fetchNotificationCount();
+};
 
   // Sample services for display
   const [sampleServices] = useState([
@@ -53,6 +79,10 @@ function CreateService() {
   // Check authentication
   useEffect(() => {
     checkAuth();
+
+  fetchNotificationCount();
+  const interval = setInterval(fetchNotificationCount, 30000);
+  return () => clearInterval(interval);
   }, []);
 
   const checkAuth = async () => {
@@ -114,6 +144,7 @@ const handleAccessControls = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    showNotification(`Service "${formData.serviceName}" was created successfully!`, "success");
     
     const formDataToSend = new FormData();
     formDataToSend.append("serviceName", formData.serviceName);
@@ -246,6 +277,12 @@ const handleAccessControls = () => {
               />
             </div>
             <div className="cs-topbar-actions">
+              <button className="admin-notification-btn" onClick={() => navigate("/admin-notifications")} style={{ position: "relative" }}>
+                🔔
+                {notificationCount > 0 && (
+                  <span className="notification-badge">{notificationCount}</span>
+                )}
+              </button>
               <div className="cs-avatar" onClick={() => navigate("/admin-profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
@@ -329,6 +366,13 @@ const handleAccessControls = () => {
           </div>
         </section>
       </main>
+
+      {showNotificationModal && latestNotification && (
+      <div className="cs-notification-toast">
+        <div className="cs-notification-icon">🔔</div>
+        <div className="cs-notification-message">{latestNotification.message}</div>
+      </div>
+    )}
 
       {/* Success Modal */}
       {showSuccessModal && (

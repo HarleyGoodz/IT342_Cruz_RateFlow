@@ -17,7 +17,33 @@ function AccessControls() {
   const [accessErrorMessage, setAccessErrorMessage] = useState("");
   const [accessShowConfirmModal, setAccessShowConfirmModal] = useState(false);
   const [accessSelectedUser, setAccessSelectedUser] = useState(null);
+  const [accessNotificationCount, setAccessNotificationCount] = useState(0);
+const [accessShowNotificationToast, setAccessShowNotificationToast] = useState(false);
+const [accessLatestNotification, setAccessLatestNotification] = useState(null);
   const [accessActionType, setAccessActionType] = useState(null);
+
+  const fetchAccessNotificationCount = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/api/notifications", {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setAccessNotificationCount(data.length);
+    }
+  } catch (error) {
+    console.error("Error fetching notification count:", error);
+  }
+};
+
+const showAccessNotification = (message) => {
+  setAccessLatestNotification({ message, timestamp: new Date() });
+  setAccessShowNotificationToast(true);
+  setTimeout(() => {
+    setAccessShowNotificationToast(false);
+  }, 3000);
+  fetchAccessNotificationCount();
+};
 
   // Filter users based on search
   const accessFilteredUsers = accessUsersList.filter(user => {
@@ -30,6 +56,10 @@ function AccessControls() {
   useEffect(() => {
     checkAccessAuth();
     fetchAccessUsers();
+
+    fetchAccessNotificationCount();
+  const interval = setInterval(fetchAccessNotificationCount, 30000);
+  return () => clearInterval(interval);
   }, []);
 
   const checkAccessAuth = async () => {
@@ -101,11 +131,13 @@ function AccessControls() {
       });
 
       if (response.ok) {
-        setAccessSuccessMessage(accessActionType === "grant" 
-          ? `${accessSelectedUser.username} is now an Admin!`
-          : `Admin access removed from ${accessSelectedUser.username}`);
-        setAccessShowSuccessModal(true);
-        fetchAccessUsers();
+        const message = accessActionType === "grant" 
+        ? `${accessSelectedUser.username} is now an Admin!`
+        : `Admin access removed from ${accessSelectedUser.username}`;
+    setAccessSuccessMessage(message);
+    setAccessShowSuccessModal(true);
+    fetchAccessUsers();
+    showAccessNotification(message);
       } else {
         const error = await response.json();
         setAccessErrorMessage(error.error || "Operation failed");
@@ -246,6 +278,12 @@ function AccessControls() {
             </div>
 
             <div className="access-topbar-actions">
+            <button className="admin-notification-btn" onClick={() => navigate("/admin-notifications")} style={{ position: "relative" }}>
+                    🔔
+                    {accessNotificationCount > 0 && (
+                        <span className="access-notification-badge">{accessNotificationCount}</span>
+                    )}
+                    </button>
               <div className="access-avatar" onClick={() => navigate("/admin-profile")}>
                 {accessCurrentUser?.username?.charAt(0).toUpperCase()}
               </div>
@@ -300,6 +338,13 @@ function AccessControls() {
           </div>
         )}
       </main>
+
+      {accessShowNotificationToast && accessLatestNotification && (
+        <div className="access-notification-toast">
+            <div className="access-notification-toast-icon">🔔</div>
+            <div className="access-notification-toast-message">{accessLatestNotification.message}</div>
+        </div>
+        )}
 
       {/* Confirm Action Modal */}
       {accessShowConfirmModal && accessSelectedUser && (

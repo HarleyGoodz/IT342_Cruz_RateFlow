@@ -20,6 +20,9 @@ function ManageServices() {
   const [manageShowCreateModal, setManageShowCreateModal] = useState(false);
   const [manageShowLogoutModal, setManageShowLogoutModal] = useState(false);
   const [manageEditingServiceItem, setManageEditingServiceItem] = useState(null);
+  const [manageNotificationCount, setManageNotificationCount] = useState(0);
+  const [manageShowNotificationToast, setManageShowNotificationToast] = useState(false);
+  const [manageLatestNotification, setManageLatestNotification] = useState(null);
   const [manageSelectedCategoryFilter, setManageSelectedCategoryFilter] = useState("All");
   const [manageSearchTerm, setManageSearchTerm] = useState("");
   
@@ -53,7 +56,34 @@ function ManageServices() {
   useEffect(() => {
     checkManageAuth();
     fetchManageServices();
+
+    fetchManageNotificationCount();
+  const interval = setInterval(fetchManageNotificationCount, 30000);
+  return () => clearInterval(interval);
   }, []);
+
+  const fetchManageNotificationCount = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/api/notifications", {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setManageNotificationCount(data.length);
+    }
+  } catch (error) {
+    console.error("Error fetching notification count:", error);
+  }
+};
+
+const showManageNotification = (message) => {
+  setManageLatestNotification({ message, timestamp: new Date() });
+  setManageShowNotificationToast(true);
+  setTimeout(() => {
+    setManageShowNotificationToast(false);
+  }, 3000);
+  fetchManageNotificationCount();
+};
 
   const checkManageAuth = async () => {
     try {
@@ -172,6 +202,7 @@ function ManageServices() {
   const handleManageUpdateService = async (e) => {
     e.preventDefault();
     setManageUpdating(true);
+    showManageNotification(`Service "${manageServiceFormData.serviceName}" was updated successfully!`);
     
     const formDataToSend = new FormData();
     formDataToSend.append("serviceName", manageServiceFormData.serviceName);
@@ -214,6 +245,7 @@ function ManageServices() {
   const handleManageDeleteService = async () => {
     if (!manageServiceToDelete) return;
     setManageDeleting(true);
+    showManageNotification(`Service deleted successfully!`);
 
     try {
       const response = await fetch(`http://localhost:8080/api/services/delete/${manageServiceToDelete}`, {
@@ -373,6 +405,13 @@ function ManageServices() {
             </div>
 
             <div className="manage-topbar-actions">
+
+              <button className="admin-notification-btn" onClick={() => navigate("/admin-notifications")} style={{ position: "relative" }}>
+                🔔
+                {manageNotificationCount > 0 && (
+                  <span className="manage-notification-badge">{manageNotificationCount}</span>
+                )}
+              </button>
               
               <div className="manage-avatar" onClick={() => navigate("/admin-profile")}>
                 {manageCurrentUser?.username?.charAt(0).toUpperCase()}
@@ -448,6 +487,13 @@ function ManageServices() {
           </div>
         )}
       </main>
+
+      {manageShowNotificationToast && manageLatestNotification && (
+  <div className="manage-notification-toast">
+    <div className="manage-notification-toast-icon">🔔</div>
+    <div className="manage-notification-toast-message">{manageLatestNotification.message}</div>
+  </div>
+)}
 
             {/* Create/Edit Modal - Redesigned to match CreateService form */}
       {(manageShowCreateModal || manageEditingServiceItem) && (

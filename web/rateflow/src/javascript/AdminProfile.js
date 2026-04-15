@@ -14,6 +14,32 @@ function AdminProfile() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [notificationCount, setNotificationCount] = useState(0);
+const [showNotificationToast, setShowNotificationToast] = useState(false);
+const [latestNotification, setLatestNotification] = useState(null);
+
+const fetchNotificationCount = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/api/notifications", {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setNotificationCount(data.length);
+    }
+  } catch (error) {
+    console.error("Error fetching notification count:", error);
+  }
+};
+
+const showNotification = (message) => {
+  setLatestNotification({ message, timestamp: new Date() });
+  setShowNotificationToast(true);
+  setTimeout(() => {
+    setShowNotificationToast(false);
+  }, 3000);
+  fetchNotificationCount();
+};
   
   // Edit profile form state
   const [editFormData, setEditFormData] = useState({
@@ -31,6 +57,10 @@ function AdminProfile() {
   // Check authentication
   useEffect(() => {
     checkAuth();
+
+    fetchNotificationCount();
+  const interval = setInterval(fetchNotificationCount, 30000);
+  return () => clearInterval(interval);
   }, []);
 
   const checkAuth = async () => {
@@ -86,7 +116,7 @@ function AdminProfile() {
         credentials: "include",
         body: JSON.stringify({
           username: editFormData.username,
-          email: editFormData.email
+          
         }),
       });
 
@@ -96,6 +126,7 @@ function AdminProfile() {
         setShowEditModal(false);
         setSuccessMessage("Profile updated successfully!");
         setShowSuccessModal(true);
+        showNotification(`Username changed to ${editFormData.username}`);
       } else {
         const error = await response.json();
         setErrorMessage(error.error || "Failed to update profile");
@@ -256,6 +287,12 @@ function AdminProfile() {
               <p className="admin-profile-page-subtitle">Manage your account settings</p>
             </div>
             <div className="admin-profile-header-actions">
+                <button className="admin-notification-btn" onClick={() => navigate("/admin-notifications")} style={{ position: "relative" }}>
+                🔔
+                {notificationCount > 0 && (
+                    <span className="adminprofile-notification-badge">{notificationCount}</span>
+                )}
+                </button>
               <div className="admin-profile-avatar" onClick={() => navigate("/profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
@@ -288,11 +325,21 @@ function AdminProfile() {
             </div>
 
             <div className="admin-profile-actions">
+                <button className="admin-profile-edit-btn" onClick={handleEditProfile}>
+                Edit Username
+            </button>
               
             </div>
           </div>
         </section>
       </main>
+
+      {showNotificationToast && latestNotification && (
+  <div className="adminprofile-notification-toast">
+    <div className="adminprofile-notification-toast-icon">🔔</div>
+    <div className="adminprofile-notification-toast-message">{latestNotification.message}</div>
+  </div>
+)}
 
       {/* Edit Profile Modal */}
       {showEditModal && (

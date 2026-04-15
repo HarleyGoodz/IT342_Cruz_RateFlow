@@ -2,7 +2,10 @@ package edu.cit.cruz.rateflow.controller;
 
 import edu.cit.cruz.rateflow.entity.Rating;
 import edu.cit.cruz.rateflow.repository.RatingRepository;
+import edu.cit.cruz.rateflow.service.NotificationService;
 import edu.cit.cruz.rateflow.service.RatingService;
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,9 @@ public class RatingController {
 
     @Autowired
     private RatingRepository ratingRepository;
+
+    @Autowired
+    private NotificationService notificationService;
     
     // Submit rating and feedback
     @PostMapping("/submit")
@@ -111,14 +117,33 @@ public class RatingController {
 
     // Delete a rating/feedback (admin only)
 @DeleteMapping("/delete/{ratingId}")
-public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId) {
+public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSession session) {
     try {
         Optional<Rating> rating = ratingRepository.findById(ratingId);
         if (rating.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        // Get rating details before deletion for notification
+            Rating ratingToDelete = rating.get();
+            String userName = ratingToDelete.getUserName();
+            Integer serviceId = ratingToDelete.getServiceId();
+            Integer starRate = ratingToDelete.getStarRate();
         
         ratingRepository.deleteById(ratingId);
+
+        // ADD THIS NOTIFICATION CODE
+            Integer adminId = (Integer) session.getAttribute("userId");
+            String adminUsername = (String) session.getAttribute("userEmail");
+            notificationService.createNotification(
+                "Deleted feedback from " + userName,
+                "DELETE_FEEDBACK",
+                adminId,
+                adminUsername,
+                "Service ID: " + serviceId + ", Rating: " + starRate + " stars"
+            );
+
+            
         return ResponseEntity.ok(Map.of(
             "success", true,
             "message", "Feedback deleted successfully"
