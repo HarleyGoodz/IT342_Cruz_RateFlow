@@ -11,4 +11,6 @@ import edu.cit.cruz.rateflow.entity.User;
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
+
+    Optional<User> findByEmailOrUsername(String email, String username);
 }

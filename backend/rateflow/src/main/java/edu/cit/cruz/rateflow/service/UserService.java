@@ -1,5 +1,6 @@
 package edu.cit.cruz.rateflow.service;
 
+import java.util.List;
 import java.util.Optional;
  
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,20 @@ public class UserService {
 
     public Optional<User> findById(Integer id) {
     return urepo.findById(id);
+}
+
+public List<User> getAllUsers() {
+    List<User> users = urepo.findAll();
+    return users != null ? users : List.of();
+}
+
+public User updateUser(User user) {
+    return urepo.save(user);
+    
+}
+
+public boolean existsById(Integer id) {
+    return urepo.existsById(id);
 }
 
 }

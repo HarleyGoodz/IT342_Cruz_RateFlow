@@ -90,7 +90,7 @@ function CreateService() {
 };
 
 const handleAccessControls = () => {
-  navigate("/accesscontrols");
+  navigate("/access-controls");
 };
 
   const handleInputChange = (e) => {
@@ -216,7 +216,7 @@ const handleAccessControls = () => {
           className={`cs-nav-item ${activeTab === "Access-Controls" ? "active" : ""}`}
           onClick={() => {
             setActiveTab("Access-Controls");
-            navigate("/accesscontrols");
+            handleAccessControls();
           }}
         >
           {!sidebarCollapsed && <span className="cs-nav-label">Access Controls</span>}
