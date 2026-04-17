@@ -281,7 +281,7 @@ function MyRatings() {
       {showLogoutModal && (
         <div className="myrating-logout-overlay">
           <div className="myrating-logout-modal">
-            <div className="myrating-logout-modal-text">Are you sure you want to logout?</div>
+            <div className="dashboard-logout-modal-text">Are you sure you want to logout?</div>
             <div className="myrating-logout-modal-actions">
               <button className="myrating-confirm-btn" onClick={confirmLogout}>Confirm</button>
               <button className="myrating-cancel-btn" onClick={cancelLogout}>Cancel</button>

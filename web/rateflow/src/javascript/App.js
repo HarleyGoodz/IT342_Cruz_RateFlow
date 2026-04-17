@@ -13,6 +13,7 @@ import AccessControls from "./AccessControls";
 import AdminProfile from "./AdminProfile";
 import AdminNotifications from "./AdminNotifications";
 import UserNotifications from "./UserNotifications";
+import ResetPassword from './ResetPassword';
 import '../css/App.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/my-ratings" element={<MyRatings />} />
         <Route path="/notifications" element={<UserNotifications />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/createservice" element={<CreateService />} />

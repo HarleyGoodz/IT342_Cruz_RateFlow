@@ -1,9 +1,14 @@
 package edu.cit.cruz.rateflow.controller;
 
 import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // Add this import
+import org.springframework.mail.SimpleMailMessage; // Add this import
+import org.springframework.mail.javamail.JavaMailSender; // Add this import
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,14 +16,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.cit.cruz.rateflow.entity.Role;
 import edu.cit.cruz.rateflow.entity.User;
+import edu.cit.cruz.rateflow.repository.UserRepository;
 import edu.cit.cruz.rateflow.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -37,7 +43,149 @@ public class UserController {
     private UserService userv;
 
     @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
     private edu.cit.cruz.rateflow.service.NotificationService notificationService;
+
+    // Forgot Password - Request reset
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            // Don't reveal that email doesn't exist for security
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "If an account exists with that email, you will receive a password reset link."
+            ));
+        }
+        
+        User user = userOpt.get();
+        
+        // Generate reset token
+        String resetToken = UUID.randomUUID().toString();
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // Token valid for 1 hour
+        userRepository.save(user);
+        
+        // Send email
+        try {
+            String resetLink = "http://localhost:3000/reset-password?token=" + resetToken;
+            
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("Password Reset Request - RateFlow");
+            message.setText("Hello " + user.getUsername() + ",\n\n"
+                + "You requested to reset your password. Click the link below to reset it:\n\n"
+                + resetLink + "\n\n"
+                + "This link will expire in 1 hour.\n\n"
+                + "If you did not request this, please ignore this email.\n\n"
+                + "Best regards,\nRateFlow Team");
+            
+            mailSender.send(message);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Password reset link has been sent to your email."
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "message", "Failed to send reset email. Please try again later."
+            ));
+        }
+    }
+    
+    // Reset Password - Verify token and update password
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+        
+        Optional<User> userOpt = userRepository.findByResetToken(token);
+        
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Invalid or expired reset token."
+            ));
+        }
+        
+        User user = userOpt.get();
+        
+        // Check if token is expired
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Reset token has expired. Please request a new one."
+            ));
+        }
+        
+        // Update password
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+        
+        // Send confirmation email
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(user.getEmail());
+            message.setSubject("Password Reset Successful - RateFlow");
+            message.setText("Hello " + user.getUsername() + ",\n\n"
+                + "Your password has been successfully reset.\n\n"
+                + "If you did not perform this action, please contact support immediately.\n\n"
+                + "Best regards,\nRateFlow Team");
+            mailSender.send(message);
+        } catch (Exception e) {
+            // Don't fail if confirmation email fails
+            e.printStackTrace();
+        }
+        
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Password has been reset successfully. You can now login with your new password."
+        ));
+    }
+    
+    // Validate reset token
+    @GetMapping("/validate-reset-token")
+    public ResponseEntity<?> validateResetToken(@RequestParam String token) {
+        Optional<User> userOpt = userRepository.findByResetToken(token);
+        
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "valid", false,
+                "message", "Invalid token"
+            ));
+        }
+        
+        User user = userOpt.get();
+        
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "valid", false,
+                "message", "Token has expired"
+            ));
+        }
+        
+        return ResponseEntity.ok(Map.of(
+            "valid", true,
+            "message", "Token is valid"
+        ));
+    }
+
+
  
     @PostMapping("/register")
     public ResponseEntity<?> addUser(@RequestBody User newUser) {

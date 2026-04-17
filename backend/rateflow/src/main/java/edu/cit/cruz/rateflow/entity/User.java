@@ -1,5 +1,7 @@
 package edu.cit.cruz.rateflow.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,9 @@ public class User {
 
     private String username;
 
+    private String resetToken;
+    private LocalDateTime resetTokenExpiry;
+
     @Column(unique = true, nullable = false)
     private String email;
     private String password;
@@ -38,6 +43,15 @@ public class User {
         this.password = password;
         this.role = role;
     }
+
+    // Getters and Setters
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+    
+    public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
+
+
  
     public Integer getId() {
         return id;
