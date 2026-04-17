@@ -150,12 +150,6 @@ function MyRatings() {
             
             {!sidebarCollapsed && <span className="myrating-logo-text">Dashboard</span>}
           </div>
-          <button 
-            className="myrating-collapse-btn" 
-            onClick={() => navigate("/dashboard")}
-          >
-            {sidebarCollapsed ? "→" : "←"}
-          </button>
         </div>
 
         <nav className="myrating-nav">
