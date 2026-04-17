@@ -37,7 +37,7 @@ public class NotificationController {
             return ResponseEntity.status(403).body("Access denied");
         }
         
-        List<Notification> notifications = notificationService.getAllNotifications();
+        List<Notification> notifications = notificationService.getAllAdminNotifications();
         System.out.println("Found " + notifications.size() + " notifications");
         return ResponseEntity.ok(notifications);
     }
@@ -72,7 +72,7 @@ public class NotificationController {
             return ResponseEntity.status(403).body("Access denied");
         }
         
-        notificationService.deleteAllNotifications();
+        notificationService.deleteAllAdminNotifications();
         return ResponseEntity.ok(Map.of("success", true));
     }
 

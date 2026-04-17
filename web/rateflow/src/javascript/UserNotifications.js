@@ -8,7 +8,7 @@ function UserNotifications() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0); // Changed from unreadCount
   const [showClearModal, setShowClearModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -20,6 +20,21 @@ function UserNotifications() {
   useEffect(() => {
     checkAuth();
   }, []);
+
+  // Poll for new notifications
+  useEffect(() => {
+    if (user && user.role !== "ADMIN") {
+      fetchNotifications();
+      fetchNotificationCount();
+      
+      const interval = setInterval(() => {
+        fetchNotifications();
+        fetchNotificationCount();
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   const checkAuth = async () => {
     try {
@@ -34,15 +49,13 @@ function UserNotifications() {
       const data = await response.json();
       setUser(data);
       
-      // If user is admin, redirect to admin notifications
       if (data.role === "ADMIN") {
         navigate("/admin-notifications");
         return;
       }
       
-      // Load notifications after user is set
       await fetchNotifications();
-      await fetchUnreadCount();
+      await fetchNotificationCount();
     } catch (error) {
       navigate("/");
     } finally {
@@ -50,7 +63,7 @@ function UserNotifications() {
     }
   };
 
-  // Fetch notifications from backend
+  // Fetch all notifications
   const fetchNotifications = async () => {
     try {
       const response = await fetch("http://localhost:8080/api/user-notifications", {
@@ -68,62 +81,19 @@ function UserNotifications() {
     }
   };
 
-  // Fetch unread count from backend
-  const fetchUnreadCount = async () => {
+  // Count total notifications (simple count)
+  const fetchNotificationCount = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/user-notifications/unread-count", {
+      const response = await fetch("http://localhost:8080/api/user-notifications", {
         credentials: "include",
       });
 
       if (response.ok) {
         const data = await response.json();
-        setUnreadCount(data.count);
+        setTotalCount(data.length); // Just count the array length
       }
     } catch (error) {
-      console.error("Error fetching unread count:", error);
-    }
-  };
-
-  // Mark single notification as read
-  const handleMarkAsRead = async (notificationId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/user-notifications/mark-read/${notificationId}`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        // Update local state
-        setNotifications(prevNotifications =>
-          prevNotifications.map(notif =>
-            notif.id === notificationId ? { ...notif, read: true } : notif
-          )
-        );
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  };
-
-  // Mark all notifications as read
-  const handleMarkAllAsRead = async () => {
-    try {
-      const response = await fetch("http://localhost:8080/api/user-notifications/mark-all-read", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        setNotifications(prevNotifications =>
-          prevNotifications.map(notif => ({ ...notif, read: true }))
-        );
-        setUnreadCount(0);
-        setSuccessMessage("All notifications marked as read!");
-        setShowSuccessModal(true);
-      }
-    } catch (error) {
-      console.error("Error marking all as read:", error);
+      console.error("Error fetching notification count:", error);
     }
   };
 
@@ -142,11 +112,7 @@ function UserNotifications() {
           n => n.id !== selectedNotification.id
         );
         setNotifications(updatedNotifications);
-        
-        if (!selectedNotification.read) {
-          setUnreadCount(prev => Math.max(0, prev - 1));
-        }
-        
+        setTotalCount(updatedNotifications.length); // Update count
         setSuccessMessage("Notification deleted successfully!");
         setShowSuccessModal(true);
       }
@@ -168,7 +134,7 @@ function UserNotifications() {
 
       if (response.ok) {
         setNotifications([]);
-        setUnreadCount(0);
+        setTotalCount(0);
         setSuccessMessage("All notifications cleared!");
         setShowSuccessModal(true);
       }
@@ -222,6 +188,10 @@ function UserNotifications() {
 
   const getNotificationIcon = (type) => {
     switch(type) {
+      case 'SERVICE_UPDATED':
+        return '🔄';
+      case 'SERVICE_DELETED':
+        return '❌';
       case 'USERNAME_CHANGE':
         return '✏️';
       case 'SERVICE_RATING':
@@ -254,7 +224,6 @@ function UserNotifications() {
     }
   };
 
-  // Handle navigation functions
   const handleServicesNav = () => {
     navigate("/dashboard");
   };
@@ -287,17 +256,11 @@ function UserNotifications() {
         </div>
 
         <nav className="usernotif-nav">
-          <button 
-            className="usernotif-nav-item" 
-            onClick={handleServicesNav}
-          >
+          <button className="usernotif-nav-item" onClick={handleServicesNav}>
             {!sidebarCollapsed && <span className="usernotif-nav-label">Services</span>}
           </button>
 
-          <button 
-            className="usernotif-nav-item"
-            onClick={handleMyRatingsNav}
-          >
+          <button className="usernotif-nav-item" onClick={handleMyRatingsNav}>
             {!sidebarCollapsed && <span className="usernotif-nav-label">My Ratings</span>}
           </button>
         </nav>
@@ -322,8 +285,8 @@ function UserNotifications() {
               <div className="usernotif-notification-bell">
                 <button className="usernotif-bell-btn">
                   🔔
-                  {unreadCount > 0 && (
-                    <span className="usernotif-badge">{unreadCount}</span>
+                  {totalCount > 0 && (
+                    <span className="usernotif-badge">{totalCount}</span>
                   )}
                 </button>
               </div>
@@ -339,11 +302,6 @@ function UserNotifications() {
         <div className="usernotif-actions-bar">
           {notifications.length > 0 && (
             <div className="usernotif-actions-group">
-              {unreadCount > 0 && (
-                <button className="usernotif-mark-read-btn" onClick={handleMarkAllAsRead}>
-                  Mark all as read
-                </button>
-              )}
               <button className="usernotif-clear-all-btn" onClick={openClearModal}>
                 Clear all
               </button>
@@ -361,11 +319,7 @@ function UserNotifications() {
             </div>
           ) : (
             notifications.map((notification) => (
-              <div 
-                key={notification.id} 
-                className={`usernotif-card ${!notification.read ? 'unread' : ''}`}
-                onClick={() => !notification.read && handleMarkAsRead(notification.id)}
-              >
+              <div key={notification.id} className="usernotif-card">
                 <div className="usernotif-icon" style={{ backgroundColor: `${getNotificationColor(notification.type)}20` }}>
                   <span style={{ color: getNotificationColor(notification.type) }}>
                     {getNotificationIcon(notification.type)}
@@ -479,6 +433,3 @@ function UserNotifications() {
 }
 
 export default UserNotifications;
-
-
-

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from './NotificationBell';
 import "../css/myratings_css.css";
 
 // PREDEFINED CATEGORIES
@@ -194,6 +195,7 @@ function MyRatings() {
             </div>
 
             <div className="myrating-header-actions">
+              <NotificationBell />
               <div className="myrating-avatar" onClick={() => navigate("/profile")}>
                 {user ? user.username.charAt(0).toUpperCase() : "U"}
               </div>

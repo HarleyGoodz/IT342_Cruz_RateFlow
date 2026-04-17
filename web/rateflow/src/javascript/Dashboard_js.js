@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from './NotificationBell';
 import "../css/dashboard_css.css";
 
 // PREDEFINED CATEGORIES
@@ -161,6 +162,7 @@ function Dashboard() {
             </div>
 
             <div className="dashboard-topbar-actions">
+              <NotificationBell />
               <div className="dashboard-avatar" onClick={() => navigate("/profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
               </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from './NotificationBell';
 import "../css/Profile_css.css";
 
 function Profile() {
@@ -207,12 +208,7 @@ function Profile() {
               <p className="profile-page-subtitle">Manage your account settings</p>
             </div>
             <div className="profile-header-actions">
-              <button className="profile-notification-btn" onClick={() => navigate("/notifications")} style={{ position: "relative" }}>
-                🔔
-                {notificationCount > 0 && (
-                  <span className="profile-notification-badge">{notificationCount}</span>
-                )}
-              </button>
+              <NotificationBell />
               <div className="profile-avatar" onClick={() => navigate("/profile")}>
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
