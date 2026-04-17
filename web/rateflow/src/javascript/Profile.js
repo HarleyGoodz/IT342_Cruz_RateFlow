@@ -171,32 +171,23 @@ function Profile() {
       <aside className={`profile-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="profile-sidebar-header">
           <div className="profile-logo">
-            <span className="profile-logo-icon">🛡️</span>
-            {!sidebarCollapsed && <span className="profile-logo-text">Admin Panel</span>}
+
+            {!sidebarCollapsed && <span className="profile-logo-text">Dashboard</span>}
           </div>
-          <button
-            className="profile-collapse-btn"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          >
-            {sidebarCollapsed ? "→" : "←"}
-          </button>
         </div>
 
         <nav className="profile-nav">
-          <button className="profile-nav-item" onClick={handleServicesNav}>
-            {!sidebarCollapsed && <span className="profile-nav-label">Services</span>}
+          <button 
+            className="dashboard-nav-item"
+            onClick={() => navigate("/dashboard")}
+          >
+            {!sidebarCollapsed && <span className="dashboard-nav-label">Services</span>}
           </button>
-
-          <button className="profile-nav-item" onClick={handleCreateServiceNav}>
-            {!sidebarCollapsed && <span className="profile-nav-label">Create Service</span>}
-          </button>
-
-          <button className="profile-nav-item" onClick={handleManageServicesNav}>
-            {!sidebarCollapsed && <span className="profile-nav-label">Manage Services</span>}
-          </button>
-
-          <button className="profile-nav-item" onClick={handleAccessControlsNav}>
-            {!sidebarCollapsed && <span className="profile-nav-label">Access Controls</span>}
+          <button 
+            className="dashboard-nav-item"
+            onClick={() => navigate("/my-ratings")}
+          >
+            {!sidebarCollapsed && <span className="dashboard-nav-label">My Ratings</span>}
           </button>
         </nav>
 
