@@ -12,6 +12,7 @@ import AdminRateService from "./AdminRateService";
 import AccessControls from "./AccessControls";
 import AdminProfile from "./AdminProfile";
 import AdminNotifications from "./AdminNotifications";
+import UserNotifications from "./UserNotifications";
 import '../css/App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/my-ratings" element={<MyRatings />} />
+        <Route path="/notifications" element={<UserNotifications />} />
 
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/createservice" element={<CreateService />} />
