@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import ForgotPasswordModal from "./ForgotPasswordModal";
 import "../css/login_css.css";
 
 function LoginContent() {
@@ -10,6 +11,7 @@ function LoginContent() {
   const [successMessage, setSuccessMessage] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [errorModalMessage, setErrorModalMessage] = useState("");
   const [successModalMessage, setSuccessModalMessage] = useState("");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -98,12 +100,9 @@ function LoginContent() {
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
-
-
-    <div class="App-Title">
-      <h2>RateFlow</h2>
-    </div>
-
+        <div class="App-Title">
+          <h2>RateFlow</h2>
+        </div>
 
         {successMessage && <div className="success-message">{successMessage}</div>}
         {errorMessage && <div className="error-message">{errorMessage}</div>}
@@ -143,7 +142,16 @@ function LoginContent() {
           </div>
         </div>
 
-        <a href="#" className="login-forgot">Forgot password?</a>
+        <a 
+          href="#" 
+          className="login-forgot" 
+          onClick={(e) => {
+            e.preventDefault();
+            setShowForgotPassword(true);
+          }}
+        >
+          Forgot password?
+        </a>
 
         <button type="submit">Sign in</button>
 
@@ -168,6 +176,12 @@ function LoginContent() {
           <Link to="/register" className="signup-link">Create one</Link>
         </p>
       </form>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal 
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
 
       {/* Error Modal */}
       {showErrorModal && (
