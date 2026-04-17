@@ -181,6 +181,15 @@ public ResponseEntity<?> grantAdminAccess(@PathVariable Integer userId, HttpSess
         adminUsername,
         "User email: " + targetUser.getEmail()
     );
+
+     notificationService.createUserNotification(
+        "You have been granted ADMIN access by " + adminUsername,
+        "ROLE_GRANTED",
+        targetUser.getId(),
+        targetUser.getEmail(),
+        adminUsername,
+        "Your role has been upgraded to ADMIN"
+    );
     
     return ResponseEntity.ok(targetUser);
 }
@@ -222,6 +231,16 @@ public ResponseEntity<?> removeAdminAccess(@PathVariable Integer userId, HttpSes
         currentUserId,
         adminUsername,
         "User email: " + targetUser.getEmail()
+    );
+
+    // ADD USER NOTIFICATION for the user who lost admin access
+    notificationService.createUserNotification(
+        "Your ADMIN access has been removed by " + adminUsername,
+        "ROLE_DEMOTED",
+        targetUser.getId(),
+        targetUser.getEmail(),
+        adminUsername,
+        "Your role has been changed back to USER"
     );
     
     return ResponseEntity.ok(targetUser);
@@ -288,6 +307,15 @@ public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileD
     user.setUsername(newUsername);
     userv.updateUser(user);
     user.setPassword(null);
+
+    notificationService.createUserNotification(
+        "You changed your username from to" + newUsername + "'",
+        "USERNAME_CHANGE",
+        userId,
+        user.getEmail(),
+        user.getUsername(),
+        "Successfully changed username!"
+    );
     
     return ResponseEntity.ok(user);
 }

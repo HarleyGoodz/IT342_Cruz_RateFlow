@@ -38,7 +38,7 @@ function AdminDashboard() {
   setTimeout(() => {
     setShowNotificationModal(false);
   }, 3000);
-  fetchUnreadCount();
+  fetchNotificationCount();
 };
 
   // Filter services based on search and category
@@ -52,20 +52,21 @@ function AdminDashboard() {
   useEffect(() => {
     checkAuth();
     fetchServices();
-    fetchUnreadCount();
+    fetchNotificationCount();
   }, []);
 
-  const fetchUnreadCount = async () => {
+ const fetchNotificationCount = async () => {
   try {
-    const response = await fetch("http://localhost:8080/api/notifications/unread-count", {
+    const response = await fetch("http://localhost:8080/api/notifications", {
       credentials: "include",
     });
     if (response.ok) {
       const data = await response.json();
-      setUnreadCount(data.count);
+      setUnreadCount(data.length); // Count total notifications
+      console.log("Total admin notifications:", data.length);
     }
   } catch (error) {
-    console.error("Error fetching unread count:", error);
+    console.error("Error fetching notification count:", error);
   }
 };
 

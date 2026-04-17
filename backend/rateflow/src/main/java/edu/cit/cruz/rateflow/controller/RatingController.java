@@ -1,15 +1,16 @@
 package edu.cit.cruz.rateflow.controller;
 
 import edu.cit.cruz.rateflow.entity.Rating;
+import edu.cit.cruz.rateflow.entity.User;
 import edu.cit.cruz.rateflow.repository.RatingRepository;
 import edu.cit.cruz.rateflow.service.NotificationService;
 import edu.cit.cruz.rateflow.service.RatingService;
+import edu.cit.cruz.rateflow.service.UserService;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,10 +27,13 @@ public class RatingController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private UserService userService;
     
     // Submit rating and feedback
     @PostMapping("/submit")
-    public ResponseEntity<?> submitRating(@RequestBody Rating rating) {
+    public ResponseEntity<?> submitRating(@RequestBody Rating rating, HttpSession session) {
         try {
             // Check if user has already rated this service
             if (ratingService.hasUserRatedService(rating.getUserId(), rating.getServiceId())) {
@@ -45,6 +49,22 @@ public class RatingController {
             }
             
             Rating savedRating = ratingService.submitRating(rating);
+
+            // ADD USER NOTIFICATION for rating submission
+        Integer userId = (Integer) session.getAttribute("userId");
+        Optional<User> userOpt = userService.findById(userId);
+        if (userOpt.isPresent()) {
+            notificationService.createUserNotification(
+                "You rated a service with " + rating.getStarRate() + " stars",
+                "SERVICE_RATING",
+                userId,
+                userOpt.get().getEmail(),
+                userOpt.get().getUsername(),
+                "Service ID: " + rating.getServiceId() + ", Feedback: " + 
+                (rating.getFeedbackText() != null ? rating.getFeedbackText().substring(0, Math.min(50, rating.getFeedbackText().length())) : "No feedback")
+            );
+        }
+
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Rating submitted successfully",
@@ -129,8 +149,22 @@ public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSessio
             String userName = ratingToDelete.getUserName();
             Integer serviceId = ratingToDelete.getServiceId();
             Integer starRate = ratingToDelete.getStarRate();
+            Integer userId = ratingToDelete.getUserId();
         
         ratingRepository.deleteById(ratingId);
+
+         // ADD USER NOTIFICATION for the user whose feedback was deleted
+        Optional<User> userOpt = userService.findById(userId);
+        if (userOpt.isPresent()) {
+            notificationService.createUserNotification(
+                "Your feedback on service ID " + serviceId + " was deleted by an admin",
+                "FEEDBACK_DELETED",
+                userId,
+                userOpt.get().getEmail(),
+                "Admin",
+                "Your " + starRate + "-star rating and feedback have been removed"
+            );
+        }
 
         // ADD THIS NOTIFICATION CODE
             Integer adminId = (Integer) session.getAttribute("userId");

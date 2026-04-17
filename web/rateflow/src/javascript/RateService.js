@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import NotificationBell from './NotificationBell';
 import "../css/rateservice_css.css";
 
 function RateService() {
@@ -239,9 +240,6 @@ function RateService() {
             
             {!sidebarCollapsed && <span className="logo-text">Dashboard</span>}
           </div>
-          <button className="collapse-btn" onClick={() => navigate("/dashboard")}>
-            {sidebarCollapsed ? "→" : "←"}
-          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -278,9 +276,7 @@ function RateService() {
               <h1 className="page-title">Rate Service</h1>
             </div>
             <div className="header-actions">
-              <button className="notifications-btn" onClick={() => navigate("/notifications")}>
-                🔔
-              </button>
+              <NotificationBell />
               <div className="user-avatar" onClick={() => navigate("/profile")} style={{ cursor: "pointer" }}>
                 {user?.username?.charAt(0).toUpperCase() || "U"}
               </div>
