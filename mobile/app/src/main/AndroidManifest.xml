@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
 
     <application
         android:allowBackup="true"
@@ -29,7 +31,13 @@
 
         <activity android:name=".RegisterActivity" />
         <activity android:name=".DashboardActivity" />
-        <activity android:name=".AdminDashboardActivity" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".AddServiceActivity"
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:theme="@style/Theme.RateFlow" />
     </application>
 
 </manifest>

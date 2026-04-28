@@ -1,6 +1,7 @@
 package com.example.rateflow
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -115,7 +116,8 @@ class AdminDashboardActivity : AppCompatActivity() {
         }
 
         btnAddService.setOnClickListener {
-            Toast.makeText(this, "Add new service", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AddServiceActivity::class.java)
+            startActivity(intent)
         }
 
         btnNotification.setOnClickListener {
