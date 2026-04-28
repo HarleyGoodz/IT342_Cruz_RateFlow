@@ -30,7 +30,7 @@
         </activity>
 
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".DashboardActivity" />
+        <activity android:name=".UserDashboardActivity" />
         <activity
             android:name=".AdminDashboardActivity"
             android:windowSoftInputMode="adjustPan" />
