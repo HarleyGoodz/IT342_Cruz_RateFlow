@@ -34,8 +34,7 @@
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Menu"
-                    android:src="@drawable/ic_menu"
-                    />
+                    android:src="@drawable/ic_menu" />
 
                 <!-- App Title -->
                 <TextView
@@ -48,6 +47,17 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
+                <!-- Add Service Button -->
+                <ImageButton
+                    android:id="@+id/btnAddService"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_icon_button"
+                    android:contentDescription="Add Service"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_add"/>
+
                 <!-- Notification Bell -->
                 <ImageButton
                     android:id="@+id/btnNotification"
@@ -57,8 +67,7 @@
                     android:background="@drawable/bg_icon_button"
                     android:contentDescription="Notifications"
                     android:padding="8dp"
-                    android:src="@drawable/ic_notifications"
-                    />
+                    android:src="@drawable/ic_notifications" />
 
                 <!-- Profile Icon -->
                 <ImageButton
@@ -68,8 +77,7 @@
                     android:background="@drawable/bg_icon_button"
                     android:contentDescription="Profile"
                     android:padding="8dp"
-                    android:src="@drawable/ic_person"
-                    />
+                    android:src="@drawable/ic_person" />
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
 
@@ -132,7 +140,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_search_bar"
-                android:hint="Search"
+                android:hint="Search services..."
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:paddingStart="12dp"
@@ -143,13 +151,83 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
+        <!-- ACTIVE FILTER INDICATOR -->
+        <LinearLayout
+            android:id="@+id/layoutFilterIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Active filter: "
+                android:textColor="#888888"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvActiveFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#00BFFF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnClearFilterIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="✕"
+                android:textColor="#FF4444"
+                android:textSize="14sp"
+                android:padding="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- SERVICES SECTION TITLE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Services"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvServiceCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 services"
+                android:textColor="#888888"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- SERVICES RECYCLER VIEW -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerServices"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:nestedScrollingEnabled="false" />
 
         <!-- QUICK ACTIONS SECTION -->
         <LinearLayout
@@ -175,7 +253,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:background="@drawable/bg_view_all_button"
-                android:text="View All"
+                android:text="View All Services"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"
                 android:textStyle="bold" />

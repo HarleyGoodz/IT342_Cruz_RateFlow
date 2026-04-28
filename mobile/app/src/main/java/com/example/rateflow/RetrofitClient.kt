@@ -30,4 +30,7 @@ object RetrofitClient {
 
         retrofit.create(ServiceApi::class.java)
     }
+
+    // Helper method to get base URL for image loading
+    fun getBaseUrl(): String = BASE_URL
 }
