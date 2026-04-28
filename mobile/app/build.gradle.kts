@@ -52,6 +52,9 @@ android {
 dependencies {
 
     implementation(libs.androidx.core.ktx)
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("com.google.android.material:material:1.9.0")
     implementation("com.github.bumptech.glide:glide:4.15.1")
     implementation("com.github.bumptech.glide:okhttp3-integration:4.15.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

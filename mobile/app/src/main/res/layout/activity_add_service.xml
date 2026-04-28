@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D1B3E"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#0D1B3E"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            app:contentInsetStart="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_back_circle"
+                    android:src="@drawable/ic_back"
+                    android:contentDescription="Back" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="10dp"
+                    android:text="Create Service"
+                    android:textColor="#00BFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#071224"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#1A3A5C"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <!-- LEFT: Image Picker -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="14dp">
+
+                        <LinearLayout
+                            android:id="@+id/layoutImagePicker"
+                            android:layout_width="96dp"
+                            android:layout_height="96dp"
+                            android:background="@drawable/bg_image_picker"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <ImageView
+                                android:id="@+id/ivServiceImage"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_add_image"
+                                android:alpha="0.45" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Tap to upload"
+                                android:textColor="#00BFFF"
+                                android:textSize="10sp"
+                                android:alpha="0.6"
+                                android:gravity="center" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="Service Image"
+                            android:textColor="#FFFFFF"
+                            android:alpha="0.3"
+                            android:textSize="10sp" />
+
+                        <TextView
+                            android:id="@+id/tvImageError"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Required"
+                            android:textColor="#FF4444"
+                            android:textSize="10sp"
+                            android:layout_marginTop="2dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <!-- RIGHT: Custom Fields -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <!-- Service Name Field -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginBottom="10dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Service Name"
+                                android:textColor="#00BFFF"
+                                android:textSize="11sp"
+                                android:layout_marginBottom="4dp"
+                                android:letterSpacing="0.05" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_field"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp">
+
+                                <EditText
+                                    android:id="@+id/etServiceName"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@null"
+                                    android:hint="e.g. Web Design"
+                                    android:textColor="#FFFFFF"
+                                    android:textColorHint="#3D5166"
+                                    android:textSize="13sp"
+                                    android:inputType="textCapWords"
+                                    android:paddingTop="11dp"
+                                    android:paddingBottom="11dp"
+                                    android:singleLine="true" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tvServiceNameError"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This field is required"
+                                android:textColor="#FF4444"
+                                android:textSize="10sp"
+                                android:layout_marginTop="3dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                        <!-- Category Field -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginBottom="10dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Category"
+                                android:textColor="#00BFFF"
+                                android:textSize="11sp"
+                                android:layout_marginBottom="4dp"
+                                android:letterSpacing="0.05" />
+
+                            <LinearLayout
+                                android:id="@+id/layoutCategory"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_field"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp"
+                                android:paddingTop="0dp"
+                                android:paddingBottom="0dp"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <TextView
+                                    android:id="@+id/tvCategoryPlaceholder"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Select category"
+                                    android:textColor="#3D5166"
+                                    android:textSize="13sp"
+                                    android:paddingTop="11dp"
+                                    android:paddingBottom="11dp" />
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:src="@drawable/ic_dropdown"
+                                    android:alpha="0.5" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tvCategoryError"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Please select a category"
+                                android:textColor="#FF4444"
+                                android:textSize="10sp"
+                                android:layout_marginTop="3dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                        <!-- Description Field -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Description"
+                                android:textColor="#00BFFF"
+                                android:textSize="11sp"
+                                android:layout_marginBottom="4dp"
+                                android:letterSpacing="0.05" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_field"
+                                android:orientation="horizontal"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp">
+
+                                <EditText
+                                    android:id="@+id/etDescription"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@null"
+                                    android:hint="Describe your service..."
+                                    android:textColor="#FFFFFF"
+                                    android:textColorHint="#3D5166"
+                                    android:textSize="13sp"
+                                    android:inputType="textMultiLine"
+                                    android:minLines="3"
+                                    android:maxLines="4"
+                                    android:paddingTop="11dp"
+                                    android:paddingBottom="11dp"
+                                    android:gravity="top|start" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tvDescriptionError"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This field is required"
+                                android:textColor="#FF4444"
+                                android:textSize="10sp"
+                                android:layout_marginTop="3dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <Button
+                android:id="@+id/btnCreateService"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_create_button"
+                android:text="Create Service"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.03"
+                android:stateListAnimator="@null" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
