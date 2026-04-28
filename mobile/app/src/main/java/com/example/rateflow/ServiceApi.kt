@@ -1,6 +1,7 @@
 package com.example.rateflow.network
 
 import com.example.rateflow.model.Service
+import com.example.rateflow.model.UserService
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -17,6 +18,7 @@ interface ServiceApi {
 
     @GET("api/services/{serviceId}")
     fun getServiceById(@Path("serviceId") serviceId: Int): Call<Service>
+
 
     // Create Service with image
     @Multipart
