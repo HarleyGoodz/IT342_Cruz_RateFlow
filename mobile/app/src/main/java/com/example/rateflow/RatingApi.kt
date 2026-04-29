@@ -25,4 +25,7 @@ interface RatingApi {
 
     @GET("/api/ratings/user/{userId}")
     fun getUserRatings(@Path("userId") userId: Int): Call<List<Rating>>
+
+    @DELETE("/api/ratings/delete/{ratingId}")
+    fun deleteRating(@Path("ratingId") ratingId: Int): Call<Map<String, Any>>
 }
