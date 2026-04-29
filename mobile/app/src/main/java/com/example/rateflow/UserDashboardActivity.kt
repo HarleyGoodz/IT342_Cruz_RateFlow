@@ -12,7 +12,8 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.drawerlayout.widget.DrawerLayout
+import android.view.Gravity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rateflow.adapter.UserServiceAdapter
 import com.example.rateflow.model.Service
@@ -39,6 +40,10 @@ class UserDashboardActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var etSearch: EditText
     private lateinit var btnFilter: TextView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navigationDrawer: LinearLayout
+    private lateinit var drawerUserName: TextView
+    private lateinit var drawerUserEmail: TextView
 
     // Adapter and Lists
     private lateinit var serviceAdapter: UserServiceAdapter
@@ -77,6 +82,11 @@ class UserDashboardActivity : AppCompatActivity() {
             etSearch = findViewById(R.id.etSearch)
             btnFilter = findViewById(R.id.btnFilter)
 
+            drawerLayout = findViewById(R.id.drawerLayout)
+            navigationDrawer = findViewById(R.id.navigationDrawer)
+            drawerUserName = findViewById(R.id.drawerUserName)
+            drawerUserEmail = findViewById(R.id.drawerUserEmail)
+
             Log.d(TAG, "initializeViews: All views initialized successfully")
         } catch (e: Exception) {
             Log.e(TAG, "initializeViews: Error initializing views", e)
@@ -85,11 +95,11 @@ class UserDashboardActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        // Use GridLayoutManager with 2 columns for 2x2 grid
+
         val gridLayoutManager = GridLayoutManager(this, 2)
         recyclerServices.layoutManager = gridLayoutManager
 
-        // Optional: Add spacing between grid items
+
         val spacingInPixels = resources.getDimensionPixelSize(R.dimen.grid_spacing)
         recyclerServices.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, true))
 
@@ -107,8 +117,8 @@ class UserDashboardActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         btnMenu.setOnClickListener {
-            Log.d(TAG, "Menu button clicked")
-            Toast.makeText(this, "Menu clicked", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "Menu button clicked - opening drawer")
+            drawerLayout.openDrawer(Gravity.START)
         }
 
         btnNotification.setOnClickListener {
@@ -124,6 +134,27 @@ class UserDashboardActivity : AppCompatActivity() {
         btnFilter.setOnClickListener {
             Log.d(TAG, "Filter button clicked")
             showFilterDialog()
+        }
+
+        setupDrawerNavigation()
+    }
+
+    private fun setupDrawerNavigation() {
+        val navServices = findViewById<TextView>(R.id.navServices)
+        val navMyRatings = findViewById<TextView>(R.id.navMyRatings)
+
+        navServices.setOnClickListener {
+            Log.d(TAG, "Drawer - Services clicked")
+            drawerLayout.closeDrawer(Gravity.START)
+            // Already on services page, just refresh
+            loadAllServices()
+        }
+
+        navMyRatings.setOnClickListener {
+            Log.d(TAG, "Drawer - My Ratings clicked")
+            drawerLayout.closeDrawer(Gravity.START)
+            val intent = Intent(this, MyRatingsActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -188,13 +219,19 @@ class UserDashboardActivity : AppCompatActivity() {
             sharedPreferences.getString("current_username", "User") ?: "User"
         }
 
+        val userEmail = if (currentUserEmail.isNotEmpty()) currentUserEmail else "guest@example.com"
+
         Log.d(TAG, "loadUserSession: Email: '$currentUserEmail', Username: '$currentUsername'")
 
         if (currentUserEmail.isEmpty()) {
             Log.w(TAG, "No user email found in session, but showing all services anyway")
             tvWelcome.text = "Welcome Guest!"
+            drawerUserName.text = "Guest User"
+            drawerUserEmail.text = "Please login"
         } else {
             tvWelcome.text = "Welcome $currentUsername!"
+            drawerUserName.text = currentUsername
+            drawerUserEmail.text = currentUserEmail
         }
     }
 

@@ -38,7 +38,9 @@
             android:name=".AddServiceActivity"
             android:windowSoftInputMode="adjustPan|stateHidden"
             android:theme="@style/Theme.RateFlow" />
+
         <activity android:name=".RateServiceActivity" />
+        <activity android:name=".MyRatingsActivity" />
     </application>
 
 </manifest>
