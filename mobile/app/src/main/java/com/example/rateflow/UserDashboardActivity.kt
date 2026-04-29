@@ -308,8 +308,9 @@ class UserDashboardActivity : AppCompatActivity() {
     }
 
     private fun viewServiceDetails(service: UserService) {
-        Log.d(TAG, "Viewing details for service: ${service.serviceName}")
-        Toast.makeText(this, "Viewing: ${service.serviceName}\nCreated by: ${service.createdBy}", Toast.LENGTH_LONG).show()
+        val intent = Intent(this, RateServiceActivity::class.java)
+        intent.putExtra("serviceId", service.serviceId)
+        startActivity(intent)
     }
 
     override fun onResume() {

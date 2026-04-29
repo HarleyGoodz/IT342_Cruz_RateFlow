@@ -38,6 +38,7 @@
             android:name=".AddServiceActivity"
             android:windowSoftInputMode="adjustPan|stateHidden"
             android:theme="@style/Theme.RateFlow" />
+        <activity android:name=".RateServiceActivity" />
     </application>
 
 </manifest>
