@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import edu.cit.cruz.rateflow.entity.User;
 import edu.cit.cruz.rateflow.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import edu.cit.cruz.rateflow.entity.Role;
 
 @Service
@@ -75,5 +76,31 @@ public User updateUser(User user) {
 public boolean existsById(Integer id) {
     return urepo.existsById(id);
 }
+
+@Transactional
+    public boolean updateUsername(Integer userId, String newUsername) {
+        Optional<User> userOpt = urepo.findById(userId);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        
+        User user = userOpt.get();
+
+        System.out.println("=== BEFORE UPDATE ===");
+        System.out.println("User ID: " + user.getId());
+        System.out.println("Username: " + user.getUsername());
+        System.out.println("Password exists: " + (user.getPassword() != null ? "YES" : "NO"));
+        System.out.println("Password length: " + (user.getPassword() != null ? user.getPassword().length() : 0));
+
+        user.setUsername(newUsername);
+        User saved = urepo.save(user); 
+
+        System.out.println("=== AFTER UPDATE ===");
+        System.out.println("User ID: " + saved.getId());
+        System.out.println("Username: " + saved.getUsername());
+        System.out.println("Password exists: " + (saved.getPassword() != null ? "YES" : "NO"));
+        System.out.println("Password length: " + (saved.getPassword() != null ? saved.getPassword().length() : 0));
+        return true;
+    }
 
 }

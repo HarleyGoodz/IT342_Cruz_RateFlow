@@ -41,6 +41,7 @@
 
         <activity android:name=".RateServiceActivity" />
         <activity android:name=".MyRatingsActivity" />
+        <activity android:name=".UserProfileActivity" />
     </application>
 
 </manifest>

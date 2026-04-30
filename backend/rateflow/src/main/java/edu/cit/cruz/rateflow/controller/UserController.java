@@ -435,37 +435,49 @@ public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileD
     Integer userId = (Integer) session.getAttribute("userId");
     
     if (userId == null) {
-        return ResponseEntity.status(401).body("Not authenticated");
+        return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
     }
     
     Optional<User> userOpt = userv.findById(userId);
     if (userOpt.isEmpty()) {
-        return ResponseEntity.status(404).body("User not found");
+        return ResponseEntity.status(404).body(Map.of("error", "User not found"));
     }
     
     User user = userOpt.get();
     String newUsername = profileData.get("username");
+
+    // Validate username
+    if (newUsername == null || newUsername.trim().isEmpty()) {
+        return ResponseEntity.badRequest().body(Map.of("error", "Username cannot be empty"));
+    }
     
     // Check if username is taken by another user
     Optional<User> existingUser = userv.findByEmailOrUsername(newUsername);
     if (existingUser.isPresent() && !existingUser.get().getId().equals(userId)) {
         return ResponseEntity.badRequest().body(Map.of("error", "Username already taken"));
     }
+
+    boolean updated = userv.updateUsername(userId, newUsername);
+
+    if (!updated) {
+        return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+    }
+
+    User updatedUser = userv.findById(userId).get();
     
-    user.setUsername(newUsername);
-    userv.updateUser(user);
-    user.setPassword(null);
 
     notificationService.createUserNotification(
-        "You changed your username from to" + newUsername + "'",
+        "You changed your username from " + user.getUsername() + " to " + newUsername,
         "USERNAME_CHANGE",
         userId,
         user.getEmail(),
-        user.getUsername(),
+        newUsername,
         "Successfully changed username!"
     );
+
+    updatedUser.setPassword(null);
     
-    return ResponseEntity.ok(user);
+    return ResponseEntity.ok(updatedUser);
 }
 
 }
