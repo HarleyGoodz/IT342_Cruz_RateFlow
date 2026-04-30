@@ -170,8 +170,10 @@ class UserDashboardActivity : AppCompatActivity() {
         }
 
         btnNotification.setOnClickListener {
-            Log.d(TAG, "Notification button clicked")
-            Toast.makeText(this, "Notifications clicked", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "Notification button clicked - Opening User Notifications")
+            val intent = Intent(this, UserNotificationActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         btnProfile.setOnClickListener {
