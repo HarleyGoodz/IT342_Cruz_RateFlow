@@ -1,10 +1,12 @@
 package com.example.rateflow.network
 
+import com.example.rateflow.NotificationApi
 import okhttp3.JavaNetCookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import java.net.CookieManager
 import java.net.CookiePolicy
 import java.util.concurrent.TimeUnit
@@ -33,7 +35,7 @@ object RetrofitClient {
             .build()
     }
 
-    private val retrofit: Retrofit by lazy {
+    val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
@@ -55,6 +57,10 @@ object RetrofitClient {
 
     val userApi: ApiService by lazy {
         retrofit.create(ApiService::class.java)
+    }
+
+    val notificationApi: NotificationApi by lazy {
+        retrofit.create(NotificationApi::class.java)
     }
 
     fun getBaseUrl(): String = BASE_URL
