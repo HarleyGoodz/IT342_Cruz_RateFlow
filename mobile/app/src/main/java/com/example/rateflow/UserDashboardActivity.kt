@@ -2,12 +2,14 @@ package com.example.rateflow
 
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.content.BroadcastReceiver
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -69,6 +71,52 @@ class UserDashboardActivity : AppCompatActivity() {
         loadAllServices()
     }
 
+    private val usernameUpdateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "USERNAME_UPDATED") {
+                val newUsername = intent.getStringExtra("new_username") ?: return
+                val userEmail = intent.getStringExtra("user_email") ?: return
+
+                if (userEmail == currentUserEmail) {
+                    currentUsername = newUsername
+                    tvWelcome.text = "Welcome $currentUsername!"
+                    drawerUserName.text = currentUsername
+
+                    // Update shared preferences
+                    val editor = sharedPreferences.edit()
+                    editor.putString("current_username", newUsername)
+                    editor.putString("${currentUserEmail}_username", newUsername)
+                    editor.apply()
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val filter = IntentFilter("USERNAME_UPDATED")
+
+        // For Android 14+ (API 34+), you need to specify the flag
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(usernameUpdateReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(usernameUpdateReceiver, filter)
+        }
+
+        // Refresh services
+        Log.d(TAG, "onResume: Refreshing services list")
+        loadAllServices()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(usernameUpdateReceiver)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unregistering receiver", e)
+        }
+    }
+
     private fun initializeViews() {
         try {
             tvWelcome = findViewById(R.id.tvWelcome)
@@ -127,8 +175,12 @@ class UserDashboardActivity : AppCompatActivity() {
         }
 
         btnProfile.setOnClickListener {
-            Log.d(TAG, "Profile button clicked")
-            Toast.makeText(this, "Profile clicked", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "Profile button clicked - Navigating to Profile Page")
+            // ✅ Navigate to UserProfileActivity
+            val intent = Intent(this, UserProfileActivity::class.java)
+            startActivity(intent)
+            // Optional: Add animation
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         btnFilter.setOnClickListener {
@@ -348,11 +400,5 @@ class UserDashboardActivity : AppCompatActivity() {
         val intent = Intent(this, RateServiceActivity::class.java)
         intent.putExtra("serviceId", service.serviceId)
         startActivity(intent)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "onResume: Refreshing services list")
-        loadAllServices()
     }
 }
