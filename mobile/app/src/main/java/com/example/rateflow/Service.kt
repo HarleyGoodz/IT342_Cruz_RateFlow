@@ -1,5 +1,7 @@
 package com.example.rateflow.model
 
+import java.io.Serializable
+
 data class Service(
     val serviceId: Int,
     val imageUrl: String? = null,
@@ -7,4 +9,4 @@ data class Service(
     val serviceCategory: String,
     val serviceDescription: String,
     val createdBy: String
-)
+) : Serializable
