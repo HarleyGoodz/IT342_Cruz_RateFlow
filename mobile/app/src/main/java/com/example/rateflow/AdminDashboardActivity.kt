@@ -100,9 +100,21 @@ class AdminDashboardActivity : AppCompatActivity() {
             },
             onDeleteClick = { service ->
                 showDeleteConfirmationDialog(service)
+            },
+            onCardClick = { service ->  // NEW: Handle card click to view ratings
+                navigateToRatingsView(service)
             }
+
         )
         recyclerServices.adapter = serviceAdapter
+    }
+
+    private fun navigateToRatingsView(service: Service) {
+        val intent = Intent(this, AdminViewRatingsActivity::class.java)
+        intent.putExtra("serviceId", service.serviceId)
+        intent.putExtra("serviceName", service.serviceName)
+        intent.putExtra("serviceCategory", service.serviceCategory)
+        startActivity(intent)
     }
 
     private fun showDeleteConfirmationDialog(service: Service) {

@@ -15,10 +15,12 @@ import com.example.rateflow.network.RetrofitClient
 class ServiceAdapter(
     private var services: List<Service>,
     private val onEditClick: ((Service) -> Unit)? = null,
-    private val onDeleteClick: ((Service) -> Unit)? = null
+    private val onDeleteClick: ((Service) -> Unit)? = null,
+    private val onCardClick: ((Service) -> Unit)? = null
 ) : RecyclerView.Adapter<ServiceAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cardService: View = view
         val ivServiceImage: ImageView = view.findViewById(R.id.ivServiceImage)
         val tvServiceName: TextView = view.findViewById(R.id.tvServiceName)
         val tvServiceCategory: TextView = view.findViewById(R.id.tvServiceCategory)
@@ -57,6 +59,10 @@ class ServiceAdapter(
 
         holder.btnDelete.setOnClickListener {
             onDeleteClick?.invoke(service)
+        }
+
+        holder.cardService.setOnClickListener {
+            onCardClick?.invoke(service)
         }
     }
 
