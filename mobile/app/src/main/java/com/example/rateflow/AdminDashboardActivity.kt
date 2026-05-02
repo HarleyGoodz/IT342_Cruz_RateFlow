@@ -207,7 +207,8 @@ class AdminDashboardActivity : AppCompatActivity() {
         }
 
         btnProfile.setOnClickListener {
-            Toast.makeText(this, "Profile clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, UserProfileActivity::class.java)
+            startActivity(intent)
         }
 
         btnViewAll.setOnClickListener {
