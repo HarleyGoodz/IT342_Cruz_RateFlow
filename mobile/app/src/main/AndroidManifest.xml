@@ -45,6 +45,7 @@
         <activity android:name=".UserNotificationActivity" />
         <activity android:name=".EditServiceActivity"/>
         <activity android:name=".AdminViewRatingsActivity"/>
+        <activity android:name=".AccessControlActivity" />
     </application>
 
 </manifest>
