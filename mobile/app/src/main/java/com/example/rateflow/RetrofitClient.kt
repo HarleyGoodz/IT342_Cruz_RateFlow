@@ -68,6 +68,10 @@ object RetrofitClient {
         retrofit.create(UserManagementApi::class.java)
     }
 
+    val adminNotificationApi: AdminNotificationApi by lazy {
+        retrofit.create(AdminNotificationApi::class.java)
+    }
+
     fun getBaseUrl(): String = BASE_URL
 
     // Optional: Method to clear cookies on logout

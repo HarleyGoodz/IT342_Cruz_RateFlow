@@ -31,6 +31,10 @@ class AdminDashboardActivity : AppCompatActivity() {
     private lateinit var btnNotification: ImageButton
     private lateinit var btnProfile: ImageButton
 
+    private lateinit var badgeAdminNotificationCount: TextView
+    private val adminNotificationHandler = android.os.Handler()
+    private lateinit var adminNotificationRunnable: Runnable
+
     // Drawer layout
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: LinearLayout
@@ -73,6 +77,7 @@ class AdminDashboardActivity : AppCompatActivity() {
         setupRecyclerView()
         setupClickListeners()
         setupSearchListener()
+        setupAdminNotificationBadge()
         loadServices()
     }
 
@@ -100,6 +105,57 @@ class AdminDashboardActivity : AppCompatActivity() {
         // Set clear filter click listener
         btnClearFilterIndicator.setOnClickListener {
             clearAllFilters()
+        }
+    }
+
+    private fun setupAdminNotificationBadge() {
+        badgeAdminNotificationCount = findViewById(R.id.badgeAdminNotificationCount)
+
+        // Set click listener for notification button
+        val btnNotification = findViewById<ImageButton>(R.id.btnNotification)
+        btnNotification.setOnClickListener {
+            val intent = Intent(this, AdminNotificationsActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Start periodic badge updates
+        startAdminBadgeUpdates()
+    }
+
+    private fun startAdminBadgeUpdates() {
+        adminNotificationRunnable = Runnable {
+            updateAdminNotificationBadge()
+            adminNotificationHandler.postDelayed(adminNotificationRunnable, 30000) // Update every 30 seconds
+        }
+        adminNotificationHandler.post(adminNotificationRunnable)
+    }
+
+    private fun updateAdminNotificationBadge() {
+        RetrofitClient.adminNotificationApi.getAdminUnreadCount().enqueue(object : retrofit2.Callback<Map<String, Long>> {
+            override fun onResponse(call: retrofit2.Call<Map<String, Long>>, response: retrofit2.Response<Map<String, Long>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val count = response.body()?.get("count") ?: 0
+                    if (count > 0) {
+                        badgeAdminNotificationCount.visibility = View.VISIBLE
+                        val countText = if (count > 99) "99+" else count.toString()
+                        badgeAdminNotificationCount.text = countText
+                    } else {
+                        badgeAdminNotificationCount.visibility = View.GONE
+                    }
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<Map<String, Long>>, t: Throwable) {
+                // Handle error silently
+            }
+        })
+    }
+
+    // Don't forget to stop updates in onDestroy
+    override fun onDestroy() {
+        super.onDestroy()
+        if (this::adminNotificationRunnable.isInitialized) {
+            adminNotificationHandler.removeCallbacks(adminNotificationRunnable)
         }
     }
 
