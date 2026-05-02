@@ -1,6 +1,7 @@
 package com.example.rateflow.network
 
 import com.example.rateflow.NotificationApi
+import com.example.rateflow.UserManagementApi
 import okhttp3.JavaNetCookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -61,6 +62,10 @@ object RetrofitClient {
 
     val notificationApi: NotificationApi by lazy {
         retrofit.create(NotificationApi::class.java)
+    }
+
+    val userManagementApi: UserManagementApi by lazy {
+        retrofit.create(UserManagementApi::class.java)
     }
 
     fun getBaseUrl(): String = BASE_URL

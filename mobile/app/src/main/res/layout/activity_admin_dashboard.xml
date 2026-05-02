@@ -1,264 +1,364 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0D1B3E"
-    android:fillViewport="true">
+    android:background="#0D1B3E">
 
-    <LinearLayout
+    <!-- Main Content -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <!-- TOP APP BAR -->
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="#0D1B3E"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            app:contentInsetStart="0dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
+            <!-- TOP APP BAR -->
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="#0D1B3E"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                app:contentInsetStart="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Hamburger Menu -->
+                    <ImageButton
+                        android:id="@+id/btnMenu"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Menu"
+                        android:src="@drawable/ic_menu" />
+
+                    <!-- App Title -->
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingStart="8dp"
+                        android:text="RateFlow"
+                        android:textColor="#00BFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <!-- Add Service Button -->
+                    <ImageButton
+                        android:id="@+id/btnAddService"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_icon_button"
+                        android:contentDescription="Add Service"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_add"/>
+
+                    <!-- Notification Bell -->
+                    <ImageButton
+                        android:id="@+id/btnNotification"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_icon_button"
+                        android:contentDescription="Notifications"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_notifications" />
+
+                    <!-- Profile Icon -->
+                    <ImageButton
+                        android:id="@+id/btnProfile"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_icon_button"
+                        android:contentDescription="Profile"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_person" />
+                </LinearLayout>
+            </androidx.appcompat.widget.Toolbar>
+
+            <!-- WELCOME BANNER -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_welcome_banner"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- Star Icon -->
+                <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:contentDescription="Star icon"
+                    android:src="@drawable/ic_star_badge" />
+
+                <!-- Welcome Text -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Welcome Admin!"
+                    android:textColor="#00BFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- FILTER + SEARCH ROW -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- Hamburger Menu -->
-                <ImageButton
-                    android:id="@+id/btnMenu"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Menu"
-                    android:src="@drawable/ic_menu" />
+                <!-- Filter Button -->
+                <TextView
+                    android:id="@+id/btnFilter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_filter_button"
+                    android:gravity="center"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="Filter"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
 
-                <!-- App Title -->
+                <!-- Search Bar -->
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_search_bar"
+                    android:hint="Search services..."
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#888888"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- ACTIVE FILTER INDICATOR -->
+            <LinearLayout
+                android:id="@+id/layoutFilterIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Active filter: "
+                    android:textColor="#888888"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvActiveFilter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="#00BFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnClearFilterIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="✕"
+                    android:textColor="#FF4444"
+                    android:textSize="14sp"
+                    android:padding="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
+            <!-- SERVICES SECTION TITLE -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:paddingStart="8dp"
-                    android:text="RateFlow"
-                    android:textColor="#00BFFF"
-                    android:textSize="20sp"
+                    android:text="Services"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <!-- Add Service Button -->
-                <ImageButton
-                    android:id="@+id/btnAddService"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_icon_button"
-                    android:contentDescription="Add Service"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_add"/>
-
-                <!-- Notification Bell -->
-                <ImageButton
-                    android:id="@+id/btnNotification"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_icon_button"
-                    android:contentDescription="Notifications"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_notifications" />
-
-                <!-- Profile Icon -->
-                <ImageButton
-                    android:id="@+id/btnProfile"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_icon_button"
-                    android:contentDescription="Profile"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_person" />
+                <TextView
+                    android:id="@+id/tvServiceCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 services"
+                    android:textColor="#888888"
+                    android:textSize="14sp" />
             </LinearLayout>
-        </androidx.appcompat.widget.Toolbar>
 
-        <!-- WELCOME BANNER -->
+            <!-- SERVICES RECYCLER VIEW -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerServices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:nestedScrollingEnabled="false" />
+
+            <!-- QUICK ACTIONS SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="Quick Actions"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnViewAll"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_view_all_button"
+                    android:text="View All Services"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Navigation Drawer -->
+    <LinearLayout
+        android:id="@+id/navigationView"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#0F1A2E"
+        android:orientation="vertical"
+        android:paddingTop="48dp">
+
+        <!-- Drawer Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:background="@drawable/bg_welcome_banner"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp">
 
-            <!-- Star Icon -->
             <ImageView
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:contentDescription="Star icon"
-                android:src="@drawable/ic_star_badge" />
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_profile_default"
+                android:contentDescription="Admin Avatar" />
 
-            <!-- Welcome Text -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="Welcome Admin!"
+                android:layout_marginTop="12dp"
+                android:text="Admin Panel"
                 android:textColor="#00BFFF"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- FILTER + SEARCH ROW -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <!-- Filter Button -->
-            <TextView
-                android:id="@+id/btnFilter"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_filter_button"
-                android:gravity="center"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:text="Filter"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp" />
-
-            <!-- Search Bar -->
-            <EditText
-                android:id="@+id/etSearch"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_search_bar"
-                android:hint="Search services..."
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:singleLine="true"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#888888"
-                android:textSize="13sp" />
-        </LinearLayout>
-
-        <!-- ACTIVE FILTER INDICATOR -->
-        <LinearLayout
-            android:id="@+id/layoutFilterIndicator"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="12dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Active filter: "
-                android:textColor="#888888"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/tvActiveFilter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="#00BFFF"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/btnClearFilterIndicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="✕"
-                android:textColor="#FF4444"
-                android:textSize="14sp"
-                android:padding="4dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true" />
-        </LinearLayout>
-
-        <!-- SERVICES SECTION TITLE -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="12dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Services"
-                android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvServiceCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 services"
-                android:textColor="#888888"
-                android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- SERVICES RECYCLER VIEW -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerServices"
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:nestedScrollingEnabled="false" />
+            android:layout_height="1dp"
+            android:background="#1E2A3E" />
 
-        <!-- QUICK ACTIONS SECTION -->
+        <!-- Drawer Menu Items -->
         <LinearLayout
+            android:id="@+id/btnServices"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:orientation="vertical">
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_services"
+                android:tint="#00BFFF" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Quick Actions"
+                android:layout_marginStart="16dp"
+                android:text="Services"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="16sp" />
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/btnViewAll"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_view_all_button"
-                android:text="View All Services"
+        <LinearLayout
+            android:id="@+id/btnAccessControls"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_security"
+                android:tint="#00BFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Access Controls"
                 android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold" />
+                android:textSize="16sp" />
         </LinearLayout>
 
     </LinearLayout>
 
-</ScrollView>
+</androidx.drawerlayout.widget.DrawerLayout>

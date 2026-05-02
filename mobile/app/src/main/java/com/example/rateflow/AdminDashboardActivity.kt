@@ -6,10 +6,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.View
 import android.view.Window
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rateflow.adapter.ServiceAdapter
@@ -27,6 +31,12 @@ class AdminDashboardActivity : AppCompatActivity() {
     private lateinit var btnNotification: ImageButton
     private lateinit var btnProfile: ImageButton
 
+    // Drawer layout
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navigationView: LinearLayout
+    private lateinit var btnServices: LinearLayout
+    private lateinit var btnAccessControls: LinearLayout
+
     // RecyclerView
     private lateinit var recyclerServices: RecyclerView
     private lateinit var serviceAdapter: ServiceAdapter
@@ -34,7 +44,7 @@ class AdminDashboardActivity : AppCompatActivity() {
     private var filteredServicesList = mutableListOf<Service>()
 
     // Quick actions
-    private lateinit var btnViewAll: View
+    private lateinit var btnViewAll: Button
 
     // Filter + Search
     private lateinit var btnFilter: TextView
@@ -59,6 +69,7 @@ class AdminDashboardActivity : AppCompatActivity() {
         setContentView(R.layout.activity_admin_dashboard)
 
         initializeViews()
+        setupDrawer()
         setupRecyclerView()
         setupClickListeners()
         setupSearchListener()
@@ -66,6 +77,11 @@ class AdminDashboardActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
+        drawerLayout = findViewById(R.id.drawerLayout)
+        navigationView = findViewById(R.id.navigationView)
+        btnServices = findViewById(R.id.btnServices)
+        btnAccessControls = findViewById(R.id.btnAccessControls)
+
         btnMenu = findViewById(R.id.btnMenu)
         btnAddService = findViewById(R.id.btnAddService)
         btnNotification = findViewById(R.id.btnNotification)
@@ -87,6 +103,22 @@ class AdminDashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupDrawer() {
+        // Close drawer when clicking on services
+        btnServices.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            // Already on services page
+            Toast.makeText(this, "Services", Toast.LENGTH_SHORT).show()
+        }
+
+        // Open Access Control when clicked
+        btnAccessControls.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            val intent = Intent(this, AccessControlActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
     private fun setupRecyclerView() {
         val gridLayoutManager = GridLayoutManager(this, 2)
         recyclerServices.layoutManager = gridLayoutManager
@@ -101,7 +133,7 @@ class AdminDashboardActivity : AppCompatActivity() {
             onDeleteClick = { service ->
                 showDeleteConfirmationDialog(service)
             },
-            onCardClick = { service ->  // NEW: Handle card click to view ratings
+            onCardClick = { service ->
                 navigateToRatingsView(service)
             }
 
@@ -142,7 +174,6 @@ class AdminDashboardActivity : AppCompatActivity() {
     }
 
     private fun deleteService(service: Service) {
-        // Better approach - show a dialog or use a proper ProgressBar in layout
         val progressDialog = ProgressDialog(this).apply {
             setMessage("Deleting service...")
             setCancelable(false)
@@ -174,7 +205,6 @@ class AdminDashboardActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == EDIT_SERVICE_REQUEST && resultCode == RESULT_OK) {
-            // Refresh the services list
             loadServices()
         }
     }
@@ -194,7 +224,7 @@ class AdminDashboardActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         btnMenu.setOnClickListener {
-            Toast.makeText(this, "Menu clicked", Toast.LENGTH_SHORT).show()
+            drawerLayout.openDrawer(GravityCompat.START)
         }
 
         btnAddService.setOnClickListener {

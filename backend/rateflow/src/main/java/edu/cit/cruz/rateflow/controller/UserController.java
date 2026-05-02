@@ -317,10 +317,19 @@ public ResponseEntity<?> grantAdminAccess(@PathVariable Integer userId, HttpSess
     
     User targetUser = targetUserOpt.get();
     targetUser.setRole(Role.ADMIN);
-    userv.updateUser(targetUser);
-    targetUser.setPassword(null);
+    
+    // IMPORTANT: Save the user WITHOUT modifying the password
+    User updatedUser = userv.updateUser(targetUser);
+    
+    // Create a response object without password
+    User responseUser = new User();
+    responseUser.setId(updatedUser.getId());
+    responseUser.setUsername(updatedUser.getUsername());
+    responseUser.setEmail(updatedUser.getEmail());
+    responseUser.setRole(updatedUser.getRole());
+    // Don't set password - it will be null in response
 
-    // ADD THIS NOTIFICATION CODE
+    // ADD NOTIFICATION CODE
     String adminUsername = currentUserOpt.get().getUsername();
     notificationService.createNotification(
         "Granted admin access to " + targetUser.getUsername(),
@@ -330,7 +339,7 @@ public ResponseEntity<?> grantAdminAccess(@PathVariable Integer userId, HttpSess
         "User email: " + targetUser.getEmail()
     );
 
-     notificationService.createUserNotification(
+    notificationService.createUserNotification(
         "You have been granted ADMIN access by " + adminUsername,
         "ROLE_GRANTED",
         targetUser.getId(),
@@ -339,7 +348,7 @@ public ResponseEntity<?> grantAdminAccess(@PathVariable Integer userId, HttpSess
         "Your role has been upgraded to ADMIN"
     );
     
-    return ResponseEntity.ok(targetUser);
+    return ResponseEntity.ok(responseUser);
 }
 
 // Remove admin access from a user (admin only)
@@ -368,10 +377,19 @@ public ResponseEntity<?> removeAdminAccess(@PathVariable Integer userId, HttpSes
     
     User targetUser = targetUserOpt.get();
     targetUser.setRole(Role.USER);
-    userv.updateUser(targetUser);
-    targetUser.setPassword(null);
+    
+    // IMPORTANT: Save the user WITHOUT modifying the password
+    User updatedUser = userv.updateUser(targetUser);
+    
+    // Create a response object without password
+    User responseUser = new User();
+    responseUser.setId(updatedUser.getId());
+    responseUser.setUsername(updatedUser.getUsername());
+    responseUser.setEmail(updatedUser.getEmail());
+    responseUser.setRole(updatedUser.getRole());
+    // Don't set password - it will be null in response
 
-    // ADD THIS NOTIFICATION CODE
+    // ADD NOTIFICATION CODE
     String adminUsername = currentUserOpt.get().getUsername();
     notificationService.createNotification(
         "Removed admin access from " + targetUser.getUsername(),
@@ -381,7 +399,6 @@ public ResponseEntity<?> removeAdminAccess(@PathVariable Integer userId, HttpSes
         "User email: " + targetUser.getEmail()
     );
 
-    // ADD USER NOTIFICATION for the user who lost admin access
     notificationService.createUserNotification(
         "Your ADMIN access has been removed by " + adminUsername,
         "ROLE_DEMOTED",
@@ -391,7 +408,7 @@ public ResponseEntity<?> removeAdminAccess(@PathVariable Integer userId, HttpSes
         "Your role has been changed back to USER"
     );
     
-    return ResponseEntity.ok(targetUser);
+    return ResponseEntity.ok(responseUser);
 }
 
 @GetMapping("/debug-console")
