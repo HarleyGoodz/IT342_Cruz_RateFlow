@@ -1,11 +1,13 @@
 package com.example.rateflow
 
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.Window
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -48,6 +50,10 @@ class AdminDashboardActivity : AppCompatActivity() {
     private var currentCategoryFilter: String? = null
     private var currentSearchQuery: String = ""
 
+    companion object {
+        private const val EDIT_SERVICE_REQUEST = 1001
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_dashboard)
@@ -88,13 +94,77 @@ class AdminDashboardActivity : AppCompatActivity() {
         serviceAdapter = ServiceAdapter(
             services = filteredServicesList,
             onEditClick = { service ->
-                Toast.makeText(this, "Edit: ${service.serviceName}", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, EditServiceActivity::class.java)
+                intent.putExtra("service", service)
+                startActivityForResult(intent, EDIT_SERVICE_REQUEST)
             },
             onDeleteClick = { service ->
-                Toast.makeText(this, "Delete: ${service.serviceName}", Toast.LENGTH_SHORT).show()
+                showDeleteConfirmationDialog(service)
             }
         )
         recyclerServices.adapter = serviceAdapter
+    }
+
+    private fun showDeleteConfirmationDialog(service: Service) {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_delete_confirmation)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val tvMessage = dialog.findViewById<TextView>(R.id.tvDeleteMessage)
+        val btnConfirm = dialog.findViewById<Button>(R.id.btnConfirmDelete)
+        val btnCancel = dialog.findViewById<Button>(R.id.btnCancelDelete)
+
+        tvMessage.text = "Are you sure you want to delete \"${service.serviceName}\"? This will also delete all ratings associated with this service."
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
+            deleteService(service)
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun deleteService(service: Service) {
+        // Better approach - show a dialog or use a proper ProgressBar in layout
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("Deleting service...")
+            setCancelable(false)
+            show()
+        }
+
+        RetrofitClient.serviceApi.deleteService(service.serviceId)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    progressDialog.dismiss()
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@AdminDashboardActivity,
+                            "Service deleted successfully", Toast.LENGTH_SHORT).show()
+                        loadServices()
+                    } else {
+                        Toast.makeText(this@AdminDashboardActivity,
+                            "Failed to delete service: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    progressDialog.dismiss()
+                    Toast.makeText(this@AdminDashboardActivity,
+                        "Error: ${t.message}", Toast.LENGTH_LONG).show()
+                }
+            })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == EDIT_SERVICE_REQUEST && resultCode == RESULT_OK) {
+            // Refresh the services list
+            loadServices()
+        }
     }
 
     private fun setupSearchListener() {
