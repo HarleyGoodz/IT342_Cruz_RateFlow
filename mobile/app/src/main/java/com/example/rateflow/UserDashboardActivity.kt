@@ -18,6 +18,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import android.view.Gravity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rateflow.adapter.UserServiceAdapter
+import com.example.rateflow.model.Notification
 import com.example.rateflow.model.Service
 import com.example.rateflow.model.UserService
 import com.example.rateflow.network.RetrofitClient
@@ -46,11 +47,13 @@ class UserDashboardActivity : AppCompatActivity() {
     private lateinit var navigationDrawer: LinearLayout
     private lateinit var drawerUserName: TextView
     private lateinit var drawerUserEmail: TextView
+    private lateinit var badgeNotification: TextView
 
     // Adapter and Lists
     private lateinit var serviceAdapter: UserServiceAdapter
     private var allServicesList = mutableListOf<UserService>()
     private var filteredServicesList = mutableListOf<UserService>()
+    private var notificationCount = 0
 
     // Session
     private lateinit var sharedPreferences: SharedPreferences
@@ -69,6 +72,7 @@ class UserDashboardActivity : AppCompatActivity() {
         setupSearchListener()
         loadUserSession()
         loadAllServices()
+        loadNotificationCount()
     }
 
     private val usernameUpdateReceiver = object : BroadcastReceiver() {
@@ -106,6 +110,9 @@ class UserDashboardActivity : AppCompatActivity() {
         // Refresh services
         Log.d(TAG, "onResume: Refreshing services list")
         loadAllServices()
+
+        loadNotificationCount()
+
     }
 
     override fun onPause() {
@@ -122,6 +129,7 @@ class UserDashboardActivity : AppCompatActivity() {
             tvWelcome = findViewById(R.id.tvWelcome)
             btnMenu = findViewById(R.id.btnMenu)
             btnNotification = findViewById(R.id.btnNotification)
+            badgeNotification = findViewById(R.id.badgeNotification)
             btnProfile = findViewById(R.id.btnProfile)
             recyclerServices = findViewById(R.id.recyclerUserServices)
             tvServiceCount = findViewById(R.id.tvServiceCount)
@@ -140,6 +148,57 @@ class UserDashboardActivity : AppCompatActivity() {
             Log.e(TAG, "initializeViews: Error initializing views", e)
             throw e
         }
+    }
+
+    private fun updateNotificationBadge(count: Int) {
+        notificationCount = count
+        if (count > 0) {
+            badgeNotification.text = if (count > 99) "99+" else count.toString()
+            badgeNotification.visibility = View.VISIBLE
+            Log.d(TAG, "updateNotificationBadge: Showing badge with count $count")
+        } else {
+            badgeNotification.visibility = View.GONE
+            Log.d(TAG, "updateNotificationBadge: Hiding badge (no notifications)")
+        }
+    }
+
+    private fun loadNotificationCount() {
+        if (currentUserEmail.isEmpty()) {
+            Log.d(TAG, "No user logged in, skipping notification count")
+            updateNotificationBadge(0)
+            return
+        }
+
+        Log.d(TAG, "Loading notification count from: http://localhost:8080/api/user-notifications")
+
+        // Call the same endpoint as React - gets ALL notifications
+        RetrofitClient.notificationApi.getUserNotifications().enqueue(object : Callback<List<Notification>> {
+            override fun onResponse(call: Call<List<Notification>>, response: Response<List<Notification>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    // Just like React: setNotificationCount(data.length)
+                    val count = response.body()?.size ?: 0
+                    updateNotificationBadge(count)
+                    Log.d(TAG, "Notification count loaded: $count")
+
+                    // Cache the count for offline use
+                    sharedPreferences.edit()
+                        .putInt("${currentUserEmail}_notification_count", count)
+                        .apply()
+                } else {
+                    Log.e(TAG, "Failed to load notifications: ${response.code()}")
+                    // Use cached count if available
+                    val cachedCount = sharedPreferences.getInt("${currentUserEmail}_notification_count", 0)
+                    updateNotificationBadge(cachedCount)
+                }
+            }
+
+            override fun onFailure(call: Call<List<Notification>>, t: Throwable) {
+                Log.e(TAG, "Network error loading notifications", t)
+                // Use cached count if available
+                val cachedCount = sharedPreferences.getInt("${currentUserEmail}_notification_count", 0)
+                updateNotificationBadge(cachedCount)
+            }
+        })
     }
 
     private fun setupRecyclerView() {

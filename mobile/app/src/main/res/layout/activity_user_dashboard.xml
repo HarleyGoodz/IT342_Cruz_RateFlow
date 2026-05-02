@@ -41,15 +41,40 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/btnNotification"
+            <FrameLayout
+                android:id="@+id/notificationContainer"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:text="🔔"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:background="@drawable/bg_icon_button"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:id="@+id/btnNotification"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="🔔"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:background="@drawable/bg_icon_button" />
+
+                <TextView
+                    android:id="@+id/badgeNotification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="18dp"
+                    android:minHeight="18dp"
+                    android:background="@drawable/bg_badge"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:visibility="gone"
+                    android:text="0" />
+
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/btnProfile"
