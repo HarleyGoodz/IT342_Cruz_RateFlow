@@ -62,6 +62,8 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.12.0")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

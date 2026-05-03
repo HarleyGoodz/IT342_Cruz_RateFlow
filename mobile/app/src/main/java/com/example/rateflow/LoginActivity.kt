@@ -8,9 +8,13 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.example.rateflow.model.User
+import com.example.rateflow.network.GoogleLoginRequest
+import com.example.rateflow.network.GoogleLoginResponse
 import com.example.rateflow.network.LoginRequest
 import com.example.rateflow.network.LoginResponse
 import com.example.rateflow.network.RetrofitClient
+import com.google.android.gms.common.SignInButton
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -19,12 +23,15 @@ class LoginActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "LoginActivity"
+        private const val RC_SIGN_IN = 1001
     }
 
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var btnLogin: Button
     private lateinit var tvRegister: TextView
+    private lateinit var btnGoogleSignIn: SignInButton
+    private lateinit var googleSignInHelper: GoogleSignInHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +39,7 @@ class LoginActivity : AppCompatActivity() {
 
         initializeViews()
         setupClickListeners()
+        googleSignInHelper = GoogleSignInHelper(this)
     }
 
     private fun initializeViews() {
@@ -39,6 +47,7 @@ class LoginActivity : AppCompatActivity() {
         etPassword = findViewById(R.id.etPassword)
         btnLogin = findViewById(R.id.btnLogin)
         tvRegister = findViewById(R.id.tvSignUp)
+        btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn)
     }
 
     private fun setupClickListeners() {
@@ -48,6 +57,100 @@ class LoginActivity : AppCompatActivity() {
 
         tvRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+        }
+
+        btnGoogleSignIn.setOnClickListener {
+            startActivityForResult(googleSignInHelper.getSignInIntent(), RC_SIGN_IN)
+        }
+    }
+
+    private fun saveUserData(user: User) {
+        val sharedPref = getSharedPreferences("UserProfiles", Context.MODE_PRIVATE)
+        val editor = sharedPref.edit()
+
+        editor.putString("current_user", user.email)
+        editor.putString("${user.email}_username", user.username)
+        editor.putString("current_username", user.username)
+        editor.putString("user_role", user.role ?: "USER")
+        editor.putInt("user_id", user.id ?: 0)
+        editor.apply()
+
+        // Verify save
+        val savedEmail = sharedPref.getString("current_user", "NOT_FOUND")
+        val savedUsername = sharedPref.getString("current_username", "NOT_FOUND")
+        Log.d(TAG, "Saved to SharedPreferences - Email: $savedEmail, Username: $savedUsername")
+    }
+
+    private fun showCreateAccountDialog(email: String, displayName: String) {
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Account Not Found")
+            .setMessage("The Google account ($email) is not registered.")
+    }
+
+    private fun navigateToDashboard(role: String) {
+        val intent = if (role == "ADMIN") {
+            Intent(this, AdminDashboardActivity::class.java)
+        } else {
+            Intent(this, UserDashboardActivity::class.java)
+        }
+        startActivity(intent)
+        finish()
+    }
+    private fun authenticateWithBackend(idToken: String, email: String?, displayName: String) {
+        // First, try to login with existing account
+        val request = GoogleLoginRequest(idToken)
+
+        RetrofitClient.instance.googleLogin(request).enqueue(object : Callback<GoogleLoginResponse> {
+            override fun onResponse(call: Call<GoogleLoginResponse>, response: Response<GoogleLoginResponse>) {
+                if (response.isSuccessful && response.body()?.success == true) {
+                    // User exists in database - login successful
+                    val userData = response.body()?.user
+                    if (userData != null) {
+                        saveUserData(userData)
+                        Toast.makeText(this@LoginActivity, "Welcome back, ${userData.username}!", Toast.LENGTH_SHORT).show()
+                        navigateToDashboard(userData.role ?: "USER")
+                    }
+                } else if (response.code() == 403) {
+                    // User not registered - show dialog to create account
+                    val errorBody = response.body()
+                    val errorEmail = errorBody?.email ?: email ?: ""
+
+                    showCreateAccountDialog(errorEmail, displayName)
+                } else {
+                    Toast.makeText(this@LoginActivity, "Authentication failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<GoogleLoginResponse>, t: Throwable) {
+                Log.e(TAG, "Google auth network error", t)
+                Toast.makeText(this@LoginActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN) {
+            val result = googleSignInHelper.handleSignInResult(data)
+            when (result) {
+                is GoogleSignInHelper.GoogleSignInResult.Success -> {
+                    val account = result.account
+                    val idToken = account.idToken
+                    val email = account.email
+                    val displayName = account.displayName ?: email?.split("@")?.get(0) ?: "User"
+
+                    if (idToken != null) {
+                        authenticateWithBackend(idToken, email, displayName)
+                    } else {
+                        Toast.makeText(this, "Failed to get authentication token", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                is GoogleSignInHelper.GoogleSignInResult.Error -> {
+                    Log.e(TAG, "Google Sign-In failed", result.exception)
+                    Toast.makeText(this, "Google Sign-In failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 

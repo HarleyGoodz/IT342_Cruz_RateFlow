@@ -43,6 +43,8 @@ class UserProfileActivity : AppCompatActivity() {
     private var currentUsername: String = ""
     private var currentUserRole: String = ""
 
+    private lateinit var googleSignInHelper: GoogleSignInHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.user_profile)
@@ -54,6 +56,8 @@ class UserProfileActivity : AppCompatActivity() {
         loadUserSession()
         loadDrawerNavigation()
         setupRoleBadge()
+
+        googleSignInHelper = GoogleSignInHelper(this)
     }
 
     private fun initializeViews() {
@@ -258,6 +262,7 @@ class UserProfileActivity : AppCompatActivity() {
         // Show loading state
         btnLogout.isEnabled = false
         btnLogout.text = "Logging out..."
+        googleSignInHelper.signOut()
 
         // Call backend logout to invalidate server session
         RetrofitClient.instance.logout().enqueue(object : Callback<Void> {
