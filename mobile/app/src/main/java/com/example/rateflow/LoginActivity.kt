@@ -32,6 +32,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var tvRegister: TextView
     private lateinit var btnGoogleSignIn: SignInButton
     private lateinit var googleSignInHelper: GoogleSignInHelper
+    private lateinit var tvForgotPassword: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +41,7 @@ class LoginActivity : AppCompatActivity() {
         initializeViews()
         setupClickListeners()
         googleSignInHelper = GoogleSignInHelper(this)
+        handleDeepLink(intent)
     }
 
     private fun initializeViews() {
@@ -48,6 +50,7 @@ class LoginActivity : AppCompatActivity() {
         btnLogin = findViewById(R.id.btnLogin)
         tvRegister = findViewById(R.id.tvSignUp)
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn)
+        tvForgotPassword = findViewById(R.id.tvForgotPassword)
     }
 
     private fun setupClickListeners() {
@@ -61,6 +64,27 @@ class LoginActivity : AppCompatActivity() {
 
         btnGoogleSignIn.setOnClickListener {
             startActivityForResult(googleSignInHelper.getSignInIntent(), RC_SIGN_IN)
+        }
+        tvForgotPassword.setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        intent?.data?.let { uri ->
+            // Check if this is a password reset deep link
+            val token = uri.getQueryParameter("token")
+            if (token != null && uri.path?.contains("reset-password") == true) {
+                // Navigate to ResetPasswordActivity
+                val resetIntent = Intent(this, ResetPasswordActivity::class.java)
+                resetIntent.putExtra("TOKEN", token)
+                startActivity(resetIntent)
+            }
         }
     }
 

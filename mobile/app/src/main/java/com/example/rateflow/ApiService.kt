@@ -8,6 +8,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -74,6 +75,21 @@ interface ApiService {
 
     @POST("/api/auth/logout")
     fun logout(): Call<Void>
+
+    @POST("/api/auth/forgot-password")
+    fun forgotPassword(
+        @Body request: Map<String, String>
+    ): Call<Map<String, Any>>
+
+    @POST("/api/auth/reset-password")
+    fun resetPassword(
+        @Body request: Map<String, String>
+    ): Call<Map<String, Any>>
+
+    @GET("/api/auth/validate-reset-token")
+    fun validateResetToken(
+        @Query("token") token: String
+    ): Call<Map<String, Any>>
 }
 
 

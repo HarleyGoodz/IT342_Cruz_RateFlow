@@ -26,6 +26,10 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="localhost" android:port="3000" android:pathPattern="/reset-password" />
             </intent-filter>
         </activity>
 
@@ -47,6 +51,8 @@
         <activity android:name=".AdminViewRatingsActivity"/>
         <activity android:name=".AccessControlActivity" />
         <activity android:name=".AdminNotificationsActivity"/>
+        <activity android:name=".ForgotPasswordActivity" />
+        <activity android:name=".ResetPasswordActivity" />
 
 
         <meta-data
