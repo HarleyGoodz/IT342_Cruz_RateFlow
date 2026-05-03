@@ -26,7 +26,36 @@ data class LoginResponse(
     val role: String?
 )
 
+data class GoogleLoginRequest(
+    val idToken: String
+)
+
+data class GoogleLoginResponse(
+    val success: Boolean?,
+    val user: User?,
+    val role: String?,
+    val error: String?,
+    val message: String?,
+    val email: String?
+)
+
+data class GoogleRegisterRequest(
+    val email: String,
+    val username: String,
+    val googleId: String
+)
+
 interface ApiService {
+
+    @POST("/api/auth/google")
+    fun googleLogin(
+        @Body request: GoogleLoginRequest
+    ): Call<GoogleLoginResponse>
+
+    @POST("/api/auth/register-from-google")
+    fun registerFromGoogle(
+        @Body request: GoogleRegisterRequest
+    ): Call<RegisterResponse>
 
     @POST("/api/auth/admin/login")
     fun loginUser(
