@@ -5,6 +5,7 @@ import edu.cit.cruz.rateflow.entity.User;
 import edu.cit.cruz.rateflow.repository.RatingRepository;
 import edu.cit.cruz.rateflow.service.NotificationService;
 import edu.cit.cruz.rateflow.service.RatingService;
+import edu.cit.cruz.rateflow.service.ServiceService;
 import edu.cit.cruz.rateflow.service.UserService;
 import jakarta.servlet.http.HttpSession;
 
@@ -21,6 +22,9 @@ public class RatingController {
     
     @Autowired
     private RatingService ratingService;
+
+    @Autowired  
+    private ServiceService serviceService;  
 
     @Autowired
     private RatingRepository ratingRepository;
@@ -137,56 +141,61 @@ public class RatingController {
 
     // Delete a rating/feedback (admin only)
 @DeleteMapping("/delete/{ratingId}")
-public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSession session) {
-    try {
-        Optional<Rating> rating = ratingRepository.findById(ratingId);
-        if (rating.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSession session) {
+        try {
+            Optional<Rating> rating = ratingRepository.findById(ratingId);
+            if (rating.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
 
-        // Get rating details before deletion for notification
+            // Get rating details before deletion
             Rating ratingToDelete = rating.get();
             String userName = ratingToDelete.getUserName();
             Integer serviceId = ratingToDelete.getServiceId();
             Integer starRate = ratingToDelete.getStarRate();
             Integer userId = ratingToDelete.getUserId();
-        
-        ratingRepository.deleteById(ratingId);
+            
+            // Get service name
+            String serviceName = "Unknown Service";
+            Optional<edu.cit.cruz.rateflow.entity.Service> serviceOpt = serviceService.getServiceById(serviceId);
+            if (serviceOpt.isPresent()) {
+                serviceName = serviceOpt.get().getServiceName();
+            }
+            
+            ratingRepository.deleteById(ratingId);
 
-         // ADD USER NOTIFICATION for the user whose feedback was deleted
-        Optional<User> userOpt = userService.findById(userId);
-        if (userOpt.isPresent()) {
-            notificationService.createUserNotification(
-                "Your feedback on service ID " + serviceId + " was deleted by an admin",
-                "FEEDBACK_DELETED",
-                userId,
-                userOpt.get().getEmail(),
-                "Admin",
-                "Your " + starRate + "-star rating and feedback have been removed"
-            );
-        }
+            // User notification for the user whose feedback was deleted
+            Optional<User> userOpt = userService.findById(userId);
+            if (userOpt.isPresent()) {
+                notificationService.createUserNotification(
+                    "Your feedback on service '" + serviceName + "' was deleted by an admin",
+                    "FEEDBACK_DELETED",
+                    userId,
+                    userOpt.get().getEmail(),
+                    "Admin",
+                    "Your " + starRate + "-star rating and feedback have been removed"
+                );
+            }
 
-        // ADD THIS NOTIFICATION CODE
+            // Admin notification
             Integer adminId = (Integer) session.getAttribute("userId");
             String adminUsername = (String) session.getAttribute("userEmail");
             notificationService.createNotification(
-                "Deleted feedback from " + userName,
+                "Deleted feedback from " + userName + " for service '" + serviceName + "'",
                 "DELETE_FEEDBACK",
                 adminId,
                 adminUsername,
                 "Service ID: " + serviceId + ", Rating: " + starRate + " stars"
             );
-
             
-        return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Feedback deleted successfully"
-        ));
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body(Map.of(
-            "error", "Error deleting feedback: " + e.getMessage()
-        ));
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Feedback deleted successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "Error deleting feedback: " + e.getMessage()
+            ));
+        }
     }
-}
-
 }
