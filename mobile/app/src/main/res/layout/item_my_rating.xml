@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     app:cardBackgroundColor="#1A2438"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -47,7 +51,7 @@
             android:text="Category"
             android:textColor="#38B6FF"
             android:textSize="12sp"
-            android:layout_marginTop="4sp" />
+            android:layout_marginTop="4dp" />
 
         <!-- Rating Date -->
         <TextView
@@ -57,7 +61,7 @@
             android:text="Rated on: "
             android:textColor="#7A8499"
             android:textSize="11sp"
-            android:layout_marginTop="8sp" />
+            android:layout_marginTop="8dp" />
 
         <!-- Feedback Text -->
         <TextView
@@ -67,7 +71,7 @@
             android:text="Feedback text here"
             android:textColor="#B0B7C9"
             android:textSize="13sp"
-            android:layout_marginTop="8sp"
+            android:layout_marginTop="8dp"
             android:maxLines="3"
             android:ellipsize="end" />
 
@@ -76,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#2A3448"
-            android:layout_marginTop="12sp" />
+            android:layout_marginTop="12dp" />
 
         <!-- Buttons Row -->
         <LinearLayout
@@ -84,7 +88,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end"
-            android:layout_marginTop="8sp">
+            android:layout_marginTop="8dp">
 
             <TextView
                 android:id="@+id/btnDeleteRating"

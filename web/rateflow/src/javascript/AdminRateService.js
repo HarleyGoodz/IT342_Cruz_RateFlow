@@ -418,14 +418,14 @@ const showAdminRateNotification = (message) => {
         </div>
       )}
 
-      {/* LOGOUT MODAL */}
+      {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="admin-rate-logout-modal-overlay">
-          <div className="admin-rate-logout-modal">
-            <div className="admin-rate-logout-text">Are you sure you want to logout?</div>
-            <div className="admin-rate-logout-buttons">
-              <button className="admin-rate-confirm-btn" onClick={confirmLogout}>Confirm</button>
-              <button className="admin-rate-cancel-btn" onClick={cancelLogout}>Cancel</button>
+        <div className="dashboard-logout-overlay">
+          <div className="dashboard-logout-modal">
+            <div className="dashboard-logout-modal-text">Are you sure you want to logout?</div>
+            <div className="dashboard-logout-modal-actions">
+              <button className="dashboard-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="dashboard-cancel-btn" onClick={cancelLogout}>Cancel</button>
             </div>
           </div>
         </div>

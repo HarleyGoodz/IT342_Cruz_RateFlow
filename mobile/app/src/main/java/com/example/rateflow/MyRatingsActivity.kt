@@ -1,6 +1,7 @@
 package com.example.rateflow
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -69,6 +71,14 @@ class MyRatingsActivity : AppCompatActivity() {
         btnBack.setOnClickListener {
             finish()
         }
+    }
+
+    private fun navigateToRateService(serviceId: Int) {
+        Log.d(TAG, "navigateToRateService called with serviceId: $serviceId")
+        val intent = Intent(this, RateServiceActivity::class.java).apply {
+            putExtra("serviceId", serviceId)
+        }
+        startActivity(intent)
     }
 
     private fun loadUserSession() {
@@ -221,12 +231,26 @@ class MyRatingsActivity : AppCompatActivity() {
     ) : RecyclerView.Adapter<MyRatingsAdapter.ViewHolder>() {
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val cardRoot: CardView = itemView.findViewById(R.id.cardRoot)
             val tvServiceName: TextView = itemView.findViewById(R.id.tvServiceName)
             val tvServiceCategory: TextView = itemView.findViewById(R.id.tvServiceCategory)
             val ratingStarsContainer: LinearLayout = itemView.findViewById(R.id.ratingStarsContainer)
             val tvRatingDate: TextView = itemView.findViewById(R.id.tvRatingDate)
             val tvFeedbackText: TextView = itemView.findViewById(R.id.tvFeedbackText)
             val btnDeleteRating: TextView = itemView.findViewById(R.id.btnDeleteRating)
+
+            init {
+                // Make the entire card clickable
+                cardRoot.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val rating = ratings[position]
+                        rating.serviceId?.let { serviceId ->
+                            navigateToRateService(serviceId)
+                        }
+                    }
+                }
+            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -258,7 +282,7 @@ class MyRatingsActivity : AppCompatActivity() {
                 holder.tvFeedbackText.text = feedbackText
             }
 
-            // Delete button click
+            // Delete button click - This stops the event from bubbling up to the card click
             holder.btnDeleteRating.setOnClickListener {
                 onDeleteClick(rating, position)
             }

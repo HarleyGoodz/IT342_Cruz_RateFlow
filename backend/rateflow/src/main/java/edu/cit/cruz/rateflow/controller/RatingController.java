@@ -141,61 +141,138 @@ public class RatingController {
 
     // Delete a rating/feedback (admin only)
 @DeleteMapping("/delete/{ratingId}")
-    public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSession session) {
-        try {
-            Optional<Rating> rating = ratingRepository.findById(ratingId);
-            if (rating.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
+public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSession session) {
+    try {
+        Optional<Rating> rating = ratingRepository.findById(ratingId);
+        if (rating.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            // Get rating details before deletion
-            Rating ratingToDelete = rating.get();
-            String userName = ratingToDelete.getUserName();
-            Integer serviceId = ratingToDelete.getServiceId();
-            Integer starRate = ratingToDelete.getStarRate();
-            Integer userId = ratingToDelete.getUserId();
-            
-            // Get service name
-            String serviceName = "Unknown Service";
-            Optional<edu.cit.cruz.rateflow.entity.Service> serviceOpt = serviceService.getServiceById(serviceId);
-            if (serviceOpt.isPresent()) {
-                serviceName = serviceOpt.get().getServiceName();
-            }
-            
-            ratingRepository.deleteById(ratingId);
-
-            // User notification for the user whose feedback was deleted
-            Optional<User> userOpt = userService.findById(userId);
+        // Get rating details before deletion
+        Rating ratingToDelete = rating.get();
+        String userName = ratingToDelete.getUserName();
+        Integer serviceId = ratingToDelete.getServiceId();
+        Integer starRate = ratingToDelete.getStarRate();
+        Integer userId = ratingToDelete.getUserId();
+        
+        // Get current logged-in user info - FIXED: Handle Role enum properly
+        Integer currentUserId = (Integer) session.getAttribute("userId");
+        Object userRoleObj = session.getAttribute("userRole");  // This is a Role enum
+        String currentUserEmail = (String) session.getAttribute("userEmail");
+        
+        // Convert Role enum to String
+        String currentUserRole = null;
+        if (userRoleObj instanceof edu.cit.cruz.rateflow.entity.Role) {
+            currentUserRole = ((edu.cit.cruz.rateflow.entity.Role) userRoleObj).toString();
+        } else if (userRoleObj instanceof String) {
+            currentUserRole = (String) userRoleObj;
+        }
+        
+        // DEBUG: Print values to verify
+        System.out.println("currentUserId: " + currentUserId);
+        System.out.println("currentUserRole (converted): " + currentUserRole);
+        System.out.println("currentUserEmail: " + currentUserEmail);
+        System.out.println("rating userId: " + userId);
+        
+        // Get service name
+        String serviceName = "Unknown Service";
+        Optional<edu.cit.cruz.rateflow.entity.Service> serviceOpt = serviceService.getServiceById(serviceId);
+        if (serviceOpt.isPresent()) {
+            serviceName = serviceOpt.get().getServiceName();
+        }
+        
+        // Check if the person deleting is the rating owner or an admin
+        boolean isAdmin = currentUserRole != null && 
+                         (currentUserRole.equals("ADMIN") || 
+                          currentUserRole.equalsIgnoreCase("admin"));
+        boolean isOwner = currentUserId != null && currentUserId.equals(userId);
+        
+        System.out.println("isAdmin: " + isAdmin);
+        System.out.println("isOwner: " + isOwner);
+        
+        if (!isAdmin && !isOwner) {
+            return ResponseEntity.status(403).body(Map.of(
+                "error", "You don't have permission to delete this rating",
+                "yourRole", currentUserRole,
+                "isAdmin", isAdmin,
+                "isOwner", isOwner
+            ));
+        }
+        
+        ratingRepository.deleteById(ratingId);
+        
+        // Send notification based on who is deleting
+        Optional<User> userOpt = userService.findById(userId);
+        
+        if (isOwner && !isAdmin) {
+            // User deleting their OWN rating
             if (userOpt.isPresent()) {
                 notificationService.createUserNotification(
-                    "Your feedback on service '" + serviceName + "' was deleted by an admin",
-                    "FEEDBACK_DELETED",
+                    "You have successfully deleted your own rating for service '" + serviceName + "'!",
+                    "RATING_DELETED_BY_USER",
                     userId,
                     userOpt.get().getEmail(),
-                    "Admin",
-                    "Your " + starRate + "-star rating and feedback have been removed"
+                    userOpt.get().getUsername(),
+                    "Your " + starRate + "-star rating and feedback for " + serviceName + " have been removed from the system"
                 );
             }
-
-            // Admin notification
-            Integer adminId = (Integer) session.getAttribute("userId");
-            String adminUsername = (String) session.getAttribute("userEmail");
+            
+            // Also create an admin notification that a user deleted their own rating
             notificationService.createNotification(
-                "Deleted feedback from " + userName + " for service '" + serviceName + "'",
-                "DELETE_FEEDBACK",
-                adminId,
-                adminUsername,
+                "User " + userName + " deleted their own rating for service '" + serviceName + "'",
+                "USER_DELETED_RATING",
+                currentUserId,
+                currentUserEmail,
                 "Service ID: " + serviceId + ", Rating: " + starRate + " stars"
             );
             
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "Feedback deleted successfully"
+                "message", "Your rating has been deleted successfully"
             ));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of(
-                "error", "Error deleting feedback: " + e.getMessage()
+            
+        } else {
+            // Admin deleting a user's rating (or admin deleting their own)
+            if (userOpt.isPresent()) {
+                String notificationMessage;
+                if (currentUserId.equals(userId)) {
+                    notificationMessage = "You have successfully deleted your own rating for service '" + serviceName + "' (as admin)!";
+                } else {
+                    notificationMessage = "Your feedback on service '" + serviceName + "' was deleted by an admin";
+                }
+                
+                notificationService.createUserNotification(
+                    notificationMessage,
+                    currentUserId.equals(userId) ? "RATING_DELETED_BY_ADMIN_OWN" : "FEEDBACK_DELETED_BY_ADMIN",
+                    userId,
+                    userOpt.get().getEmail(),
+                    currentUserEmail != null ? currentUserEmail : "Admin",
+                    "Your " + starRate + "-star rating and feedback for " + serviceName + " have been removed" + 
+                    (currentUserId.equals(userId) ? " by you (as admin)" : " by an administrator")
+                );
+            }
+            
+            // Admin notification
+            notificationService.createNotification(
+                (currentUserId.equals(userId) ? "Admin deleted their own rating" : "Deleted feedback from " + userName) + 
+                " for service '" + serviceName + "'",
+                "DELETE_FEEDBACK_BY_ADMIN",
+                currentUserId,
+                currentUserEmail,
+                "Service ID: " + serviceId + ", Rating: " + starRate + " stars"
+            );
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", currentUserId.equals(userId) ? "Your rating has been deleted successfully (as admin)" : "Feedback deleted successfully by admin"
             ));
         }
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body(Map.of(
+            "error", "Error deleting feedback: " + e.getMessage()
+        ));
     }
+}
 }
