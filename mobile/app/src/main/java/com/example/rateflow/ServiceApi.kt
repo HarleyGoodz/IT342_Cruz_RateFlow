@@ -17,7 +17,6 @@ interface ServiceApi {
 
     @GET("api/services")
     fun getAllServices(): Call<List<Service>>
-
     @GET("api/services/{serviceId}")
     fun getServiceById(@Path("serviceId") serviceId: Int): Call<Service>
 

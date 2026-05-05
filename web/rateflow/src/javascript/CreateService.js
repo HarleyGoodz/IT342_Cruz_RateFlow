@@ -19,7 +19,7 @@ function CreateService() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showNotificationToast, setShowNotificationToast] = useState(false);
   const [latestNotification, setLatestNotification] = useState(null);
   
   // Form state
@@ -31,29 +31,36 @@ function CreateService() {
     image: null
   });
   const [imagePreview, setImagePreview] = useState(null);
+  
+  // Validation error states
+  const [errors, setErrors] = useState({
+    serviceName: false,
+    serviceDescription: false,
+    image: false
+  });
 
   const fetchNotificationCount = async () => {
-  try {
-    const response = await fetch("http://localhost:8080/api/notifications", {
-      credentials: "include",
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setNotificationCount(data.length);
+    try {
+      const response = await fetch("http://localhost:8080/api/notifications", {
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setNotificationCount(data.length);
+      }
+    } catch (error) {
+      console.error("Error fetching notification count:", error);
     }
-  } catch (error) {
-    console.error("Error fetching notification count:", error);
-  }
-};
+  };
 
-const showNotification = (message, type) => {
-  setLatestNotification({ message, type, timestamp: new Date() });
-  setShowNotificationModal(true);
-  setTimeout(() => {
-    setShowNotificationModal(false);
-  }, 3000);
-  fetchNotificationCount();
-};
+  const showNotification = (message, type = "error") => {
+    setLatestNotification({ message, type, timestamp: new Date() });
+    setShowNotificationToast(true);
+    setTimeout(() => {
+      setShowNotificationToast(false);
+    }, 4000);
+    fetchNotificationCount();
+  };
 
   // Sample services for display
   const [sampleServices] = useState([
@@ -79,10 +86,9 @@ const showNotification = (message, type) => {
   // Check authentication
   useEffect(() => {
     checkAuth();
-
-  fetchNotificationCount();
-  const interval = setInterval(fetchNotificationCount, 30000);
-  return () => clearInterval(interval);
+    fetchNotificationCount();
+    const interval = setInterval(fetchNotificationCount, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const checkAuth = async () => {
@@ -116,12 +122,12 @@ const showNotification = (message, type) => {
   };
 
   const handleManageServices = () => {
-  navigate("/manageservices");
-};
+    navigate("/manageservices");
+  };
 
-const handleAccessControls = () => {
-  navigate("/access-controls");
-};
+  const handleAccessControls = () => {
+    navigate("/access-controls");
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -129,6 +135,13 @@ const handleAccessControls = () => {
       ...prev,
       [name]: value
     }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: false
+      }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -139,12 +152,58 @@ const handleAccessControls = () => {
         image: file
       }));
       setImagePreview(URL.createObjectURL(file));
+      // Clear image error
+      if (errors.image) {
+        setErrors(prev => ({
+          ...prev,
+          image: false
+        }));
+      }
     }
+  };
+
+  // Validation function
+  const validateForm = () => {
+    const newErrors = {
+      serviceName: !formData.serviceName.trim(),
+      serviceDescription: !formData.serviceDescription.trim(),
+      image: !formData.image
+    };
+    
+    setErrors(newErrors);
+    
+    // Build error message
+    const missingFields = [];
+    if (newErrors.serviceName) missingFields.push("Service Name");
+    if (newErrors.serviceDescription) missingFields.push("Service Description");
+    if (newErrors.image) missingFields.push("Service Image");
+    
+    if (missingFields.length > 0) {
+      const errorMessage = `Please fill in the following required fields: ${missingFields.join(", ")}`;
+      showNotification(errorMessage, "error");
+      
+      // Scroll to first error field
+      if (newErrors.serviceName) {
+        document.querySelector('input[name="serviceName"]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (newErrors.serviceDescription) {
+        document.querySelector('textarea[name="serviceDescription"]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (newErrors.image) {
+        document.querySelector('.cs-image-upload')?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      
+      return false;
+    }
+    
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    showNotification(`Service "${formData.serviceName}" was created successfully!`, "success");
+    
+    // Validate all fields first
+    if (!validateForm()) {
+      return;
+    }
     
     const formDataToSend = new FormData();
     formDataToSend.append("serviceName", formData.serviceName);
@@ -161,13 +220,15 @@ const handleAccessControls = () => {
       });
 
       if (response.ok) {
+        showNotification(`Service "${formData.serviceName}" was created successfully!`, "success");
         setShowSuccessModal(true);
       } else {
-        alert("Failed to create service");
+        const errorData = await response.text();
+        showNotification(`Failed to create service: ${errorData}`, "error");
       }
     } catch (error) {
       console.error("Error creating service:", error);
-      alert("Error creating service");
+      showNotification("Error creating service. Please try again.", "error");
     }
   };
 
@@ -203,6 +264,14 @@ const handleAccessControls = () => {
 
   return (
     <div className="cs-layout">
+      {/* Notification Toast */}
+      {showNotificationToast && latestNotification && (
+        <div className={`cs-notification-toast ${latestNotification.type === "success" ? "success" : "error"}`}>
+          <div className="cs-notification-icon">🔔</div>
+          <div className="cs-notification-message">{latestNotification.message}</div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className={`cs-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="cs-sidebar-header">
@@ -214,44 +283,44 @@ const handleAccessControls = () => {
 
         <nav className="cs-nav">
           <button 
-          className={`cs-nav-item ${activeTab === "Services" ? "active" : ""}`} 
-          onClick={() => {
-            setActiveTab("Services");
-            navigate("/admindashboard");
-          }}
-        >
-          {!sidebarCollapsed && <span className="cs-nav-label">Services</span>}
-        </button>
+            className={`cs-nav-item ${activeTab === "Services" ? "active" : ""}`} 
+            onClick={() => {
+              setActiveTab("Services");
+              navigate("/admindashboard");
+            }}
+          >
+            {!sidebarCollapsed && <span className="cs-nav-label">Services</span>}
+          </button>
 
-        <button 
-          className={`cs-nav-item ${activeTab === "Create-Service" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("Create-Service");
-            navigate("/createservice");
-          }}
-        >
-          {!sidebarCollapsed && <span className="cs-nav-label">Create Service</span>}
-        </button>
+          <button 
+            className={`cs-nav-item ${activeTab === "Create-Service" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("Create-Service");
+              navigate("/createservice");
+            }}
+          >
+            {!sidebarCollapsed && <span className="cs-nav-label">Create Service</span>}
+          </button>
 
-        <button 
-          className={`cs-nav-item ${activeTab === "Manage-Services" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("Manage-Services");
-            navigate("/manageservices");
-          }}
-        >
-          {!sidebarCollapsed && <span className="cs-nav-label">Manage Services</span>}
-        </button>
+          <button 
+            className={`cs-nav-item ${activeTab === "Manage-Services" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("Manage-Services");
+              navigate("/manageservices");
+            }}
+          >
+            {!sidebarCollapsed && <span className="cs-nav-label">Manage Services</span>}
+          </button>
 
-        <button 
-          className={`cs-nav-item ${activeTab === "Access-Controls" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("Access-Controls");
-            handleAccessControls();
-          }}
-        >
-          {!sidebarCollapsed && <span className="cs-nav-label">Access Controls</span>}
-        </button>
+          <button 
+            className={`cs-nav-item ${activeTab === "Access-Controls" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("Access-Controls");
+              handleAccessControls();
+            }}
+          >
+            {!sidebarCollapsed && <span className="cs-nav-label">Access Controls</span>}
+          </button>
         </nav>
 
         <div className="cs-sidebar-footer">
@@ -294,11 +363,11 @@ const handleAccessControls = () => {
         <section className="cs-form-area">
           <div className="cs-form-card">
             {/* Image Upload */}
-            <label className="cs-image-upload" htmlFor="cs-image-file">
+            <label className={`cs-image-upload ${errors.image ? "error" : ""}`} htmlFor="cs-image-file">
               {imagePreview ? (
                 <img src={imagePreview} alt="Service preview" />
               ) : (
-                <span>Upload Image</span>
+                <span>Upload Image {errors.image && "(Required)"}</span>
               )}
               <input
                 id="cs-image-file"
@@ -318,12 +387,15 @@ const handleAccessControls = () => {
                 <input
                   type="text"
                   name="serviceName"
-                  placeholder="Service Name"
-                  className="cs-field-input"
+                  placeholder="Service Name *"
+                  className={`cs-field-input ${errors.serviceName ? "error" : ""}`}
                   value={formData.serviceName}
                   onChange={handleInputChange}
                   required
                 />
+                {errors.serviceName && (
+                  <div className="cs-field-error">Service Name is required</div>
+                )}
               </div>
 
               <div className="cs-form-group">
@@ -342,16 +414,19 @@ const handleAccessControls = () => {
               </div>
 
               <div className="cs-form-group">
-                <label className="cs-form-label">Service Description</label>
+                <label className="cs-form-label">Service Description *</label>
                 <textarea
                   name="serviceDescription"
-                  placeholder="Enter service description..."
-                  className="cs-textarea-input"
+                  placeholder="Enter service description... *"
+                  className={`cs-textarea-input ${errors.serviceDescription ? "error" : ""}`}
                   value={formData.serviceDescription}
                   onChange={handleInputChange}
                   rows="4"
                   required
                 />
+                {errors.serviceDescription && (
+                  <div className="cs-field-error">Service Description is required</div>
+                )}
               </div>
 
               <div className="cs-form-actions">
@@ -366,13 +441,6 @@ const handleAccessControls = () => {
           </div>
         </section>
       </main>
-
-      {showNotificationModal && latestNotification && (
-      <div className="cs-notification-toast">
-        <div className="cs-notification-icon">🔔</div>
-        <div className="cs-notification-message">{latestNotification.message}</div>
-      </div>
-    )}
 
       {/* Success Modal */}
       {showSuccessModal && (
