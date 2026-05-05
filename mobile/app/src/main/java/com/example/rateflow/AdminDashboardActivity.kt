@@ -2,6 +2,7 @@ package com.example.rateflow
 
 import android.app.Dialog
 import android.app.ProgressDialog
+import com.bumptech.glide.Glide
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -47,6 +48,8 @@ class AdminDashboardActivity : AppCompatActivity() {
     private var servicesList = mutableListOf<Service>()
     private var filteredServicesList = mutableListOf<Service>()
 
+    private lateinit var imgLogo: ImageView
+
     // Quick actions
     private lateinit var btnViewAll: Button
 
@@ -73,6 +76,7 @@ class AdminDashboardActivity : AppCompatActivity() {
         setContentView(R.layout.activity_admin_dashboard)
 
         initializeViews()
+        loadAnimatedLogo()
         setupDrawer()
         setupRecyclerView()
         setupClickListeners()
@@ -81,11 +85,20 @@ class AdminDashboardActivity : AppCompatActivity() {
         loadServices()
     }
 
+    private fun loadAnimatedLogo() {
+        // Load and animate the GIF using Glide
+        Glide.with(this)
+            .asGif()
+            .load(R.drawable.starlogo) // Your GIF in drawable folder
+            .into(imgLogo)
+    }
+
     private fun initializeViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         btnServices = findViewById(R.id.btnServices)
         btnAccessControls = findViewById(R.id.btnAccessControls)
+        imgLogo = findViewById(R.id.imgLogo)
 
         btnMenu = findViewById(R.id.btnMenu)
         btnAddService = findViewById(R.id.btnAddService)
