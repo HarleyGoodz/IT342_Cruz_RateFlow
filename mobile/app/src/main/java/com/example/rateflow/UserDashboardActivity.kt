@@ -1,6 +1,7 @@
 package com.example.rateflow
 
 import android.content.Context
+import com.bumptech.glide.Glide
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
@@ -33,10 +34,11 @@ class UserDashboardActivity : AppCompatActivity() {
     }
 
     // Views
+    private lateinit var imgLogo: ImageView
     private lateinit var tvWelcome: TextView
     private lateinit var btnMenu: TextView
-    private lateinit var btnNotification: TextView
-    private lateinit var btnProfile: TextView
+    private lateinit var btnNotification: ImageButton
+    private lateinit var btnProfile: ImageButton
     private lateinit var recyclerServices: RecyclerView
     private lateinit var tvServiceCount: TextView
     private lateinit var layoutEmpty: LinearLayout
@@ -67,12 +69,21 @@ class UserDashboardActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate: User Dashboard started")
 
         initializeViews()
+        loadAnimatedLogo()
         setupRecyclerView()
         setupClickListeners()
         setupSearchListener()
         loadUserSession()
         loadAllServices()
         loadNotificationCount()
+    }
+
+    private fun loadAnimatedLogo() {
+        // Load and animate the GIF using Glide
+        Glide.with(this)
+            .asGif()
+            .load(R.drawable.starlogo) // Your GIF in drawable folder
+            .into(imgLogo)
     }
 
     private val usernameUpdateReceiver = object : BroadcastReceiver() {
@@ -126,6 +137,7 @@ class UserDashboardActivity : AppCompatActivity() {
 
     private fun initializeViews() {
         try {
+            imgLogo = findViewById(R.id.imgLogo)
             tvWelcome = findViewById(R.id.tvWelcome)
             btnMenu = findViewById(R.id.btnMenu)
             btnNotification = findViewById(R.id.btnNotification)

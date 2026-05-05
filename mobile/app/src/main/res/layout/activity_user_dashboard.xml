@@ -47,14 +47,14 @@
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp">
 
-                <TextView
+                <ImageButton
                     android:id="@+id/btnNotification"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="🔔"
                     android:textSize="16sp"
                     android:gravity="center"
-                    android:background="@drawable/bg_icon_button" />
+                    android:background="@drawable/bg_icon_button"
+                    android:src="@drawable/ic_notifications"/>
 
                 <TextView
                     android:id="@+id/badgeNotification"
@@ -76,14 +76,14 @@
 
             </FrameLayout>
 
-            <TextView
+            <ImageButton
                 android:id="@+id/btnProfile"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:text="👤"
-                android:textSize="16sp"
                 android:gravity="center"
-                android:background="@drawable/bg_icon_button" />
+                android:padding="8dp"
+                android:background="@drawable/bg_icon_button"
+                android:src="@drawable/ic_person"/>
 
         </LinearLayout>
 
@@ -115,13 +115,15 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp">
 
-                    <TextView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:text="⭐"
-                        android:textSize="36sp"
-                        android:gravity="center"
-                        android:layout_marginEnd="16dp" />
+                    <ImageView
+                        android:id="@+id/imgLogo"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/starlogo"
+                        android:contentDescription="RateFlow Logo"
+                        android:layout_marginBottom="16dp" />
 
                     <TextView
                         android:id="@+id/tvWelcome"

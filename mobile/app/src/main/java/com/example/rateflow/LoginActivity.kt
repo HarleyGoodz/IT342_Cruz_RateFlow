@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import com.bumptech.glide.Glide
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -26,6 +27,7 @@ class LoginActivity : AppCompatActivity() {
         private const val RC_SIGN_IN = 1001
     }
 
+    private lateinit var imgLogo: ImageView
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var btnLogin: Button
@@ -40,6 +42,7 @@ class LoginActivity : AppCompatActivity() {
 
         initializeViews()
         setupClickListeners()
+        loadAnimatedLogo()
         googleSignInHelper = GoogleSignInHelper(this)
         handleDeepLink(intent)
     }
@@ -51,6 +54,15 @@ class LoginActivity : AppCompatActivity() {
         tvRegister = findViewById(R.id.tvSignUp)
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn)
         tvForgotPassword = findViewById(R.id.tvForgotPassword)
+        imgLogo = findViewById(R.id.imgLogo)
+    }
+
+    private fun loadAnimatedLogo() {
+        // Load and animate the GIF using Glide
+        Glide.with(this)
+            .asGif()
+            .load(R.drawable.starlogo) // Your GIF in drawable folder
+            .into(imgLogo)
     }
 
     private fun setupClickListeners() {
