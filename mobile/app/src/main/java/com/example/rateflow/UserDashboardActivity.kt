@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.drawerlayout.widget.DrawerLayout
 import android.view.Gravity
+import android.view.LayoutInflater
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rateflow.adapter.UserServiceAdapter
 import com.example.rateflow.model.Notification
@@ -56,6 +58,7 @@ class UserDashboardActivity : AppCompatActivity() {
     private var allServicesList = mutableListOf<UserService>()
     private var filteredServicesList = mutableListOf<UserService>()
     private var notificationCount = 0
+    private var selectedCategory: String = "All"
 
     // Session
     private lateinit var sharedPreferences: SharedPreferences
@@ -284,36 +287,138 @@ class UserDashboardActivity : AppCompatActivity() {
     }
 
     private fun showFilterDialog() {
-        // Simple filter dialog - can be expanded
-        val options = arrayOf("All", "Food & Hospitality", "Medical & Health", "Retail & Commercial", "Personal & Lifestyle")
-        AlertDialog.Builder(this)
-            .setTitle("Filter by Category")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> {
-                        Log.d(TAG, "Filter: Showing all services")
-                        filterServices("", null)
-                    }
-                    1 -> {
-                        Log.d(TAG, "Filter: Food & Hospitality")
-                        filterServices("", "Food & Hospitality")
-                    }
-                    2 -> {
-                        Log.d(TAG, "Filter: Medical & Health")
-                        filterServices("", "Medical & Health")
-                    }
-                    3 -> {
-                        Log.d(TAG, "Filter: Retail & Commercial")
-                        filterServices("", "Retail & Commercial")
-                    }
-                    4 -> {
-                        Log.d(TAG, "Filter: Personal & Lifestyle")
-                        filterServices("", "Personal & Lifestyle")
-                    }
-                }
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_filter, null)
+
+        // Get buttons from your custom layout
+        val btnFoodHospitality = dialogView.findViewById<Button>(R.id.btnFoodHospitality)
+        val btnMedicalHealth = dialogView.findViewById<Button>(R.id.btnMedicalHealth)
+        val btnRetailCommercial = dialogView.findViewById<Button>(R.id.btnRetailCommercial)
+        val btnPersonalLifestyle = dialogView.findViewById<Button>(R.id.btnPersonalLifestyle)
+        val btnClearFilter = dialogView.findViewById<Button>(R.id.btnClearFilter)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+
+        // Track current selected category
+        var tempSelectedCategory: String? = selectedCategory
+
+        // Function to update button appearances (highlight selected)
+        fun updateButtonSelection(category: String?) {
+            // Reset all buttons background
+            val defaultBg = ContextCompat.getDrawable(this, R.drawable.bg_filter_option)
+            val selectedBg = ContextCompat.getDrawable(this, R.drawable.bg_filter_option_selected)
+
+            btnFoodHospitality.background = defaultBg
+            btnMedicalHealth.background = defaultBg
+            btnRetailCommercial.background = defaultBg
+            btnPersonalLifestyle.background = defaultBg
+
+            // Highlight selected button
+            when (category) {
+                "Food & Hospitality" -> btnFoodHospitality.background = selectedBg
+                "Medical & Health" -> btnMedicalHealth.background = selectedBg
+                "Retail & Commercial" -> btnRetailCommercial.background = selectedBg
+                "Personal & Lifestyle" -> btnPersonalLifestyle.background = selectedBg
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        // Set initial selection
+        updateButtonSelection(selectedCategory)
+
+        // Button click listeners
+        btnFoodHospitality.setOnClickListener {
+            tempSelectedCategory = "Food & Hospitality"
+            updateButtonSelection(tempSelectedCategory)
+        }
+
+        btnMedicalHealth.setOnClickListener {
+            tempSelectedCategory = "Medical & Health"
+            updateButtonSelection(tempSelectedCategory)
+        }
+
+        btnRetailCommercial.setOnClickListener {
+            tempSelectedCategory = "Retail & Commercial"
+            updateButtonSelection(tempSelectedCategory)
+        }
+
+        btnPersonalLifestyle.setOnClickListener {
+            tempSelectedCategory = "Personal & Lifestyle"
+            updateButtonSelection(tempSelectedCategory)
+        }
+
+        btnClearFilter.setOnClickListener {
+            tempSelectedCategory = "All"
+            updateButtonSelection("All")
+        }
+
+        // Create and show dialog
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        // Handle confirm - apply filter when any button is clicked (since no apply button)
+        // Since your layout doesn't have an Apply button, we'll apply immediately
+        // But if you want to keep the current behavior, we need to add listeners
+
+        // Option 1: Apply filter immediately when a category is selected
+        // Just set the value and dismiss
+
+        // Option 2: Add an Apply button (recommended)
+        // For now, let's use immediate application
+        val applyFilter = {
+            if (tempSelectedCategory != selectedCategory) {
+                selectedCategory = tempSelectedCategory ?: "All"
+                filterServices(etSearch.text.toString().trim(), selectedCategory)
+                updateFilterButtonState()
+            }
+            dialog.dismiss()
+        }
+
+        // Apply filter when category is selected (immediate)
+        btnFoodHospitality.setOnClickListener {
+            tempSelectedCategory = "Food & Hospitality"
+            updateButtonSelection(tempSelectedCategory)
+            applyFilter()
+        }
+
+        btnMedicalHealth.setOnClickListener {
+            tempSelectedCategory = "Medical & Health"
+            updateButtonSelection(tempSelectedCategory)
+            applyFilter()
+        }
+
+        btnRetailCommercial.setOnClickListener {
+            tempSelectedCategory = "Retail & Commercial"
+            updateButtonSelection(tempSelectedCategory)
+            applyFilter()
+        }
+
+        btnPersonalLifestyle.setOnClickListener {
+            tempSelectedCategory = "Personal & Lifestyle"
+            updateButtonSelection(tempSelectedCategory)
+            applyFilter()
+        }
+
+        btnClearFilter.setOnClickListener {
+            tempSelectedCategory = "All"
+            updateButtonSelection("All")
+            applyFilter()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    }
+
+    private fun updateFilterButtonState() {
+        if (selectedCategory != "All") {
+            btnFilter.text = "Filter: ${selectedCategory} ✓"
+            btnFilter.setBackgroundResource(R.drawable.bg_filter_apply)
+        } else {
+            btnFilter.text = "Filter"
+            btnFilter.setBackgroundResource(R.drawable.bg_filter_button)
+        }
     }
 
     private fun setupSearchListener() {

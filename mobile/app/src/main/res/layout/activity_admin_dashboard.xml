@@ -119,10 +119,11 @@
 
                 <!-- Star Icon -->
                 <ImageView
+                    android:id="@+id/imgLogo"
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:contentDescription="Star icon"
-                    android:src="@drawable/ic_star_badge" />
+                    android:src="@drawable/starlogo" />
 
                 <!-- Welcome Text -->
                 <TextView
