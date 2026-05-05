@@ -21,6 +21,26 @@ function MyRatings() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [ratingToDelete, setRatingToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  
+  // Notification states (matching ManageServices style)
+  const [showNotificationToast, setShowNotificationToast] = useState(false);
+  const [latestNotification, setLatestNotification] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Show notification toast (matching ManageServices style)
+  const showNotification = (message) => {
+    setLatestNotification({ message, timestamp: new Date() });
+    setShowNotificationToast(true);
+    setTimeout(() => {
+      setShowNotificationToast(false);
+    }, 3000);
+  };
 
   // Filter ratings based on search term and category
   const filteredRatings = myRatings.filter(rating => {
@@ -88,6 +108,53 @@ function MyRatings() {
     fetchUserRatings();
   }, [navigate]);
 
+  // Handle delete click
+  const handleDeleteClick = (rating) => {
+    setRatingToDelete(rating);
+    setShowDeleteModal(true);
+  };
+
+  // Confirm delete rating
+  const confirmDelete = async () => {
+    if (!ratingToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const response = await fetch(`http://localhost:8080/api/ratings/delete/${ratingToDelete.ratingId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Remove the deleted rating from the state
+        setMyRatings(myRatings.filter(r => r.ratingId !== ratingToDelete.ratingId));
+        setShowDeleteModal(false);
+        setRatingToDelete(null);
+        
+        // Show success notification with bell icon style
+        showNotification(`Rating deleted successfully!`);
+        setSuccessMessage(data.message || "Your rating has been deleted successfully!");
+        setShowSuccessModal(true);
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.error || "Failed to delete rating");
+        setShowErrorModal(true);
+      }
+    } catch (error) {
+      console.error("Error deleting rating:", error);
+      setErrorMessage("An error occurred while deleting your rating");
+      setShowErrorModal(true);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setRatingToDelete(null);
+  };
+
   const handleLogoutClick = () => setShowLogoutModal(true);
 
   const confirmLogout = async () => {
@@ -144,6 +211,46 @@ function MyRatings() {
 
   return (
     <div className="myrating-layout">
+      {/* Notification Toast with Bell Icon - Matching ManageServices style */}
+      {showNotificationToast && latestNotification && (
+        <div className="myrating-notification-toast">
+          <div className="myrating-notification-toast-icon">🔔</div>
+          <div className="myrating-notification-toast-message">{latestNotification.message}</div>
+        </div>
+      )}
+
+      {/* Success Modal - Matching ManageServices style */}
+      {showSuccessModal && (
+        <div className="myrating-success-overlay">
+          <div className="myrating-success-modal">
+            <div className="myrating-success-icon">✓</div>
+            <div className="myrating-success-message">{successMessage}</div>
+            <button 
+              className="myrating-success-btn"
+              onClick={() => setShowSuccessModal(false)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal - Matching ManageServices style */}
+      {showErrorModal && (
+        <div className="myrating-error-overlay">
+          <div className="myrating-error-modal">
+            <div className="myrating-error-icon">!</div>
+            <div className="myrating-error-message">{errorMessage}</div>
+            <button 
+              className="myrating-error-btn"
+              onClick={() => setShowErrorModal(false)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className={`myrating-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="myrating-sidebar-header">
@@ -262,7 +369,13 @@ function MyRatings() {
                     className="myrating-record-action-btn view"
                     onClick={() => navigate(`/rate-service/${rating.serviceId}`)}
                   >
-                    View Service
+                    View
+                  </button>
+                  <button 
+                    className="myrating-record-action-btn delete"
+                    onClick={() => handleDeleteClick(rating)}
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
@@ -277,14 +390,54 @@ function MyRatings() {
         )}
       </main>
 
+      {/* Delete Confirmation Modal - Updated styling */}
+      {showDeleteModal && ratingToDelete && (
+        <div className="myrating-delete-overlay">
+          <div className="myrating-delete-modal">
+            <div className="myrating-modal-header">
+              <h2>Confirm Delete</h2>
+              <button 
+                className="myrating-modal-close"
+                onClick={cancelDelete}
+              >
+                ×
+              </button>
+            </div>
+            <div className="myrating-modal-body">
+              <p className="myrating-confirm-text">
+                Are you sure you want to delete your rating for <strong>"{ratingToDelete.service?.serviceName || `Service #${ratingToDelete.serviceId}`}"</strong>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="myrating-modal-footer">
+              <button
+                type="button"
+                className="myrating-btn-cancel"
+                onClick={cancelDelete}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="myrating-btn-delete"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="myrating-logout-overlay">
-          <div className="myrating-logout-modal">
+        <div className="dashboard-logout-overlay">
+          <div className="dashboard-logout-modal">
             <div className="dashboard-logout-modal-text">Are you sure you want to logout?</div>
-            <div className="myrating-logout-modal-actions">
-              <button className="myrating-confirm-btn" onClick={confirmLogout}>Confirm</button>
-              <button className="myrating-cancel-btn" onClick={cancelLogout}>Cancel</button>
+            <div className="dashboard-logout-modal-actions">
+              <button className="dashboard-confirm-btn" onClick={confirmLogout}>Confirm</button>
+              <button className="dashboard-cancel-btn" onClick={cancelLogout}>Cancel</button>
             </div>
           </div>
         </div>

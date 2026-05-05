@@ -454,6 +454,23 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+/* Match ManageServices button sizes */
+.myrating-record-action-btn.view {
+  background: rgba(56, 189, 248, 0.2);
+  color: var(--primary);
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.myrating-record-action-btn.delete {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin-left: 8px;
 }
 
 .myrating-record-action-btn.view {
@@ -674,4 +691,409 @@ body {
   .myrating-page-subtitle {
     text-align: center;
   }
+}
+
+/* Delete Button Styles */
+.myrating-record-action-btn.delete {
+    background-color: #dc3545;
+    color: white;
+    margin-left: 10px;
+}
+
+.myrating-record-action-btn.delete:hover {
+    background-color: #c82333;
+}
+
+.myrating-record-action-btn.delete:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Toast Notification Styles */
+.myrating-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease-out;
+    min-width: 300px;
+    max-width: 450px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.myrating-toast.success {
+    background-color: #28a745;
+    color: white;
+    border-left: 4px solid #155724;
+}
+
+.myrating-toast.error {
+    background-color: #dc3545;
+    color: white;
+    border-left: 4px solid #721c24;
+}
+
+.toast-icon {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 14px;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+    opacity: 0.8;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+/* Modal styles for delete confirmation */
+.myrating-logout-modal .dashboard-logout-modal-text strong {
+    color: #dc3545;
+}
+
+.myrating-confirm-btn:disabled,
+.myrating-cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Notification Toast with Bell Icon - Matching ManageServices */
+.myrating-notification-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95));
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10000;
+  animation: myratingSlideInRight 0.3s ease, myratingFadeOut 0.3s ease 2.7s forwards;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.myrating-notification-toast-icon {
+  font-size: 20px;
+}
+
+.myrating-notification-toast-message {
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+@keyframes myratingSlideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes myratingFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Success Modal - Matching ManageServices */
+.myrating-success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: myratingFadeIn 0.3s ease;
+}
+
+.myrating-success-modal {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  width: 400px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  animation: myratingSlideUp 0.3s ease;
+}
+
+.myrating-success-icon {
+  width: 70px;
+  height: 70px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: #10b981;
+  margin: 0 auto 20px;
+}
+
+.myrating-success-message {
+  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 30px;
+}
+
+.myrating-success-btn {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.myrating-success-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+/* Error Modal - Matching ManageServices */
+.myrating-error-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: myratingFadeIn 0.3s ease;
+}
+
+.myrating-error-modal {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 20px;
+  width: 400px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  animation: myratingSlideUp 0.3s ease;
+}
+
+.myrating-error-icon {
+  width: 70px;
+  height: 70px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: #ef4444;
+  margin: 0 auto 20px;
+}
+
+.myrating-error-message {
+  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 30px;
+}
+
+.myrating-error-btn {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.myrating-error-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+/* Delete Confirmation Modal - Matching ManageServices */
+.myrating-delete-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: myratingFadeIn 0.3s ease;
+}
+
+.myrating-delete-modal {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 20px;
+  width: 450px;
+  max-width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  animation: myratingSlideUp 0.3s ease;
+}
+
+.myrating-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+.myrating-modal-header h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.myrating-modal-close {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: var(--primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.myrating-modal-close:hover {
+  background: rgba(56, 189, 248, 0.2);
+  transform: scale(1.05);
+}
+
+.myrating-modal-body {
+  padding: 28px;
+}
+
+.myrating-confirm-text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.myrating-confirm-text strong {
+  color: #ef4444;
+}
+
+.myrating-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 28px 28px;
+  border-top: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+.myrating-btn-cancel {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(100, 116, 139, 0.2);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  color: var(--text-secondary);
+}
+
+.myrating-btn-cancel:hover {
+  background: rgba(100, 116, 139, 0.3);
+  transform: translateY(-2px);
+}
+
+.myrating-btn-delete {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  color: white;
+}
+
+.myrating-btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.myrating-btn-delete:disabled,
+.myrating-btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes myratingFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes myratingSlideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
