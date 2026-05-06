@@ -68,9 +68,22 @@ function Registration() {
       setErrorMessage("Email has already been created!");
     }
   };
+  
 
   return (
     <div className="register-container">
+      {/* Back button - positioned at upper left */}
+    <div className="back-button-container">
+      <button 
+        className="back-button" 
+        onClick={() => navigate('/')}
+        aria-label="Go back to login"
+      >
+        <span className="back-arrow">←</span>
+        <span>Back</span>
+      </button>
+    </div>
+
       <form className="register-card" onSubmit={handleSubmit}>
         <h2>Create Account</h2>
         <p className="subtitle">Join us and get started</p>
