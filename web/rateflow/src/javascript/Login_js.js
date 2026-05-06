@@ -96,12 +96,14 @@ function LoginContent() {
 
   const closeErrorModal = () => { setShowErrorModal(false); setErrorModalMessage(""); };
   const closeSuccessModal = () => { setShowSuccessModal(false); setSuccessModalMessage(""); };
+  
 
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
         <div class="App-Title">
-          <h2>RateFlow</h2>
+          <h2>Welcome!</h2>
+          <label className="login-field-label">Sign in to your account</label>
         </div>
 
         {successMessage && <div className="success-message">{successMessage}</div>}
@@ -173,7 +175,7 @@ function LoginContent() {
 
         <p className="signup-text">
           Don't have an account?{" "}
-          <Link to="/register" className="signup-link">Create one</Link>
+          <Link to="/register" className="signup-link">Sign up</Link>
         </p>
       </form>
 
