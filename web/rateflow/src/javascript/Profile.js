@@ -174,6 +174,13 @@ function Profile() {
           <div className="profile-logo">
 
             {!sidebarCollapsed && <span className="profile-logo-text">Dashboard</span>}
+
+            <button
+      className="dashboard-back-btn"
+      onClick={() => navigate(-1)}
+    >
+      ←
+    </button>
           </div>
         </div>
 

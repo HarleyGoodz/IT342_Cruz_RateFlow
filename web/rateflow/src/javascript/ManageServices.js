@@ -333,8 +333,7 @@ const showManageNotification = (message) => {
       <aside className={`manage-sidebar ${manageSidebarCollapsed ? "collapsed" : ""}`}>
         <div className="manage-sidebar-header">
           <div className="manage-logo">
-            <span className="manage-logo-icon">🛡️</span>
-            {!manageSidebarCollapsed && <span className="manage-logo-text">Admin Panel</span>}
+            {!manageSidebarCollapsed && <span className="manage-logo-text">Admin Dashboard</span>}
           </div>
         </div>
 
@@ -586,18 +585,7 @@ const showManageNotification = (message) => {
                     />
                   </div>
 
-                  <div className="manage-form-group">
-                    <label>Created By</label>
-                    <input
-                      type="text"
-                      name="createdBy"
-                      value={manageServiceFormData.createdBy}
-                      onChange={handleManageInputChange}
-                      required
-                      placeholder="Enter creator name"
-                      className="manage-field-input"
-                    />
-                  </div>
+                  
 
                   <div className="manage-form-actions">
                     <button

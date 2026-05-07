@@ -8,9 +8,11 @@ import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.example.rateflow.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,6 +21,7 @@ import retrofit2.Response
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var etUsername: EditText
+    private lateinit var imgLogo: ImageView
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var etConfirmPassword: EditText
@@ -36,6 +39,7 @@ class RegisterActivity : AppCompatActivity() {
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
         btnRegister = findViewById(R.id.btnRegister)
         tvSignIn = findViewById(R.id.tvSignIn)
+        imgLogo = findViewById(R.id.imgLogo)
 
         disableEnterKey(etUsername)
         disableEnterKey(etEmail)
@@ -55,6 +59,16 @@ class RegisterActivity : AppCompatActivity() {
         tvSignIn.setOnClickListener {
             finish()
         }
+
+        loadAnimatedLogo()
+    }
+
+    private fun loadAnimatedLogo() {
+        // Load and animate the GIF using Glide
+        Glide.with(this)
+            .asGif()
+            .load(R.drawable.starlogo) // Your GIF in drawable folder
+            .into(imgLogo)
     }
 
     private fun registerUser() {
@@ -64,6 +78,7 @@ class RegisterActivity : AppCompatActivity() {
         val password = etPassword.text.toString().trim()
         val confirmPassword =
             etConfirmPassword.text.toString().trim()
+
 
         if (
             username.isEmpty() ||

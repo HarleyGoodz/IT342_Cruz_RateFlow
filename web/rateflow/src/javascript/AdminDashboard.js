@@ -280,8 +280,7 @@ function AdminDashboard() {
       <aside className={`admin-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="admin-sidebar-header">
           <div className="admin-logo">
-            <span className="admin-logo-icon">🛡️</span>
-            {!sidebarCollapsed && <span className="admin-logo-text">Admin Panel</span>}
+            {!sidebarCollapsed && <span className="admin-logo-text">Admin Dashboard</span>}
           </div>
         </div>
 

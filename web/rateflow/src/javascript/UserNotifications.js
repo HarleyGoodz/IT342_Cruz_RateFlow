@@ -252,6 +252,13 @@ function UserNotifications() {
         <div className="usernotif-sidebar-header">
           <div className="usernotif-logo">
             {!sidebarCollapsed && <span className="usernotif-logo-text">Dashboard</span>}
+
+            <button
+      className="dashboard-back-btn"
+      onClick={() => navigate(-1)}
+    >
+      ←
+    </button>
           </div>
         </div>
 

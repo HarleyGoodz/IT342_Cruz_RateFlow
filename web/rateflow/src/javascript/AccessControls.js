@@ -205,8 +205,8 @@ const showAccessNotification = (message) => {
       <aside className={`access-sidebar ${accessSidebarCollapsed ? "collapsed" : ""}`}>
         <div className="access-sidebar-header">
           <div className="access-logo">
-            <span className="access-logo-icon">🛡️</span>
-            {!accessSidebarCollapsed && <span className="access-logo-text">Admin Panel</span>}
+            
+            {!accessSidebarCollapsed && <span className="access-logo-text">Admin Dashboard</span>}
           </div>
         </div>
 

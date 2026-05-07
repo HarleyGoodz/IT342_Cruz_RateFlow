@@ -50,9 +50,6 @@ class AdminDashboardActivity : AppCompatActivity() {
 
     private lateinit var imgLogo: ImageView
 
-    // Quick actions
-    private lateinit var btnViewAll: Button
-
     // Filter + Search
     private lateinit var btnFilter: TextView
     private lateinit var etSearch: EditText
@@ -104,7 +101,6 @@ class AdminDashboardActivity : AppCompatActivity() {
         btnAddService = findViewById(R.id.btnAddService)
         btnNotification = findViewById(R.id.btnNotification)
         btnProfile = findViewById(R.id.btnProfile)
-        btnViewAll = findViewById(R.id.btnViewAll)
         btnFilter = findViewById(R.id.btnFilter)
         etSearch = findViewById(R.id.etSearch)
         tvServiceCount = findViewById(R.id.tvServiceCount)
@@ -308,11 +304,6 @@ class AdminDashboardActivity : AppCompatActivity() {
         btnProfile.setOnClickListener {
             val intent = Intent(this, UserProfileActivity::class.java)
             startActivity(intent)
-        }
-
-        btnViewAll.setOnClickListener {
-            clearAllFilters()
-            Toast.makeText(this, "Showing all services", Toast.LENGTH_SHORT).show()
         }
 
         btnFilter.setOnClickListener {

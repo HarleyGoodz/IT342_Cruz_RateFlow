@@ -224,7 +224,12 @@ function RateService() {
   };
 
   if (loading) {
-    return <div className="loading-container">Loading...</div>;
+    return (
+      <div className="myrating-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading your ratings...</p>
+      </div>
+    );
   }
 
   if (!service) {
@@ -239,6 +244,13 @@ function RateService() {
           <div className="logo">
             
             {!sidebarCollapsed && <span className="logo-text">Dashboard</span>}
+
+            <button
+      className="dashboard-back-btn"
+      onClick={() => navigate(-1)}
+    >
+      ←
+    </button>
           </div>
         </div>
 

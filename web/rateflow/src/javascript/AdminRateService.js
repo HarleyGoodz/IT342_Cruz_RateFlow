@@ -216,7 +216,12 @@ const showAdminRateNotification = (message) => {
   };
 
   if (loading) {
-    return <div className="admin-rate-loading-container">Loading...</div>;
+    return (
+      <div className="myrating-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading your ratings...</p>
+      </div>
+    );
   }
 
   if (!service) {
@@ -229,7 +234,7 @@ const showAdminRateNotification = (message) => {
       <aside className={`admin-rate-sidebar ${sidebarCollapsed ? "admin-rate-collapsed" : ""}`}>
         <div className="admin-rate-sidebar-header">
           <div className="admin-rate-logo">
-            {!sidebarCollapsed && <span className="admin-rate-logo-text">Admin Panel</span>}
+            {!sidebarCollapsed && <span className="admin-rate-logo-text">Admin Dashboard</span>}
           </div>
           
         </div>
