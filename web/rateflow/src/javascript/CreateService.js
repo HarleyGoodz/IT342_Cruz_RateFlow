@@ -276,8 +276,8 @@ function CreateService() {
       <aside className={`cs-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="cs-sidebar-header">
           <div className="cs-logo">
-            <span className="cs-logo-icon">🛡️</span>
-            {!sidebarCollapsed && <span className="cs-logo-text">Admin Panel</span>}
+          
+            {!sidebarCollapsed && <span className="cs-logo-text">Admin Dashboard</span>}
           </div>
         </div>
 

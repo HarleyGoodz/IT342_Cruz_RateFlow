@@ -235,8 +235,8 @@ const showNotification = (message) => {
       <aside className={`admin-profile-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="admin-profile-sidebar-header">
           <div className="admin-profile-logo">
-            <span className="admin-profile-logo-icon">🛡️</span>
-            {!sidebarCollapsed && <span className="admin-profile-logo-text">Admin Panel</span>}
+            
+            {!sidebarCollapsed && <span className="admin-profile-logo-text">Admin Dashboard</span>}
           </div>
         </div>
 

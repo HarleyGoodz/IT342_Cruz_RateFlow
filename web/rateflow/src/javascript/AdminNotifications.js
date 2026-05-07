@@ -202,8 +202,8 @@ function AdminNotifications() {
       <aside className={`notif-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="notif-sidebar-header">
           <div className="notif-logo">
-            <span className="notif-logo-icon">🛡️</span>
-            {!sidebarCollapsed && <span className="notif-logo-text">Admin Panel</span>}
+            
+            {!sidebarCollapsed && <span className="notif-logo-text">Admin Dashboard</span>}
           </div>
         </div>
 

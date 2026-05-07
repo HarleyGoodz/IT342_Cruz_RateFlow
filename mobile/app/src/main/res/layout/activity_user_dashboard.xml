@@ -269,7 +269,6 @@
             <TextView
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:text="⭐"
                 android:textSize="40sp"
                 android:gravity="center"
 
