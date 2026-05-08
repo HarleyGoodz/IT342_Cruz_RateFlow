@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import "../css/login_css.css";
+import "../../css/login_css.css";
 
 function LoginContent() {
   const [email, setEmail] = useState("");

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import NotificationBell from './NotificationBell';
-import "../css/Profile_css.css";
+import NotificationBell from '../notifications/NotificationBell';
+import "../../css/Profile_css.css";
 
 function Profile() {
   const navigate = useNavigate();

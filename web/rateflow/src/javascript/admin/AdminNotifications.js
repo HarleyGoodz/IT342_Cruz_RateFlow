@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../css/AdminNotificationsStyles.css";
+import "../../css/AdminNotificationsStyles.css";
 
 function AdminNotifications() {
   const navigate = useNavigate();

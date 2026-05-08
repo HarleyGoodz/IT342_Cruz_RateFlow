@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../css/ForgotPasswordModal.css';
+import '../../css/ForgotPasswordModal.css';
 
 function ForgotPasswordModal({ isOpen, onClose }) {
   const [email, setEmail] = useState('');
