@@ -4,6 +4,35 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import "../../css/auth/login_css.css";
 
+// Clean SVG eye icons — same as registration
+const EyeIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+    <line x1="1" y1="1" x2="23" y2="23" className="eye-slash-line" />
+  </svg>
+);
+
+function PasswordToggle({ visible, onToggle, label }) {
+  return (
+    <button
+      type="button"
+      className={`password-toggle${visible ? " visible" : ""}`}
+      onClick={onToggle}
+      aria-label={visible ? `Hide ${label}` : `Show ${label}`}
+    >
+      {visible ? <EyeIcon /> : <EyeOffIcon />}
+    </button>
+  );
+}
+
 function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +44,9 @@ function LoginContent() {
   const [errorModalMessage, setErrorModalMessage] = useState("");
   const [successModalMessage, setSuccessModalMessage] = useState("");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  
+  // Add state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -101,7 +133,7 @@ function LoginContent() {
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
-        <div class="App-Title">
+        <div className="App-Title">
           <h2>Welcome!</h2>
           <label className="login-field-label">Sign in to your account</label>
         </div>
@@ -126,20 +158,25 @@ function LoginContent() {
           </div>
         </div>
 
-        {/* Password field */}
+        {/* Password field with toggle */}
         <div className="login-field-group">
           <label className="login-field-label">Password</label>
-          <div className="login-field-wrap">
+          <div className="login-field-wrap password-group">
             <svg className="login-field-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
               <rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 016 0v2"/>
               <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
             </svg>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+            />
+            <PasswordToggle
+              visible={showPassword}
+              onToggle={() => setShowPassword(v => !v)}
+              label="password"
             />
           </div>
         </div>

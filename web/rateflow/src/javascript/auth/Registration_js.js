@@ -2,11 +2,43 @@ import { useState } from "react";
 import "../../css/auth/registration_css.css";
 import { useNavigate } from "react-router-dom";
 
+// Clean SVG eye icons — no emojis, fully styled via CSS
+const EyeIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+    <line x1="1" y1="1" x2="23" y2="23" className="eye-slash-line" />
+  </svg>
+);
+
+function PasswordToggle({ visible, onToggle, label }) {
+  return (
+    <button
+      type="button"
+      className={`password-toggle${visible ? " visible" : ""}`}
+      onClick={onToggle}
+      aria-label={visible ? `Hide ${label}` : `Show ${label}`}
+    >
+      {visible ? <EyeIcon /> : <EyeOffIcon />}
+    </button>
+  );
+}
+
 function Registration() {
   const navigate = useNavigate();
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -63,26 +95,24 @@ function Registration() {
       setTimeout(() => {
         navigate("/");
       }, 2000);
-
     } catch (err) {
       setErrorMessage("Email has already been created!");
     }
   };
-  
 
   return (
     <div className="register-container">
-      {/* Back button - positioned at upper left */}
-    <div className="back-button-container">
-      <button 
-        className="back-button" 
-        onClick={() => navigate('/')}
-        aria-label="Go back to login"
-      >
-        <span className="back-arrow">←</span>
-        <span>Back</span>
-      </button>
-    </div>
+      {/* Back button */}
+      <div className="back-button-container">
+        <button
+          className="back-button"
+          onClick={() => navigate("/")}
+          aria-label="Go back to login"
+        >
+          <span className="back-arrow">←</span>
+          <span>Back</span>
+        </button>
+      </div>
 
       <form className="register-card" onSubmit={handleSubmit}>
         <h2>Create Account</h2>
@@ -91,7 +121,6 @@ function Registration() {
         {successMessage && (
           <div className="success-message">{successMessage}</div>
         )}
-
         {errorMessage && (
           <div className="error-message">{errorMessage}</div>
         )}
@@ -118,25 +147,37 @@ function Registration() {
           />
         </div>
 
-        <div className="input-group">
+        {/* Password field */}
+        <div className="input-group password-group">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
             required
           />
+          <PasswordToggle
+            visible={showPassword}
+            onToggle={() => setShowPassword((v) => !v)}
+            label="password"
+          />
         </div>
 
-        <div className="input-group">
+        {/* Confirm Password field */}
+        <div className="input-group password-group">
           <input
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
             placeholder="Confirm Password"
             value={formData.confirmPassword}
             onChange={handleChange}
             required
+          />
+          <PasswordToggle
+            visible={showConfirmPassword}
+            onToggle={() => setShowConfirmPassword((v) => !v)}
+            label="confirm password"
           />
         </div>
 
