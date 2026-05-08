@@ -1,4 +1,4 @@
-package edu.cit.cruz.rateflow.entity;
+package edu.cit.cruz.rateflow.features.authentication;
 
 import java.time.LocalDateTime;
 

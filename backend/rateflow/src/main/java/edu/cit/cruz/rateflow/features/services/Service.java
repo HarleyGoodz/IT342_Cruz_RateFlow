@@ -1,4 +1,4 @@
-package edu.cit.cruz.rateflow.entity;
+package edu.cit.cruz.rateflow.features.services;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

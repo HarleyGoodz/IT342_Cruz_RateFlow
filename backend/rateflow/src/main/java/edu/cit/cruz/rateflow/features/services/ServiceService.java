@@ -1,7 +1,5 @@
-package edu.cit.cruz.rateflow.service;
+package edu.cit.cruz.rateflow.features.services;
 
-import edu.cit.cruz.rateflow.entity.Service;
-import edu.cit.cruz.rateflow.repository.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 

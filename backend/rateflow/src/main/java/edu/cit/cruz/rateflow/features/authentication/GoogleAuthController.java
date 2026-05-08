@@ -1,7 +1,5 @@
-package edu.cit.cruz.rateflow.controller;
+package edu.cit.cruz.rateflow.features.authentication;
 
-import edu.cit.cruz.rateflow.entity.User;
-import edu.cit.cruz.rateflow.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

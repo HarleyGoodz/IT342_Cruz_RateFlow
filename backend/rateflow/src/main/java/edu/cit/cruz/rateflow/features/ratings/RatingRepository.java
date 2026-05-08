@@ -1,10 +1,10 @@
-package edu.cit.cruz.rateflow.repository;
+package edu.cit.cruz.rateflow.features.ratings;
 
-import edu.cit.cruz.rateflow.entity.Rating;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 

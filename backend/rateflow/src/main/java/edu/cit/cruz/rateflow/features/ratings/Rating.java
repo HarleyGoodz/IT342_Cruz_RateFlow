@@ -1,4 +1,4 @@
-package edu.cit.cruz.rateflow.entity;
+package edu.cit.cruz.rateflow.features.ratings;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

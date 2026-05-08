@@ -1,7 +1,5 @@
-package edu.cit.cruz.rateflow.service;
+package edu.cit.cruz.rateflow.features.notifications;
 
-import edu.cit.cruz.rateflow.entity.Notification;
-import edu.cit.cruz.rateflow.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

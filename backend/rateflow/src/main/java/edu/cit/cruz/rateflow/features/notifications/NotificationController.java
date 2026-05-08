@@ -1,10 +1,9 @@
-package edu.cit.cruz.rateflow.controller;
+package edu.cit.cruz.rateflow.features.notifications;
 
-import edu.cit.cruz.rateflow.entity.Notification;
-import edu.cit.cruz.rateflow.entity.Role;
-import edu.cit.cruz.rateflow.entity.User;
-import edu.cit.cruz.rateflow.service.NotificationService;
-import edu.cit.cruz.rateflow.service.UserService;
+import edu.cit.cruz.rateflow.features.authentication.Role;
+import edu.cit.cruz.rateflow.features.authentication.User;
+import edu.cit.cruz.rateflow.features.authentication.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

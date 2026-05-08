@@ -1,4 +1,4 @@
-package edu.cit.cruz.rateflow.controller;
+package edu.cit.cruz.rateflow.features.authentication;
 
 import java.util.Optional;
 import java.time.LocalDateTime;
@@ -22,10 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.cit.cruz.rateflow.entity.Role;
-import edu.cit.cruz.rateflow.entity.User;
-import edu.cit.cruz.rateflow.repository.UserRepository;
-import edu.cit.cruz.rateflow.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -52,7 +48,7 @@ public class UserController {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private edu.cit.cruz.rateflow.service.NotificationService notificationService;
+    private edu.cit.cruz.rateflow.features.notifications.NotificationService notificationService;
 
     // Forgot Password - Request reset
     @PostMapping("/forgot-password")

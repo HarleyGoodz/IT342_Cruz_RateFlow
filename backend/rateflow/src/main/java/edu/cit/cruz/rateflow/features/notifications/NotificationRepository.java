@@ -1,6 +1,5 @@
-package edu.cit.cruz.rateflow.repository;
+package edu.cit.cruz.rateflow.features.notifications;
 
-import edu.cit.cruz.rateflow.entity.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

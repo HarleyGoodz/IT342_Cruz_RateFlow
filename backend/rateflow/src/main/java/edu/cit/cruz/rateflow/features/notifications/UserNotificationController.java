@@ -1,7 +1,5 @@
-package edu.cit.cruz.rateflow.controller;
+package edu.cit.cruz.rateflow.features.notifications;
 
-import edu.cit.cruz.rateflow.entity.Notification;
-import edu.cit.cruz.rateflow.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

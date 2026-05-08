@@ -1,12 +1,10 @@
-package edu.cit.cruz.rateflow.controller;
+package edu.cit.cruz.rateflow.features.services;
 
-import edu.cit.cruz.rateflow.entity.Service;
-import edu.cit.cruz.rateflow.entity.Rating;
-import edu.cit.cruz.rateflow.entity.User;
-import edu.cit.cruz.rateflow.repository.RatingRepository;
-import edu.cit.cruz.rateflow.repository.UserRepository;
-import edu.cit.cruz.rateflow.service.NotificationService;
-import edu.cit.cruz.rateflow.service.ServiceService;
+import edu.cit.cruz.rateflow.features.authentication.User;
+import edu.cit.cruz.rateflow.features.authentication.UserRepository;
+import edu.cit.cruz.rateflow.features.notifications.NotificationService;
+import edu.cit.cruz.rateflow.features.ratings.Rating;
+import edu.cit.cruz.rateflow.features.ratings.RatingRepository;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;

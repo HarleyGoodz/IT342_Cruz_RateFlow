@@ -1,7 +1,5 @@
-package edu.cit.cruz.rateflow.service;
+package edu.cit.cruz.rateflow.features.ratings;
 
-import edu.cit.cruz.rateflow.entity.Rating;
-import edu.cit.cruz.rateflow.repository.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;

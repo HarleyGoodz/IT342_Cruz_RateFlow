@@ -1,12 +1,9 @@
-package edu.cit.cruz.rateflow.controller;
+package edu.cit.cruz.rateflow.features.ratings;
 
-import edu.cit.cruz.rateflow.entity.Rating;
-import edu.cit.cruz.rateflow.entity.User;
-import edu.cit.cruz.rateflow.repository.RatingRepository;
-import edu.cit.cruz.rateflow.service.NotificationService;
-import edu.cit.cruz.rateflow.service.RatingService;
-import edu.cit.cruz.rateflow.service.ServiceService;
-import edu.cit.cruz.rateflow.service.UserService;
+import edu.cit.cruz.rateflow.features.authentication.User;
+import edu.cit.cruz.rateflow.features.authentication.UserService;
+import edu.cit.cruz.rateflow.features.notifications.NotificationService;
+import edu.cit.cruz.rateflow.features.services.ServiceService;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,8 +159,8 @@ public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSessio
         
         // Convert Role enum to String
         String currentUserRole = null;
-        if (userRoleObj instanceof edu.cit.cruz.rateflow.entity.Role) {
-            currentUserRole = ((edu.cit.cruz.rateflow.entity.Role) userRoleObj).toString();
+        if (userRoleObj instanceof edu.cit.cruz.rateflow.features.authentication.Role) {
+            currentUserRole = ((edu.cit.cruz.rateflow.features.authentication.Role) userRoleObj).toString();
         } else if (userRoleObj instanceof String) {
             currentUserRole = (String) userRoleObj;
         }
@@ -176,7 +173,7 @@ public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSessio
         
         // Get service name
         String serviceName = "Unknown Service";
-        Optional<edu.cit.cruz.rateflow.entity.Service> serviceOpt = serviceService.getServiceById(serviceId);
+        Optional<edu.cit.cruz.rateflow.features.services.Service> serviceOpt = serviceService.getServiceById(serviceId);
         if (serviceOpt.isPresent()) {
             serviceName = serviceOpt.get().getServiceName();
         }

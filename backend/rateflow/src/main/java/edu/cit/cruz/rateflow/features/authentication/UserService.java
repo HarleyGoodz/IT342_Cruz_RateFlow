@@ -1,4 +1,4 @@
-package edu.cit.cruz.rateflow.service;
+package edu.cit.cruz.rateflow.features.authentication;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import edu.cit.cruz.rateflow.entity.User;
-import edu.cit.cruz.rateflow.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import edu.cit.cruz.rateflow.entity.Role;
 
 @Service
 public class UserService {
