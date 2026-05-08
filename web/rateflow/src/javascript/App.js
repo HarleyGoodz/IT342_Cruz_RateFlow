@@ -1,19 +1,19 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./Login_js";
-import Registration from "./Registration_js";
-import Dashboard from "./Dashboard_js";
-import Profile from "./Profile";
-import MyRatings from "./MyRatings";
-import AdminDashboard from "./AdminDashboard";
-import CreateService from "./CreateService";
-import RateService from "./RateService";
-import ManageServices from "./ManageServices";
-import AdminRateService from "./AdminRateService";
-import AccessControls from "./AccessControls";
-import AdminProfile from "./AdminProfile";
-import AdminNotifications from "./AdminNotifications";
-import UserNotifications from "./UserNotifications";
-import ResetPassword from './ResetPassword';
+import Login from "./auth/Login_js";
+import Registration from "./auth/Registration_js";
+import Dashboard from "./dashboard/Dashboard_js";
+import Profile from "./auth/Profile";
+import MyRatings from "./ratings/MyRatings";
+import AdminDashboard from "./admin/AdminDashboard";
+import CreateService from "./admin/CreateService";
+import RateService from "./ratings/RateService";
+import ManageServices from "./admin/ManageServices";
+import AdminRateService from "./admin/AdminRateService";
+import AccessControls from "./admin/AccessControls";
+import AdminProfile from "./admin/AdminProfile";
+import AdminNotifications from "./admin/AdminNotifications";
+import UserNotifications from "./notifications/UserNotifications";
+import ResetPassword from './auth/ResetPassword';
 import '../css/App.css';
 
 function App() {

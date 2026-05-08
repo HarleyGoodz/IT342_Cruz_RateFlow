@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './javascript/App';
-import Login from "./javascript/Login_js";
+import Login from "./javascript/auth/Login_js";
 import reportWebVitals from './reportWebVitals';
-import Registration from "./javascript/Registration_js";
+import Registration from "./javascript/auth/Registration_js";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

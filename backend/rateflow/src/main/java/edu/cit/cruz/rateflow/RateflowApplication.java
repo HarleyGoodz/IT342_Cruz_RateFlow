@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-@EnableJpaRepositories(basePackages = "edu.cit.cruz.rateflow.repository")
 public class RateflowApplication {
 
 	public static void main(String[] args) {

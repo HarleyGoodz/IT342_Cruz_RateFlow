@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import edu.cit.cruz.rateflow.entity.Role;
-import edu.cit.cruz.rateflow.entity.User;
-import edu.cit.cruz.rateflow.repository.UserRepository;
+import edu.cit.cruz.rateflow.features.authentication.Role;
+import edu.cit.cruz.rateflow.features.authentication.User;
+import edu.cit.cruz.rateflow.features.authentication.UserRepository;
 
 @Configuration
 public class AdminInitializer {
