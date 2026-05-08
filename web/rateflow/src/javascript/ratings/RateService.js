@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import NotificationBell from '../notifications/NotificationBell';
-import "../../css/rateservice_css.css";
+import "../../css/ratings/rateservice_css.css";
 
 function RateService() {
   const navigate = useNavigate();

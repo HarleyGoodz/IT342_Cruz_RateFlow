@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NotificationBell from '../notifications/NotificationBell';
-import "../../css/dashboard_css.css";
+import "../../css/dashboard/dashboard_css.css";
 
 // PREDEFINED CATEGORIES
 const PREDEFINED_CATEGORIES = [

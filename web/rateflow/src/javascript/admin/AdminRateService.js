@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../../css/admin_rateservice.css";
+import "../../css/admin/admin_rateservice.css";
 
 function AdminRateService() {
   const navigate = useNavigate();

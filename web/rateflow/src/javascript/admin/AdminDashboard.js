@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../css/admin_dashboard.css";
+import "../../css/admin/admin_dashboard.css";
 
 // PREDEFINED CATEGORIES - Add this at the top
 const PREDEFINED_CATEGORIES = [

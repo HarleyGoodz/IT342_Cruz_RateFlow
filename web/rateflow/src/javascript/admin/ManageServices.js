@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../css/ManageServicesStyles.css";
+import "../../css/admin/ManageServicesStyles.css";
 
 // PREDEFINED CATEGORIES FOR SERVICES
 const PREDEFINED_SERVICE_CATEGORIES = [
