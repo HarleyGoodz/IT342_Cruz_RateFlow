@@ -176,19 +176,140 @@ class MyRatingsActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmationDialog(rating: Rating, position: Int) {
-        AlertDialog.Builder(this)
-            .setTitle("Delete Rating")
-            .setMessage("Are you sure you want to delete your rating for this service?")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteRating(rating, position)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_rating, null)
+
+        // Get views
+        val tvServiceNamePreview = dialogView.findViewById<TextView>(R.id.tvServiceNamePreview)
+        val deleteMessage = dialogView.findViewById<TextView>(R.id.deleteMessage)
+        val previewStarsContainer = dialogView.findViewById<LinearLayout>(R.id.previewStarsContainer)
+        val previewFeedback = dialogView.findViewById<TextView>(R.id.previewFeedback)
+        val btnCancel = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelDelete)
+        val btnConfirm = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
+
+        // Show loading state in dialog
+        tvServiceNamePreview.text = "Loading service details..."
+
+        // Load service details to show in dialog
+        rating.serviceId?.let { serviceId ->
+            RetrofitClient.serviceApi.getServiceById(serviceId).enqueue(object : Callback<Service> {
+                override fun onResponse(call: Call<Service>, response: Response<Service>) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val service = response.body()!!
+                        tvServiceNamePreview.text = service.serviceName
+                    } else {
+                        tvServiceNamePreview.text = "Service"
+                    }
+                }
+
+                override fun onFailure(call: Call<Service>, t: Throwable) {
+                    tvServiceNamePreview.text = "Service"
+                }
+            })
+        }
+
+        // Customize message based on rating
+        val message = when (rating.starRate) {
+            5 -> "Are you sure you want to delete your 5-star rating? This will affect the service's overall rating."
+            4 -> "Are you sure you want to delete your positive rating?"
+            3 -> "Are you sure you want to delete your rating?"
+            2, 1 -> "Are you sure you want to delete your rating? Your feedback helps improve services."
+            else -> "Are you sure you want to delete your rating for this service?"
+        }
+        deleteMessage.text = message
+
+        // Display rating stars in preview
+        displayPreviewStars(previewStarsContainer, rating.starRate ?: 0)
+
+        // Display feedback if exists
+        if (!rating.feedbackText.isNullOrEmpty()) {
+            previewFeedback.text = "\"${rating.feedbackText}\""
+            previewFeedback.visibility = View.VISIBLE
+        } else {
+            previewFeedback.visibility = View.GONE
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
+            deleteRating(rating, position)
+        }
+    }
+
+    private fun displayPreviewStars(container: LinearLayout, rating: Int) {
+        container.removeAllViews()
+
+        for (i in 0 until 5) {
+            val star = ImageView(this)
+            val params = LinearLayout.LayoutParams(dpToPx(20), dpToPx(20))
+            params.setMargins(dpToPx(2), 0, dpToPx(2), 0)
+            star.layoutParams = params
+            star.scaleType = ImageView.ScaleType.FIT_CENTER
+
+            star.setImageResource(
+                if (i < rating) R.drawable.ic_star_filled
+                else R.drawable.ic_star_empty
+            )
+
+            container.addView(star)
+        }
+    }
+
+    private fun showDeleteSuccessDialog(serviceName: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_success, null)
+        val tvServiceName = dialogView.findViewById<TextView>(R.id.tvDeletedServiceName)
+        val btnOK = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnDialogOK)
+
+        tvServiceName.text = serviceName
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnOK.setOnClickListener {
+            dialog.dismiss()
+        }
     }
 
     private fun deleteRating(rating: Rating, position: Int) {
         progressBar.visibility = View.VISIBLE
 
+        // Get service name first for success dialog
+        var serviceName = "Service"
+        rating.serviceId?.let { serviceId ->
+            RetrofitClient.serviceApi.getServiceById(serviceId).enqueue(object : Callback<Service> {
+                override fun onResponse(call: Call<Service>, response: Response<Service>) {
+                    if (response.isSuccessful && response.body() != null) {
+                        serviceName = response.body()!!.serviceName ?: "Service"
+                    }
+                    // Continue with deletion after getting service name
+                    performDeletion(rating, position, serviceName)
+                }
+
+                override fun onFailure(call: Call<Service>, t: Throwable) {
+                    performDeletion(rating, position, serviceName)
+                }
+            })
+        } ?: run {
+            performDeletion(rating, position, serviceName)
+        }
+    }
+
+    private fun performDeletion(rating: Rating, position: Int, serviceName: String) {
         RetrofitClient.ratingApi.deleteRating(rating.ratingId!!).enqueue(object : Callback<Map<String, Any>> {
             override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
                 progressBar.visibility = View.GONE
@@ -200,7 +321,8 @@ class MyRatingsActivity : AppCompatActivity() {
                         ratingsAdapter.updateRatings(ratingsList)
                         updateStats(ratingsList)
 
-                        Toast.makeText(this@MyRatingsActivity, "Rating deleted successfully", Toast.LENGTH_SHORT).show()
+                        // Show success dialog instead of Toast
+                        showDeleteSuccessDialog(serviceName)
 
                         if (ratingsList.isEmpty()) {
                             layoutEmpty.visibility = View.VISIBLE
