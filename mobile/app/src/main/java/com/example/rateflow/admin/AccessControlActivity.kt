@@ -68,7 +68,6 @@ class AccessControlActivity : AppCompatActivity() {
     }
 
     private fun getCurrentUserId(): Int? {
-        // Get current user ID from SharedPreferences or session
         val sharedPref = getSharedPreferences("RateFlowPrefs", Context.MODE_PRIVATE)
         return sharedPref.getInt("userId", -1).takeIf { it != -1 }
     }
@@ -82,11 +81,9 @@ class AccessControlActivity : AppCompatActivity() {
     private fun setupSearchListener() {
         etSearch.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 filterUsers(s.toString())
             }
-
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
     }
@@ -140,28 +137,127 @@ class AccessControlActivity : AppCompatActivity() {
     }
 
     private fun showRoleChangeConfirmation(user: User, newRole: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_role_confirmation, null)
+
+        // Get views
+        val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val tvUserName = dialogView.findViewById<TextView>(R.id.tvUserName)
+        val tvUserEmail = dialogView.findViewById<TextView>(R.id.tvUserEmail)
+        val tvCurrentRole = dialogView.findViewById<TextView>(R.id.tvCurrentRole)
+        val tvOldRoleBadge = dialogView.findViewById<TextView>(R.id.tvOldRoleBadge)
+        val tvNewRoleBadge = dialogView.findViewById<TextView>(R.id.tvNewRoleBadge)
+        val roleIcon = dialogView.findViewById<ImageView>(R.id.roleIcon)
+        val iconBackground = dialogView.findViewById<View>(R.id.iconBackground)
+        val btnCancel = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancel)
+        val btnConfirm = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirm)
+
         val isPromoting = newRole.equals("ADMIN", ignoreCase = true)
-        val message = if (isPromoting) {
-            "Are you sure you want to make ${user.username} an admin?"
+        val currentRole = user.role ?: "USER"
+
+        // Set user details
+        tvUserName.text = user.username ?: "Unknown User"
+        tvUserEmail.text = user.email ?: "No email"
+        tvCurrentRole.text = currentRole.uppercase()
+
+        // Set role badges
+        tvOldRoleBadge.text = currentRole.uppercase()
+        tvNewRoleBadge.text = newRole.uppercase()
+
+        // Set badge colors
+        if (isPromoting) {
+            // Promoting from USER to ADMIN
+            tvDialogTitle.text = "Grant Admin Access"
+            tvCurrentRole.setTextColor(0xFFFFFFFF.toInt())
+
+            // Set old role badge (USER - gray)
+            tvOldRoleBadge.setBackgroundResource(R.drawable.bg_role_badge_user)
+            tvOldRoleBadge.setTextColor(0xFFFFFFFF.toInt())
+
+            // Set new role badge (ADMIN - blue)
+            tvNewRoleBadge.setBackgroundResource(R.drawable.bg_role_badge_admin)
+            tvNewRoleBadge.setTextColor(0xFFFFFFFF.toInt())
+
+            // Update icon and background for admin promotion
+            roleIcon.setImageResource(R.drawable.ic_admin_shield)
+            roleIcon.setColorFilter(0xFF00BFFF.toInt(), android.graphics.PorterDuff.Mode.SRC_IN)
+            (iconBackground.background as? android.graphics.drawable.GradientDrawable)?.setColor(0x1A00BFFF.toInt())
+
         } else {
-            "Are you sure you want to remove admin access from ${user.username}?"
+            // Demoting from ADMIN to USER
+            tvDialogTitle.text = "Demote"
+            tvCurrentRole.setTextColor(0xFF00BFFF.toInt())
+
+            // Set old role badge (ADMIN - blue)
+            tvOldRoleBadge.setBackgroundResource(R.drawable.bg_role_badge_admin)
+            tvOldRoleBadge.setTextColor(0xFFFFFFFF.toInt())
+
+            // Set new role badge (USER - gray)
+            tvNewRoleBadge.setBackgroundResource(R.drawable.bg_role_badge_user)
+            tvNewRoleBadge.setTextColor(0xFFFFFFFF.toInt())
+
+            // Update icon and background for demotion
+            roleIcon.setImageResource(R.drawable.ic_demote)
+            roleIcon.setColorFilter(0xFFFF5252.toInt(), android.graphics.PorterDuff.Mode.SRC_IN)
+            (iconBackground.background as? android.graphics.drawable.GradientDrawable)?.setColor(0x1AFF5252.toInt())
         }
 
-        AlertDialog.Builder(this)
-            .setTitle("Confirm Role Change")
-            .setMessage(message)
-            .setPositiveButton("Yes") { _, _ ->
-                changeUserRole(user, newRole)
-            }
-            .setNegativeButton("No", null)
-            .show()
+        // Set confirm button text based on action
+        btnConfirm.text = if (isPromoting) "Promote" else "Demote"
+
+        // KEEP THE BUTTON COLOR CONSISTENT - Use your app's primary blue theme
+        // This ensures the button doesn't change color for both actions
+        btnConfirm.backgroundTintList = android.content.res.ColorStateList.valueOf(0xFF00BFFF.toInt())
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
+            changeUserRole(user, newRole)
+        }
+    }
+
+    private fun showRoleChangeSuccessDialog(userName: String, isPromoted: Boolean) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_role_change_success, null)
+        val tvSuccessMessage = dialogView.findViewById<TextView>(R.id.tvSuccessMessage)
+        val btnOK = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOK)
+
+        val message = if (isPromoted) {
+            "$userName has been granted admin access successfully!"
+        } else {
+            "Admin access has been removed from $userName successfully!"
+        }
+        tvSuccessMessage.text = message
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnOK.setOnClickListener {
+            dialog.dismiss()
+        }
     }
 
     private fun changeUserRole(user: User, newRole: String) {
         progressDialog.setMessage("Updating user role...")
         progressDialog.show()
 
-        val call = if (newRole.equals("ADMIN", ignoreCase = true)) {
+        val isPromoting = newRole.equals("ADMIN", ignoreCase = true)
+
+        val call = if (isPromoting) {
             RetrofitClient.userManagementApi.grantAdminAccess(user.id!!)
         } else {
             RetrofitClient.userManagementApi.removeAdminAccess(user.id!!)
@@ -172,12 +268,8 @@ class AccessControlActivity : AppCompatActivity() {
                 progressDialog.dismiss()
 
                 if (response.isSuccessful) {
-                    Toast.makeText(
-                        this@AccessControlActivity,
-                        "User role updated successfully",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    loadUsers() // Refresh the list
+                    showRoleChangeSuccessDialog(user.username ?: "User", isPromoting)
+                    loadUsers()
                 } else {
                     showError("Failed to update user role: ${response.code()}")
                 }
@@ -230,11 +322,10 @@ class UserAdapter(
             tvEmail.text = user.email ?: "No email"
             tvRole.text = user.role ?: "USER"
 
-            // Set role text color based on role
             when (user.role?.uppercase()) {
                 "ADMIN" -> {
                     tvRole.setTextColor(0xFF00BFFF.toInt())
-                    btnChangeRole.text = "Demote to User"
+                    btnChangeRole.text = "Demote"
                 }
                 else -> {
                     tvRole.setTextColor(0xFFFFFFFF.toInt())
@@ -242,7 +333,6 @@ class UserAdapter(
                 }
             }
 
-            // Disable role change for current user (can't change own role)
             btnChangeRole.isEnabled = currentUserId != user.id
 
             btnChangeRole.setOnClickListener {
@@ -252,6 +342,3 @@ class UserAdapter(
         }
     }
 }
-
-// Extension function for ApiService to add user management endpoints
-// Add these functions to your RetrofitClient or create a new interface
