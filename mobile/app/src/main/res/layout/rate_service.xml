@@ -181,7 +181,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:hint="Write your feedback (optional)"
-                        app:hintTextColor="#7A8499"
+                        app:hintTextColor="@color/white"
                         app:boxStrokeColor="#38B6FF"
                         app:boxBackgroundColor="#0D1424"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -195,7 +195,8 @@
                             android:lines="4"
                             android:maxLines="6"
                             android:textColor="#FFFFFF"
-                            android:textColorHint="#7A8499" />
+                            android:textColorHint="#7A8499"
+                            android:textSize="14sp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
