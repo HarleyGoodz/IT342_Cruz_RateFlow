@@ -442,25 +442,76 @@ class RateServiceActivity : AppCompatActivity() {
     }
 
     private fun showSuccessDialogAndRefresh() {
-        AlertDialog.Builder(this)
-            .setTitle("Success!")
-            .setMessage("Your rating has been submitted successfully!")
-            .setPositiveButton("OK") { _, _ ->
-                loadRatingStats()
-                loadFeedbacks()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_rating_success, null)
+        val dialogRatingStars = dialogView.findViewById<LinearLayout>(R.id.dialogRatingStars)
+        val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
+        val feedbackPreviewContainer = dialogView.findViewById<LinearLayout>(R.id.feedbackPreviewContainer)
+        val tvFeedbackPreview = dialogView.findViewById<TextView>(R.id.tvFeedbackPreview)
+        val btnOK = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnDialogOK)
 
-                hasUserRated = true
-                btnSubmitRating.isEnabled = false
-                btnSubmitRating.alpha = 0.5f
-                tvAlreadyRated.visibility = View.VISIBLE
-                etFeedback.isEnabled = false
-                updateInputStars(selectedStarRating)
-            }
+        // Display selected stars in dialog
+        displayDialogStars(selectedStarRating, dialogRatingStars)
+
+        // Customize message based on rating
+        val message = when (selectedStarRating) {
+            5 -> "Excellent! Thank you for your 5-star rating! 🌟"
+            4 -> "Great! We appreciate your positive feedback! 👍"
+            3 -> "Thank you for your honest feedback! 📝"
+            2 -> "Thanks for your feedback. We'll work to improve! 💪"
+            else -> "Thank you for sharing your experience! 🙏"
+        }
+        dialogMessage.text = message
+
+        // Show feedback preview if user wrote something
+        val feedbackText = etFeedback.text?.toString()?.trim()
+        if (!feedbackText.isNullOrEmpty()) {
+            tvFeedbackPreview.text = "\"$feedbackText\""
+            feedbackPreviewContainer.visibility = View.VISIBLE
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
             .setCancelable(false)
-            .show()
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnOK.setOnClickListener {
+            dialog.dismiss()
+            loadRatingStats()
+            loadFeedbacks()
+
+            hasUserRated = true
+            btnSubmitRating.isEnabled = false
+            btnSubmitRating.alpha = 0.5f
+            tvAlreadyRated.visibility = View.VISIBLE
+            etFeedback.isEnabled = false
+            updateInputStars(selectedStarRating)
+        }
 
         btnSubmitRating.isEnabled = true
     }
+
+    private fun displayDialogStars(rating: Int, container: LinearLayout) {
+        container.removeAllViews()
+
+        for (i in 0 until 5) {
+            val star = ImageView(this)
+            val params = LinearLayout.LayoutParams(dpToPx(32), dpToPx(32))
+            params.setMargins(dpToPx(4), 0, dpToPx(4), 0)
+            star.layoutParams = params
+            star.scaleType = ImageView.ScaleType.FIT_CENTER
+
+            star.setImageResource(
+                if (i < rating) R.drawable.ic_star_filled
+                else R.drawable.ic_star_empty
+            )
+
+            container.addView(star)
+        }
+    }
+
 
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()

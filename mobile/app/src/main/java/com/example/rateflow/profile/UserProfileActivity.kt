@@ -157,28 +157,37 @@ class UserProfileActivity : AppCompatActivity() {
     private fun showEditUsernameDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_username, null)
         val etNewUsername = dialogView.findViewById<EditText>(R.id.etNewUsername)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelEdit)
+        val btnSave = dialogView.findViewById<Button>(R.id.btnSaveEdit)
+
         etNewUsername.setText(currentUsername)
         etNewUsername.selectAll()
 
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Edit Username")
             .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
-                val newUsername = etNewUsername.text.toString().trim()
-                if (newUsername.isNotEmpty() && newUsername != currentUsername) {
-                    if (newUsername.length >= 3 && newUsername.length <= 20) {
-                        updateUsername(newUsername)
-                    } else {
-                        Toast.makeText(this, "Username must be 3-20 characters", Toast.LENGTH_SHORT).show()
-                    }
-                } else if (newUsername.isEmpty()) {
-                    Toast.makeText(this, "Username cannot be empty", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
+            .setCancelable(true)
             .create()
 
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnSave.setOnClickListener {
+            val newUsername = etNewUsername.text.toString().trim()
+            if (newUsername.isNotEmpty() && newUsername != currentUsername) {
+                if (newUsername.length in 3..20) {
+                    dialog.dismiss()
+                    updateUsername(newUsername)
+                } else {
+                    Toast.makeText(this, "Username must be 3-20 characters", Toast.LENGTH_SHORT).show()
+                }
+            } else if (newUsername.isEmpty()) {
+                Toast.makeText(this, "Username cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun updateUsername(newUsername: String) {
@@ -251,14 +260,26 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun showLogoutConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle("Logout")
-            .setMessage("Are you sure you want to logout?")
-            .setPositiveButton("Yes") { _, _ ->
-                performLogout()
-            }
-            .setNegativeButton("No", null)
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_logout_confirmation, null)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelLogout)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirmLogout)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
+            performLogout()
+        }
     }
 
     private fun performLogout() {

@@ -6,7 +6,7 @@
     android:background="@drawable/bg_dialog"
     android:padding="24dp">
 
-    <!-- Edit Icon -->
+    <!-- Delete Icon Animation -->
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,15 +16,15 @@
         <View
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:background="@drawable/bg_edit_circle"
-            android:alpha="0.1" />
+            android:background="@drawable/bg_delete_circle"
+            android:alpha="0.15" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="center"
-            android:text="✏️"
-            android:textSize="32sp" />
+            android:src="@drawable/ic_delete_bin"
+            android:tint="#FF5252" />
 
     </FrameLayout>
 
@@ -33,57 +33,50 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Edit Username"
+        android:text="Delete Notification"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
 
-    <!-- Subtitle -->
+    <!-- Message -->
     <TextView
+        android:id="@+id/notificationMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Choose a new username for your account"
+        android:text="Are you sure you want to delete this notification?"
         android:textColor="#A0A8B8"
-        android:textSize="13sp"
-        android:layout_marginBottom="20dp" />
-
-    <!-- Input Field -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Username"
-        android:textColor="#38B6FF"
-        android:textSize="11sp"
-        android:letterSpacing="0.08"
-        android:layout_marginBottom="8dp" />
-
-    <EditText
-        android:id="@+id/etNewUsername"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:hint="Enter new username"
-        android:textColorHint="#7A8499"
-        android:textColor="#FFFFFF"
         android:textSize="14sp"
-        android:background="@drawable/bg_input_field_dialog"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:inputType="text"
-        android:maxLines="1"
-        android:singleLine="true"
+        android:gravity="center"
         android:layout_marginBottom="24dp" />
 
-    <!-- Info Text -->
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- Warning Box -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Username must be 3-20 characters"
-        android:textColor="#64748B"
-        android:textSize="11sp"
-        android:layout_marginBottom="20dp" />
+        android:orientation="horizontal"
+        android:background="@drawable/bg_warning_box"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_warning"
+            android:tint="#FFB74D"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="This action cannot be undone"
+            android:textColor="#FFB74D"
+            android:textSize="12sp" />
+
+    </LinearLayout>
 
     <!-- Buttons -->
     <LinearLayout
@@ -93,27 +86,27 @@
         android:gravity="center">
 
         <Button
-            android:id="@+id/btnCancelEdit"
+            android:id="@+id/btnCancelDelete"
             android:layout_width="0dp"
             android:layout_height="44dp"
             android:layout_weight="1"
             android:text="Cancel"
-            android:textStyle="bold"
             android:textColor="#FF0000"
+            android:textStyle="bold"
             android:textSize="14sp"
             android:background="@drawable/bg_dialog_button_cancel"
             android:layout_marginEnd="8dp" />
 
         <Button
-            android:id="@+id/btnSaveEdit"
+            android:id="@+id/btnConfirmDelete"
             android:layout_width="0dp"
             android:layout_height="44dp"
             android:layout_weight="1"
-            android:text="Save"
-            android:textColor="#0D1B2A"
+            android:text="Delete"
+            android:textColor="#FFFFFF"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:background="@drawable/bg_dialog_button_save"
+            android:background="@drawable/bg_dialog_button_delete"
             android:layout_marginStart="8dp" />
 
     </LinearLayout>

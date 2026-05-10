@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -211,25 +212,58 @@ class UserNotificationActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmation(notification: Notification) {
-        AlertDialog.Builder(this)
-            .setTitle("Delete Notification")
-            .setMessage("Are you sure you want to delete this notification?")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteNotification(notification)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_notification, null)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelDelete)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirmDelete)
+        val notificationMessage = dialogView.findViewById<TextView>(R.id.notificationMessage)
+
+
+        // Customize message with notification details
+        notificationMessage.text = "Delete notification: \"${notification.message.take(50)}${if (notification.message.length > 50) "..." else ""}\""
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
+            deleteNotification(notification)
+        }
     }
 
     private fun showClearAllConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle("Clear All Notifications")
-            .setMessage("Are you sure you want to clear all notifications? This action cannot be undone.")
-            .setPositiveButton("Clear All") { _, _ ->
-                clearAllNotifications()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_clear_all, null)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelClear)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirmClear)
+        val tvNotificationCount = dialogView.findViewById<TextView>(R.id.tvNotificationCount)
+
+        // Show how many notifications will be deleted
+        tvNotificationCount.text = "${notificationsList.size} notification${if (notificationsList.size > 1) "s" else ""} will be deleted"
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
+            clearAllNotifications()
+        }
     }
 
     private fun formatDateString(dateString: String): String {
