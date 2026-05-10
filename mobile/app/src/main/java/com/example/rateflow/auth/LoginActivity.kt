@@ -30,11 +30,14 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var imgLogo: ImageView
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
+    private lateinit var btnTogglePassword: ImageButton
     private lateinit var btnLogin: Button
     private lateinit var tvRegister: TextView
     private lateinit var btnGoogleSignIn: SignInButton
     private lateinit var googleSignInHelper: GoogleSignInHelper
     private lateinit var tvForgotPassword: TextView
+
+    private var isPasswordVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +46,7 @@ class LoginActivity : AppCompatActivity() {
         initializeViews()
         setupClickListeners()
         loadAnimatedLogo()
+        setupPasswordToggle()
         googleSignInHelper = GoogleSignInHelper(this)
         handleDeepLink(intent)
     }
@@ -50,6 +54,7 @@ class LoginActivity : AppCompatActivity() {
     private fun initializeViews() {
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
+        btnTogglePassword = findViewById(R.id.btnTogglePassword)
         btnLogin = findViewById(R.id.btnLogin)
         tvRegister = findViewById(R.id.tvSignUp)
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn)
@@ -65,6 +70,28 @@ class LoginActivity : AppCompatActivity() {
             .into(imgLogo)
     }
 
+    private fun setupPasswordToggle() {
+        btnTogglePassword.setOnClickListener {
+            isPasswordVisible = !isPasswordVisible
+
+            if (isPasswordVisible) {
+                // Show password
+                etPassword.inputType = android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                btnTogglePassword.setImageResource(R.drawable.ic_eye_open)
+
+                // Move cursor to the end of text
+                etPassword.setSelection(etPassword.text.length)
+            } else {
+                // Hide password
+                etPassword.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                btnTogglePassword.setImageResource(R.drawable.ic_eye_off)
+
+                // Move cursor to the end of text
+                etPassword.setSelection(etPassword.text.length)
+            }
+        }
+    }
+
     private fun setupClickListeners() {
         btnLogin.setOnClickListener {
             loginUser()
@@ -77,6 +104,7 @@ class LoginActivity : AppCompatActivity() {
         btnGoogleSignIn.setOnClickListener {
             startActivityForResult(googleSignInHelper.getSignInIntent(), RC_SIGN_IN)
         }
+
         tvForgotPassword.setOnClickListener {
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
@@ -120,7 +148,16 @@ class LoginActivity : AppCompatActivity() {
     private fun showCreateAccountDialog(email: String, displayName: String) {
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Account Not Found")
-            .setMessage("The Google account ($email) is not registered.")
+            .setMessage("The Google account ($email) is not registered. Would you like to create an account?")
+            .setPositiveButton("Sign Up") { _, _ ->
+                // Navigate to RegisterActivity with pre-filled email
+                val intent = Intent(this, RegisterActivity::class.java)
+                intent.putExtra("email", email)
+                intent.putExtra("name", displayName)
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun navigateToDashboard(role: String) {
@@ -132,6 +169,7 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
     private fun authenticateWithBackend(idToken: String, email: String?, displayName: String) {
         // First, try to login with existing account
         val request = GoogleLoginRequest(idToken)
@@ -198,7 +236,6 @@ class LoginActivity : AppCompatActivity() {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
-
 
         btnLogin.isEnabled = false
 

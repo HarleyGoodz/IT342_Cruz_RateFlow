@@ -6,6 +6,7 @@ import android.util.Patterns
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -26,6 +27,11 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var etConfirmPassword: EditText
     private lateinit var btnRegister: Button
     private lateinit var tvSignIn: TextView
+    private lateinit var btnTogglePassword: ImageButton
+    private lateinit var btnToggleConfirmPassword: ImageButton
+
+    private var isPasswordVisible = false
+    private var isConfirmPasswordVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +45,8 @@ class RegisterActivity : AppCompatActivity() {
         btnRegister = findViewById(R.id.btnRegister)
         tvSignIn = findViewById(R.id.tvSignIn)
         imgLogo = findViewById(R.id.imgLogo)
+        btnTogglePassword = findViewById(R.id.btnTogglePassword)
+        btnToggleConfirmPassword = findViewById(R.id.btnToggleConfirmPassword)
 
         disableEnterKey(etUsername)
         disableEnterKey(etEmail)
@@ -50,6 +58,8 @@ class RegisterActivity : AppCompatActivity() {
         etEmail.filters = filters
         etPassword.filters = filters
         etConfirmPassword.filters = filters
+
+        setupPasswordToggles()
 
         btnRegister.setOnClickListener {
             registerUser()
@@ -70,14 +80,48 @@ class RegisterActivity : AppCompatActivity() {
             .into(imgLogo)
     }
 
+    private fun setupPasswordToggles() {
+        // Toggle for Password field
+        btnTogglePassword.setOnClickListener {
+            isPasswordVisible = !isPasswordVisible
+
+            if (isPasswordVisible) {
+                // Show password
+                etPassword.inputType = android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                btnTogglePassword.setImageResource(R.drawable.ic_eye_open)
+            } else {
+                // Hide password
+                etPassword.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                btnTogglePassword.setImageResource(R.drawable.ic_eye_off)
+            }
+            // Move cursor to the end of text
+            etPassword.setSelection(etPassword.text.length)
+        }
+
+        // Toggle for Confirm Password field
+        btnToggleConfirmPassword.setOnClickListener {
+            isConfirmPasswordVisible = !isConfirmPasswordVisible
+
+            if (isConfirmPasswordVisible) {
+                // Show confirm password
+                etConfirmPassword.inputType = android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                btnToggleConfirmPassword.setImageResource(R.drawable.ic_eye_open)
+            } else {
+                // Hide confirm password
+                etConfirmPassword.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                btnToggleConfirmPassword.setImageResource(R.drawable.ic_eye_off)
+            }
+            // Move cursor to the end of text
+            etConfirmPassword.setSelection(etConfirmPassword.text.length)
+        }
+    }
+
     private fun registerUser() {
 
         val username = etUsername.text.toString().trim()
         val email = etEmail.text.toString().trim()
         val password = etPassword.text.toString().trim()
-        val confirmPassword =
-            etConfirmPassword.text.toString().trim()
-
+        val confirmPassword = etConfirmPassword.text.toString().trim()
 
         if (
             username.isEmpty() ||
@@ -120,12 +164,7 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
-        val request =
-            RegisterRequest(
-                username,
-                email,
-                password
-            )
+        val request = RegisterRequest(username, email, password)
 
         RetrofitClient.instance
             .registerUser(request)
@@ -137,22 +176,31 @@ class RegisterActivity : AppCompatActivity() {
                 ) {
 
                     if (response.isSuccessful) {
-
                         Toast.makeText(
                             this@RegisterActivity,
                             "Registration successful",
                             Toast.LENGTH_SHORT
                         ).show()
-
                         finish()
-                    }
-                    else {
-
-                        Toast.makeText(
-                            this@RegisterActivity,
-                            "Registration failed",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    } else {
+                        // Handle specific error codes
+                        when (response.code()) {
+                            409 -> Toast.makeText(
+                                this@RegisterActivity,
+                                "Email or username already exists",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            400 -> Toast.makeText(
+                                this@RegisterActivity,
+                                "Invalid input data",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            else -> Toast.makeText(
+                                this@RegisterActivity,
+                                "Registration failed: ${response.code()}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
 
@@ -160,10 +208,9 @@ class RegisterActivity : AppCompatActivity() {
                     call: Call<RegisterResponse>,
                     t: Throwable
                 ) {
-
                     Toast.makeText(
                         this@RegisterActivity,
-                        "Cannot connect to server",
+                        "Cannot connect to server: ${t.message}",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -171,36 +218,27 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun disableEnterKey(editText: EditText) {
-
         editText.setOnEditorActionListener { _, actionId, _ ->
-
             if (
                 actionId == EditorInfo.IME_ACTION_DONE ||
                 actionId == EditorInfo.IME_ACTION_NEXT
             ) {
                 return@setOnEditorActionListener true
             }
-
             false
         }
     }
 
-    private val emojiFilter =
-        InputFilter { source, start, end, _, _, _ ->
-
-            for (i in start until end) {
-
-                val type =
-                    Character.getType(source[i])
-
-                if (
-                    type == Character.SURROGATE.toInt() ||
-                    type == Character.OTHER_SYMBOL.toInt()
-                ) {
-                    return@InputFilter ""
-                }
+    private val emojiFilter = InputFilter { source, start, end, _, _, _ ->
+        for (i in start until end) {
+            val type = Character.getType(source[i])
+            if (
+                type == Character.SURROGATE.toInt() ||
+                type == Character.OTHER_SYMBOL.toInt()
+            ) {
+                return@InputFilter ""
             }
-
-            null
         }
+        null
+    }
 }
