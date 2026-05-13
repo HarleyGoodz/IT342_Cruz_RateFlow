@@ -15,6 +15,8 @@ import com.example.rateflow.network.GoogleLoginResponse
 import com.example.rateflow.network.LoginRequest
 import com.example.rateflow.network.LoginResponse
 import com.example.rateflow.core.RetrofitClient
+import com.example.rateflow.utils.CustomNotification
+import com.example.rateflow.utils.NotificationType
 import com.google.android.gms.common.SignInButton
 import retrofit2.Call
 import retrofit2.Callback
@@ -36,6 +38,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnGoogleSignIn: SignInButton
     private lateinit var googleSignInHelper: GoogleSignInHelper
     private lateinit var tvForgotPassword: TextView
+    private lateinit var customNotification: CustomNotification
 
     private var isPasswordVisible = false
 
@@ -44,6 +47,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.login)
 
         initializeViews()
+        customNotification = CustomNotification(this)
         setupClickListeners()
         loadAnimatedLogo()
         setupPasswordToggle()
@@ -181,7 +185,12 @@ class LoginActivity : AppCompatActivity() {
                     val userData = response.body()?.user
                     if (userData != null) {
                         saveUserData(userData)
-                        Toast.makeText(this@LoginActivity, "Welcome back, ${userData.username}!", Toast.LENGTH_SHORT).show()
+                        customNotification.show(
+                            message = "Welcome back, ${userData.username}!",
+                            title = "Success",
+                            type = NotificationType.SUCCESS,
+                            duration = 2000
+                        )
                         navigateToDashboard(userData.role ?: "USER")
                     }
                 } else if (response.code() == 403) {
@@ -191,13 +200,23 @@ class LoginActivity : AppCompatActivity() {
 
                     showCreateAccountDialog(errorEmail, displayName)
                 } else {
-                    Toast.makeText(this@LoginActivity, "Authentication failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    customNotification.show(
+                        message = "Authentication failed: ${response.code()}",
+                        title = "Error",
+                        type = NotificationType.ERROR,
+                        duration = 2000
+                    )
                 }
             }
 
             override fun onFailure(call: Call<GoogleLoginResponse>, t: Throwable) {
                 Log.e(TAG, "Google auth network error", t)
-                Toast.makeText(this@LoginActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+                customNotification.show(
+                    message = "Network error: ${t.message}",
+                    title = "Connection Error",
+                    type = NotificationType.ERROR,
+                    duration = 3000
+                )
             }
         })
     }
@@ -217,12 +236,22 @@ class LoginActivity : AppCompatActivity() {
                     if (idToken != null) {
                         authenticateWithBackend(idToken, email, displayName)
                     } else {
-                        Toast.makeText(this, "Failed to get authentication token", Toast.LENGTH_SHORT).show()
+                        customNotification.show(
+                            message = "Failed to get authentication token",
+                            title = "Error",
+                            type = NotificationType.ERROR,
+                            duration = 2000
+                        )
                     }
                 }
                 is GoogleSignInHelper.GoogleSignInResult.Error -> {
                     Log.e(TAG, "Google Sign-In failed", result.exception)
-                    Toast.makeText(this, "Google Sign-In failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    customNotification.show(
+                        message = "Google Sign-In failed: ${result.exception.message}",
+                        title = "Sign In Error",
+                        type = NotificationType.ERROR,
+                        duration = 2000
+                    )
                 }
             }
         }
@@ -233,7 +262,12 @@ class LoginActivity : AppCompatActivity() {
         val password = etPassword.text.toString().trim()
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+            customNotification.show(
+                message = "Please fill all fields",
+                title = "Missing Information",
+                type = NotificationType.WARNING,
+                duration = 2000
+            )
             return
         }
 
@@ -279,7 +313,12 @@ class LoginActivity : AppCompatActivity() {
                         val savedUsername = sharedPref.getString("current_username", "NOT_FOUND")
                         Log.d(TAG, "Saved to SharedPreferences - Email: $savedEmail, Username: $savedUsername")
 
-                        Toast.makeText(this@LoginActivity, "Login successful! Welcome $username", Toast.LENGTH_SHORT).show()
+                        customNotification.show(
+                            message = "Welcome $username!",
+                            title = "Login Successful",
+                            type = NotificationType.SUCCESS,
+                            duration = 2000
+                        )
 
                         // Navigate based on role
                         if (user.role == "ADMIN") {
@@ -292,7 +331,12 @@ class LoginActivity : AppCompatActivity() {
                         finish()
                     } else {
                         Log.e(TAG, "Login response body is null")
-                        Toast.makeText(this@LoginActivity, "Login failed: Invalid response", Toast.LENGTH_SHORT).show()
+                        customNotification.show(
+                            message = "Login failed: Invalid response",
+                            title = "Error",
+                            type = NotificationType.ERROR,
+                            duration = 2000
+                        )
                     }
                 } else {
                     Log.e(TAG, "Login failed - Code: ${response.code()}")
