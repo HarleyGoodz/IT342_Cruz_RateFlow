@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -31,6 +33,8 @@ import com.example.rateflow.notifications.Notification
 import com.example.rateflow.services.Service
 import com.example.rateflow.profile.UserService
 import com.example.rateflow.core.RetrofitClient
+import com.example.rateflow.utils.CustomNotification
+import com.example.rateflow.utils.NotificationType
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -71,11 +75,17 @@ class UserDashboardActivity : AppCompatActivity() {
     private var currentUserEmail: String = ""
     private var currentUsername: String = ""
 
+    // Custom Notification
+    private lateinit var customNotification: CustomNotification
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_dashboard)
 
         Log.d(TAG, "onCreate: User Dashboard started")
+
+        // Initialize custom notification
+        customNotification = CustomNotification(this)
 
         initializeViews()
         loadAnimatedLogo()
@@ -85,13 +95,31 @@ class UserDashboardActivity : AppCompatActivity() {
         loadUserSession()
         loadAllServices()
         loadNotificationCount()
+
+        // Show welcome notification if coming from login
+        showWelcomeNotificationIfNeeded()
+    }
+
+    private fun showWelcomeNotificationIfNeeded() {
+        val shouldShow = intent.getBooleanExtra("show_welcome_notification", false)
+        val username = intent.getStringExtra("username") ?: currentUsername
+
+        if (shouldShow) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                customNotification.show(
+                    message = "Welcome $username!",
+                    title = "Login Successful",
+                    type = NotificationType.SUCCESS,
+                    duration = 3000
+                )
+            }, 500)
+        }
     }
 
     private fun loadAnimatedLogo() {
-        // Load and animate the GIF using Glide
         Glide.with(this)
             .asGif()
-            .load(R.drawable.starlogo) // Your GIF in drawable folder
+            .load(R.drawable.starlogo)
             .into(imgLogo)
     }
 
@@ -106,11 +134,17 @@ class UserDashboardActivity : AppCompatActivity() {
                     tvWelcome.text = "Welcome $currentUsername!"
                     drawerUserName.text = currentUsername
 
-                    // Update shared preferences
                     val editor = sharedPreferences.edit()
                     editor.putString("current_username", newUsername)
                     editor.putString("${currentUserEmail}_username", newUsername)
                     editor.apply()
+
+                    customNotification.show(
+                        message = "Username updated successfully!",
+                        title = "Profile Updated",
+                        type = NotificationType.SUCCESS,
+                        duration = 2000
+                    )
                 }
             }
         }
@@ -120,19 +154,15 @@ class UserDashboardActivity : AppCompatActivity() {
         super.onResume()
         val filter = IntentFilter("USERNAME_UPDATED")
 
-        // For Android 14+ (API 34+), you need to specify the flag
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(usernameUpdateReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(usernameUpdateReceiver, filter)
         }
 
-        // Refresh services
         Log.d(TAG, "onResume: Refreshing services list")
         loadAllServices()
-
         loadNotificationCount()
-
     }
 
     override fun onPause() {
@@ -192,22 +222,18 @@ class UserDashboardActivity : AppCompatActivity() {
 
         Log.d(TAG, "Loading notification count from: http://localhost:8080/api/user-notifications")
 
-        // Call the same endpoint as React - gets ALL notifications
         RetrofitClient.notificationApi.getUserNotifications().enqueue(object : Callback<List<Notification>> {
             override fun onResponse(call: Call<List<Notification>>, response: Response<List<Notification>>) {
                 if (response.isSuccessful && response.body() != null) {
-                    // Just like React: setNotificationCount(data.length)
                     val count = response.body()?.size ?: 0
                     updateNotificationBadge(count)
                     Log.d(TAG, "Notification count loaded: $count")
 
-                    // Cache the count for offline use
                     sharedPreferences.edit()
                         .putInt("${currentUserEmail}_notification_count", count)
                         .apply()
                 } else {
                     Log.e(TAG, "Failed to load notifications: ${response.code()}")
-                    // Use cached count if available
                     val cachedCount = sharedPreferences.getInt("${currentUserEmail}_notification_count", 0)
                     updateNotificationBadge(cachedCount)
                 }
@@ -215,7 +241,6 @@ class UserDashboardActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<List<Notification>>, t: Throwable) {
                 Log.e(TAG, "Network error loading notifications", t)
-                // Use cached count if available
                 val cachedCount = sharedPreferences.getInt("${currentUserEmail}_notification_count", 0)
                 updateNotificationBadge(cachedCount)
             }
@@ -223,10 +248,8 @@ class UserDashboardActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-
         val gridLayoutManager = GridLayoutManager(this, 2)
         recyclerServices.layoutManager = gridLayoutManager
-
 
         val spacingInPixels = resources.getDimensionPixelSize(R.dimen.grid_spacing)
         recyclerServices.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, true))
@@ -258,10 +281,8 @@ class UserDashboardActivity : AppCompatActivity() {
 
         btnProfile.setOnClickListener {
             Log.d(TAG, "Profile button clicked - Navigating to Profile Page")
-            // ✅ Navigate to UserProfileActivity
             val intent = Intent(this, UserProfileActivity::class.java)
             startActivity(intent)
-            // Optional: Add animation
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
@@ -280,7 +301,6 @@ class UserDashboardActivity : AppCompatActivity() {
         navServices.setOnClickListener {
             Log.d(TAG, "Drawer - Services clicked")
             drawerLayout.closeDrawer(Gravity.START)
-            // Already on services page, just refresh
             loadAllServices()
         }
 
@@ -295,7 +315,6 @@ class UserDashboardActivity : AppCompatActivity() {
     private fun showFilterDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_filter, null)
 
-        // Get buttons from your custom layout
         val btnFoodHospitality = dialogView.findViewById<Button>(R.id.btnFoodHospitality)
         val btnMedicalHealth = dialogView.findViewById<Button>(R.id.btnMedicalHealth)
         val btnRetailCommercial = dialogView.findViewById<Button>(R.id.btnRetailCommercial)
@@ -303,12 +322,9 @@ class UserDashboardActivity : AppCompatActivity() {
         val btnClearFilter = dialogView.findViewById<Button>(R.id.btnClearFilter)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
 
-        // Track current selected category
         var tempSelectedCategory: String? = selectedCategory
 
-        // Function to update button appearances (highlight selected)
         fun updateButtonSelection(category: String?) {
-            // Reset all buttons background
             val defaultBg = ContextCompat.getDrawable(this, R.drawable.bg_filter_option)
             val selectedBg = ContextCompat.getDrawable(this, R.drawable.bg_filter_option_selected)
 
@@ -317,7 +333,6 @@ class UserDashboardActivity : AppCompatActivity() {
             btnRetailCommercial.background = defaultBg
             btnPersonalLifestyle.background = defaultBg
 
-            // Highlight selected button
             when (category) {
                 "Food & Hospitality" -> btnFoodHospitality.background = selectedBg
                 "Medical & Health" -> btnMedicalHealth.background = selectedBg
@@ -326,59 +341,27 @@ class UserDashboardActivity : AppCompatActivity() {
             }
         }
 
-        // Set initial selection
         updateButtonSelection(selectedCategory)
 
-        // Button click listeners
-        btnFoodHospitality.setOnClickListener {
-            tempSelectedCategory = "Food & Hospitality"
-            updateButtonSelection(tempSelectedCategory)
-        }
-
-        btnMedicalHealth.setOnClickListener {
-            tempSelectedCategory = "Medical & Health"
-            updateButtonSelection(tempSelectedCategory)
-        }
-
-        btnRetailCommercial.setOnClickListener {
-            tempSelectedCategory = "Retail & Commercial"
-            updateButtonSelection(tempSelectedCategory)
-        }
-
-        btnPersonalLifestyle.setOnClickListener {
-            tempSelectedCategory = "Personal & Lifestyle"
-            updateButtonSelection(tempSelectedCategory)
-        }
-
-        btnClearFilter.setOnClickListener {
-            tempSelectedCategory = "All"
-            updateButtonSelection("All")
-        }
-
-        // Create and show dialog
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .create()
 
-        // Handle confirm - apply filter when any button is clicked (since no apply button)
-        // Since your layout doesn't have an Apply button, we'll apply immediately
-        // But if you want to keep the current behavior, we need to add listeners
-
-        // Option 1: Apply filter immediately when a category is selected
-        // Just set the value and dismiss
-
-        // Option 2: Add an Apply button (recommended)
-        // For now, let's use immediate application
         val applyFilter = {
             if (tempSelectedCategory != selectedCategory) {
                 selectedCategory = tempSelectedCategory ?: "All"
                 filterServices(etSearch.text.toString().trim(), selectedCategory)
                 updateFilterButtonState()
+                customNotification.show(
+                    message = "Filter applied: ${selectedCategory}",
+                    title = "Filter Updated",
+                    type = NotificationType.INFO,
+                    duration = 1500
+                )
             }
             dialog.dismiss()
         }
 
-        // Apply filter when category is selected (immediate)
         btnFoodHospitality.setOnClickListener {
             tempSelectedCategory = "Food & Hospitality"
             updateButtonSelection(tempSelectedCategory)
@@ -407,6 +390,12 @@ class UserDashboardActivity : AppCompatActivity() {
             tempSelectedCategory = "All"
             updateButtonSelection("All")
             applyFilter()
+            customNotification.show(
+                message = "Filter cleared",
+                title = "Filter Reset",
+                type = NotificationType.INFO,
+                duration = 1500
+            )
         }
 
         btnCancel.setOnClickListener {
@@ -444,10 +433,8 @@ class UserDashboardActivity : AppCompatActivity() {
     private fun loadUserSession() {
         sharedPreferences = getSharedPreferences("UserProfiles", Context.MODE_PRIVATE)
 
-        // Get the current logged-in user email
         currentUserEmail = sharedPreferences.getString("current_user", "") ?: ""
 
-        // Get username from multiple possible locations
         currentUsername = if (currentUserEmail.isNotEmpty()) {
             sharedPreferences.getString("${currentUserEmail}_username", null) ?:
             sharedPreferences.getString("current_username", "User") ?: "User"
@@ -487,7 +474,6 @@ class UserDashboardActivity : AppCompatActivity() {
 
                         allServicesList.clear()
 
-                        // Convert Service to UserService and add ALL services
                         services.forEach { service ->
                             Log.d(TAG, "  Service: ${service.serviceName}, Created by: '${service.createdBy}'")
                             allServicesList.add(
@@ -503,7 +489,6 @@ class UserDashboardActivity : AppCompatActivity() {
                             )
                         }
 
-                        // Show all services without filtering by creator
                         filteredServicesList.clear()
                         filteredServicesList.addAll(allServicesList)
                         serviceAdapter.updateServices(filteredServicesList)
@@ -523,7 +508,12 @@ class UserDashboardActivity : AppCompatActivity() {
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Unknown error"
                     Log.e(TAG, "Failed with code ${response.code()}. Error: $errorBody")
-                    Toast.makeText(this@UserDashboardActivity, "Failed to load services", Toast.LENGTH_SHORT).show()
+                    customNotification.show(
+                        message = "Failed to load services",
+                        title = "Error",
+                        type = NotificationType.ERROR,
+                        duration = 2000
+                    )
                     layoutEmpty.visibility = View.VISIBLE
                 }
             }
@@ -531,7 +521,12 @@ class UserDashboardActivity : AppCompatActivity() {
             override fun onFailure(call: Call<List<Service>>, t: Throwable) {
                 progressBar.visibility = View.GONE
                 Log.e(TAG, "Network failure", t)
-                Toast.makeText(this@UserDashboardActivity, "Error: ${t.message}", Toast.LENGTH_LONG).show()
+                customNotification.show(
+                    message = "Error: ${t.message}",
+                    title = "Connection Error",
+                    type = NotificationType.ERROR,
+                    duration = 3000
+                )
                 layoutEmpty.visibility = View.VISIBLE
             }
         })
@@ -542,13 +537,11 @@ class UserDashboardActivity : AppCompatActivity() {
 
         var filtered = allServicesList.toList()
 
-        // Apply category filter
         if (category != null && category != "All") {
             filtered = filtered.filter { it.serviceCategory == category }
             Log.d(TAG, "After category filter: ${filtered.size} services")
         }
 
-        // Apply search filter
         if (query.isNotEmpty()) {
             filtered = filtered.filter { service ->
                 service.serviceName.contains(query, ignoreCase = true) ||

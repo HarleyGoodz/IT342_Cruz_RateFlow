@@ -5,6 +5,8 @@ import android.app.ProgressDialog
 import com.bumptech.glide.Glide
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -24,6 +26,8 @@ import com.example.rateflow.profile.UserProfileActivity
 import com.example.rateflow.services.ServiceAdapter
 import com.example.rateflow.services.Service
 import com.example.rateflow.core.RetrofitClient
+import com.example.rateflow.utils.CustomNotification
+import com.example.rateflow.utils.NotificationType
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -37,7 +41,7 @@ class AdminDashboardActivity : AppCompatActivity() {
     private lateinit var btnProfile: ImageButton
 
     private lateinit var badgeAdminNotificationCount: TextView
-    private val adminNotificationHandler = android.os.Handler()
+    private val adminNotificationHandler = Handler(Looper.getMainLooper())
     private lateinit var adminNotificationRunnable: Runnable
 
     // Drawer layout
@@ -68,6 +72,9 @@ class AdminDashboardActivity : AppCompatActivity() {
     private var currentCategoryFilter: String? = null
     private var currentSearchQuery: String = ""
 
+    // Custom Notification
+    private lateinit var customNotification: CustomNotification
+
     companion object {
         private const val EDIT_SERVICE_REQUEST = 1001
     }
@@ -75,6 +82,9 @@ class AdminDashboardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_dashboard)
+
+        // Initialize custom notification
+        customNotification = CustomNotification(this)
 
         initializeViews()
         loadAnimatedLogo()
@@ -84,13 +94,31 @@ class AdminDashboardActivity : AppCompatActivity() {
         setupSearchListener()
         setupAdminNotificationBadge()
         loadServices()
+
+        // Show welcome notification if coming from login
+        showWelcomeNotificationIfNeeded()
+    }
+
+    private fun showWelcomeNotificationIfNeeded() {
+        val shouldShow = intent.getBooleanExtra("show_welcome_notification", false)
+        val username = intent.getStringExtra("username") ?: "Admin"
+
+        if (shouldShow) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                customNotification.show(
+                    message = "Welcome $username!",
+                    title = "Login Successful",
+                    type = NotificationType.SUCCESS,
+                    duration = 3000
+                )
+            }, 500)
+        }
     }
 
     private fun loadAnimatedLogo() {
-        // Load and animate the GIF using Glide
         Glide.with(this)
             .asGif()
-            .load(R.drawable.starlogo) // Your GIF in drawable folder
+            .load(R.drawable.starlogo)
             .into(imgLogo)
     }
 
@@ -110,12 +138,10 @@ class AdminDashboardActivity : AppCompatActivity() {
         tvServiceCount = findViewById(R.id.tvServiceCount)
         recyclerServices = findViewById(R.id.recyclerServices)
 
-        // Filter indicator views
         layoutFilterIndicator = findViewById(R.id.layoutFilterIndicator)
         tvActiveFilter = findViewById(R.id.tvActiveFilter)
         btnClearFilterIndicator = findViewById(R.id.btnClearFilterIndicator)
 
-        // Set clear filter click listener
         btnClearFilterIndicator.setOnClickListener {
             clearAllFilters()
         }
@@ -124,21 +150,19 @@ class AdminDashboardActivity : AppCompatActivity() {
     private fun setupAdminNotificationBadge() {
         badgeAdminNotificationCount = findViewById(R.id.badgeAdminNotificationCount)
 
-        // Set click listener for notification button
         val btnNotification = findViewById<ImageButton>(R.id.btnNotification)
         btnNotification.setOnClickListener {
             val intent = Intent(this, AdminNotificationsActivity::class.java)
             startActivity(intent)
         }
 
-        // Start periodic badge updates
         startAdminBadgeUpdates()
     }
 
     private fun startAdminBadgeUpdates() {
         adminNotificationRunnable = Runnable {
             updateAdminNotificationBadge()
-            adminNotificationHandler.postDelayed(adminNotificationRunnable, 30000) // Update every 30 seconds
+            adminNotificationHandler.postDelayed(adminNotificationRunnable, 30000)
         }
         adminNotificationHandler.post(adminNotificationRunnable)
     }
@@ -164,23 +188,24 @@ class AdminDashboardActivity : AppCompatActivity() {
         })
     }
 
-    // Don't forget to stop updates in onDestroy
     override fun onDestroy() {
         super.onDestroy()
-        if (this::adminNotificationRunnable.isInitialized) {
+        if (::adminNotificationRunnable.isInitialized) {
             adminNotificationHandler.removeCallbacks(adminNotificationRunnable)
         }
     }
 
     private fun setupDrawer() {
-        // Close drawer when clicking on services
         btnServices.setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
-            // Already on services page
-            Toast.makeText(this, "Services", Toast.LENGTH_SHORT).show()
+            customNotification.show(
+                message = "Services",
+                title = "Navigation",
+                type = NotificationType.INFO,
+                duration = 1500
+            )
         }
 
-        // Open Access Control when clicked
         btnAccessControls.setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
             val intent = Intent(this, AccessControlActivity::class.java)
@@ -205,7 +230,6 @@ class AdminDashboardActivity : AppCompatActivity() {
             onCardClick = { service ->
                 navigateToRatingsView(service)
             }
-
         )
         recyclerServices.adapter = serviceAdapter
     }
@@ -254,19 +278,31 @@ class AdminDashboardActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     progressDialog.dismiss()
                     if (response.isSuccessful) {
-                        Toast.makeText(this@AdminDashboardActivity,
-                            "Service deleted successfully", Toast.LENGTH_SHORT).show()
+                        customNotification.show(
+                            message = "Service deleted successfully",
+                            title = "Success",
+                            type = NotificationType.SUCCESS,
+                            duration = 2000
+                        )
                         loadServices()
                     } else {
-                        Toast.makeText(this@AdminDashboardActivity,
-                            "Failed to delete service: ${response.code()}", Toast.LENGTH_SHORT).show()
+                        customNotification.show(
+                            message = "Failed to delete service: ${response.code()}",
+                            title = "Error",
+                            type = NotificationType.ERROR,
+                            duration = 2000
+                        )
                     }
                 }
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {
                     progressDialog.dismiss()
-                    Toast.makeText(this@AdminDashboardActivity,
-                        "Error: ${t.message}", Toast.LENGTH_LONG).show()
+                    customNotification.show(
+                        message = "Error: ${t.message}",
+                        title = "Connection Error",
+                        type = NotificationType.ERROR,
+                        duration = 3000
+                    )
                 }
             })
     }
@@ -275,6 +311,12 @@ class AdminDashboardActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == EDIT_SERVICE_REQUEST && resultCode == RESULT_OK) {
             loadServices()
+            customNotification.show(
+                message = "Service updated successfully",
+                title = "Success",
+                type = NotificationType.SUCCESS,
+                duration = 2000
+            )
         }
     }
 
@@ -301,10 +343,6 @@ class AdminDashboardActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        btnNotification.setOnClickListener {
-            Toast.makeText(this, "Notifications clicked", Toast.LENGTH_SHORT).show()
-        }
-
         btnProfile.setOnClickListener {
             val intent = Intent(this, UserProfileActivity::class.java)
             startActivity(intent)
@@ -321,6 +359,12 @@ class AdminDashboardActivity : AppCompatActivity() {
         etSearch.setText("")
         applyFilters()
         updateFilterIndicator()
+        customNotification.show(
+            message = "All filters cleared",
+            title = "Filter Reset",
+            type = NotificationType.INFO,
+            duration = 1500
+        )
     }
 
     private fun updateFilterIndicator() {
@@ -357,7 +401,12 @@ class AdminDashboardActivity : AppCompatActivity() {
             applyFilters()
             updateFilterIndicator()
             dialog.dismiss()
-            Toast.makeText(this, "Filtered: Food & Hospitality", Toast.LENGTH_SHORT).show()
+            customNotification.show(
+                message = "Filtered: Food & Hospitality",
+                title = "Filter Applied",
+                type = NotificationType.INFO,
+                duration = 1500
+            )
         }
 
         btnMedicalHealth.setOnClickListener {
@@ -365,7 +414,12 @@ class AdminDashboardActivity : AppCompatActivity() {
             applyFilters()
             updateFilterIndicator()
             dialog.dismiss()
-            Toast.makeText(this, "Filtered: Medical & Health", Toast.LENGTH_SHORT).show()
+            customNotification.show(
+                message = "Filtered: Medical & Health",
+                title = "Filter Applied",
+                type = NotificationType.INFO,
+                duration = 1500
+            )
         }
 
         btnRetailCommercial.setOnClickListener {
@@ -373,7 +427,12 @@ class AdminDashboardActivity : AppCompatActivity() {
             applyFilters()
             updateFilterIndicator()
             dialog.dismiss()
-            Toast.makeText(this, "Filtered: Retail & Commercial", Toast.LENGTH_SHORT).show()
+            customNotification.show(
+                message = "Filtered: Retail & Commercial",
+                title = "Filter Applied",
+                type = NotificationType.INFO,
+                duration = 1500
+            )
         }
 
         btnPersonalLifestyle.setOnClickListener {
@@ -381,13 +440,17 @@ class AdminDashboardActivity : AppCompatActivity() {
             applyFilters()
             updateFilterIndicator()
             dialog.dismiss()
-            Toast.makeText(this, "Filtered: Personal & Lifestyle", Toast.LENGTH_SHORT).show()
+            customNotification.show(
+                message = "Filtered: Personal & Lifestyle",
+                title = "Filter Applied",
+                type = NotificationType.INFO,
+                duration = 1500
+            )
         }
 
         btnClearFilter.setOnClickListener {
             clearAllFilters()
             dialog.dismiss()
-            Toast.makeText(this, "Filter cleared", Toast.LENGTH_SHORT).show()
         }
 
         btnCancel.setOnClickListener {
@@ -400,12 +463,10 @@ class AdminDashboardActivity : AppCompatActivity() {
     private fun applyFilters() {
         var filtered = servicesList.toList()
 
-        // Apply category filter
         if (!currentCategoryFilter.isNullOrEmpty()) {
             filtered = filtered.filter { it.serviceCategory == currentCategoryFilter }
         }
 
-        // Apply search filter
         if (currentSearchQuery.isNotEmpty()) {
             filtered = filtered.filter { service ->
                 service.serviceName.contains(currentSearchQuery, ignoreCase = true) ||
@@ -414,7 +475,6 @@ class AdminDashboardActivity : AppCompatActivity() {
             }
         }
 
-        // Update the filtered list
         filteredServicesList.clear()
         filteredServicesList.addAll(filtered)
         serviceAdapter.updateServices(filteredServicesList)
@@ -439,20 +499,22 @@ class AdminDashboardActivity : AppCompatActivity() {
                         updateServiceCount(services.size)
                     }
                 } else {
-                    Toast.makeText(
-                        this@AdminDashboardActivity,
-                        "Failed to load services: ${response.code()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    customNotification.show(
+                        message = "Failed to load services: ${response.code()}",
+                        title = "Error",
+                        type = NotificationType.ERROR,
+                        duration = 2000
+                    )
                 }
             }
 
             override fun onFailure(call: Call<List<Service>>, t: Throwable) {
-                Toast.makeText(
-                    this@AdminDashboardActivity,
-                    "Error: ${t.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                customNotification.show(
+                    message = "Error: ${t.message}",
+                    title = "Connection Error",
+                    type = NotificationType.ERROR,
+                    duration = 3000
+                )
             }
         })
     }
