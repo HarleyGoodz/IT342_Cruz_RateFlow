@@ -203,7 +203,7 @@ public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSessio
         
         if (isOwner && !isAdmin) {
             // User deleting their OWN rating
-            if (userOpt.isPresent()) {
+            if (userOpt.isPresent()) {  
                 notificationService.createUserNotification(
                     "You have successfully deleted your own rating for service '" + serviceName + "'!",
                     "RATING_DELETED_BY_USER",
@@ -233,7 +233,7 @@ public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSessio
             if (userOpt.isPresent()) {
                 String notificationMessage;
                 if (currentUserId.equals(userId)) {
-                    notificationMessage = "You have successfully deleted your own rating for service '" + serviceName + "' (as admin)!";
+                    notificationMessage = "You have successfully deleted your own rating for service '" + serviceName + "'!";
                 } else {
                     notificationMessage = "Your feedback on service '" + serviceName + "' was deleted by an admin";
                 }
@@ -261,7 +261,7 @@ public ResponseEntity<?> deleteRating(@PathVariable Integer ratingId, HttpSessio
             
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", currentUserId.equals(userId) ? "Your rating has been deleted successfully (as admin)" : "Feedback deleted successfully by admin"
+                "message", currentUserId.equals(userId) ? "Your rating has been deleted successfully " : "Feedback deleted successfully"
             ));
         }
         

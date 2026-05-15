@@ -1,7 +1,10 @@
 package edu.cit.cruz.rateflow.features.notifications;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
+
+import edu.cit.cruz.rateflow.features.authentication.User;
 
 @Entity
 @Table(name = "notifications")
@@ -30,8 +33,28 @@ public class Notification {
     @Column(length = 500)
     private String details;
     
-    
     private String notificationType; // "ADMIN" or "USER"
+    
+    // ========== ADDED RELATIONSHIPS ==========
+    
+    // Many Notifications belong to one User (for user-type notifications)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", referencedColumnName = "userId", insertable = false, updatable = false)
+    @JsonIgnore
+    private User user;
+    
+    // Many Notifications belong to one Admin User (for admin-type notifications)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "adminId", referencedColumnName = "userId", insertable = false, updatable = false)
+    @JsonIgnore
+    private User admin;
+    
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
     
     public Notification() {}
     
@@ -91,4 +114,30 @@ public class Notification {
     
     public String getNotificationType() { return notificationType; }
     public void setNotificationType(String notificationType) { this.notificationType = notificationType; }
+    
+    // ========== ADDED GETTERS AND SETTERS FOR RELATIONSHIPS ==========
+    
+    public User getUser() {
+        return user;
+    }
+    
+    public void setUser(User user) {
+        this.user = user;
+        if (user != null) {
+            this.userId = user.getId();
+            this.userEmail = user.getEmail();
+        }
+    }
+    
+    public User getAdmin() {
+        return admin;
+    }
+    
+    public void setAdmin(User admin) {
+        this.admin = admin;
+        if (admin != null) {
+            this.adminId = admin.getId();
+            this.adminUsername = admin.getUsername();
+        }
+    }
 }
