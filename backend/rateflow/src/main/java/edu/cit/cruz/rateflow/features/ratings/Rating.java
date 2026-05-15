@@ -1,10 +1,16 @@
 package edu.cit.cruz.rateflow.features.ratings;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 
+import edu.cit.cruz.rateflow.features.services.Service;
+import edu.cit.cruz.rateflow.features.authentication.User;
+
 @Entity
-@Table(name = "ratings")
+@Table(name = "ratings", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"UserID", "ServiceID"}, name = "uk_user_service")
+})
 public class Rating {
     
     @Id
@@ -30,9 +36,28 @@ public class Rating {
     @Column(name = "DateCreated", nullable = false)
     private LocalDateTime dateCreated;
     
+    // ========== ADDED RELATIONSHIPS ==========
+    
+    // Many Ratings belong to one Service
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ServiceID", referencedColumnName = "service_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Service service;
+    
+    // Many Ratings belong to one User
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UserID", referencedColumnName = "userId", insertable = false, updatable = false)
+    @JsonIgnore
+    private User user;
+    
     @PrePersist
     protected void onCreate() {
         dateCreated = LocalDateTime.now();
+    }
+    
+    @PostLoad
+    protected void onLoad() {
+        // This ensures consistency when loading from database
     }
     
     // Constructors
@@ -101,5 +126,30 @@ public class Rating {
     
     public void setDateCreated(LocalDateTime dateCreated) {
         this.dateCreated = dateCreated;
+    }
+    
+    // ========== ADDED GETTERS AND SETTERS FOR RELATIONSHIPS ==========
+    
+    public Service getService() {
+        return service;
+    }
+    
+    public void setService(Service service) {
+        this.service = service;
+        if (service != null) {
+            this.serviceId = service.getServiceId();
+        }
+    }
+    
+    public User getUser() {
+        return user;
+    }
+    
+    public void setUser(User user) {
+        this.user = user;
+        if (user != null) {
+            this.userId = user.getId();
+            this.userName = user.getUsername(); // Auto-sync denormalized field
+        }
     }
 }

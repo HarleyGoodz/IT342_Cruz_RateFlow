@@ -1,6 +1,8 @@
 package edu.cit.cruz.rateflow.features.authentication;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +12,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import edu.cit.cruz.rateflow.features.ratings.Rating;
+import edu.cit.cruz.rateflow.features.services.Service;
+import edu.cit.cruz.rateflow.features.notifications.Notification;
  
 @Entity
 @Table(name = "users") // matches your MySQL table name
@@ -19,7 +29,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userId")
     private Integer id;
-
 
     private String username;
 
@@ -34,6 +43,24 @@ public class User {
     
     @Enumerated(EnumType.STRING)
     private Role role;
+    
+    // ========== ADDED RELATIONSHIPS ==========
+    
+    // One User can have many Ratings
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Rating> ratings = new ArrayList<>();
+    
+    
+    // One User can have many User Notifications
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Notification> userNotifications = new ArrayList<>();
+    
+    // One User (as Admin) can have many Admin Notifications
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Notification> adminNotifications = new ArrayList<>();
  
     public User() {
         super();
@@ -54,8 +81,6 @@ public class User {
     public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
     public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
 
-
- 
     public Integer getId() {
         return id;
     }
@@ -88,7 +113,6 @@ public class User {
         this.password = password;
     }
 
-
     public Role getRole() {
         return role;
     }
@@ -96,7 +120,31 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
-
- 
-   
+    
+    // ========== ADDED GETTERS AND SETTERS FOR RELATIONSHIPS ==========
+    
+    public List<Rating> getRatings() {
+        return ratings;
+    }
+    
+    public void setRatings(List<Rating> ratings) {
+        this.ratings = ratings;
+    }
+    
+    
+    public List<Notification> getUserNotifications() {
+        return userNotifications;
+    }
+    
+    public void setUserNotifications(List<Notification> userNotifications) {
+        this.userNotifications = userNotifications;
+    }
+    
+    public List<Notification> getAdminNotifications() {
+        return adminNotifications;
+    }
+    
+    public void setAdminNotifications(List<Notification> adminNotifications) {
+        this.adminNotifications = adminNotifications;
+    }
 }
